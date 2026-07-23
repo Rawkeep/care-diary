@@ -51,7 +51,13 @@ npm test             # Vitest (Aggregations-Kern)
   absetzen (Historie bleibt erhalten).
 - **Zustands-Skalen** (1–5, je Preset) mit Auffälligkeits-Notiz.
 - **Verlauf:** chronologisch nach Tagen gruppiert + Ereignis-Zähler je Art.
-- **JSON-Export** aller Daten (versioniertes Format).
+- **Foto-Anhänge** an Ereignissen und Zustandseinträgen (Kamera oder Galerie,
+  automatisch verkleinert, Vollbild-Ansicht) — z. B. Hautbilder, Befunde,
+  Medikamentenpackungen. Fotos bleiben wie alles andere lokal.
+- **Verschlüsseltes Backup** (.cdbak): AES-256-GCM mit Passphrase
+  (PBKDF2), sicher ablegbar auch in Cloud/Mail; **Wiederherstellen** von
+  Backup- und JSON-Dateien direkt in der App (idempotenter Import).
+- **JSON-Export** aller Daten (versioniertes Format, inkl. Fotos).
 - **Offline:** PWA mit Service Worker, installierbar.
 - **Arztbericht:** druckbarer Verlaufsbericht (Browser-Druck → PDF, komplett
   lokal) mit Ereignis-Zählern, **Anfallskalender** (Monatsraster wie der
@@ -81,7 +87,6 @@ tests/          Vitest (Aggregations-Kern)
 
 ## Nächste Schritte (siehe Konzept §10)
 
-Phase 2 (Rest): Foto-/Audio-Anhänge, Parameter-Überlagerung (nur Darstellung).
+Phase 2 (Rest): Audio-Anhänge, Parameter-Überlagerung (nur Darstellung).
 Phase 3: Mehrprofil-Ausbau, Capacitor-Builds (iOS/Android, Biometrie),
 optionaler E2E-verschlüsselter Sync, weitere Erkrankungs-Presets.
-Umzug in eigenes Repo `Rawkeep/care-diary` sobald verfügbar.

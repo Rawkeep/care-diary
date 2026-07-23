@@ -105,6 +105,32 @@ export interface TimelineEntry {
   createdAt: string;
 }
 
+/** Eintragsarten, an die Fotos angehängt werden können */
+export type AttachmentEntryKind = 'event' | 'observation';
+
+/** Foto-Anhang zu einem Eintrag — Binärdaten bleiben lokal in IndexedDB */
+export interface Attachment {
+  id: ID;
+  profileId: ID;
+  entryKind: AttachmentEntryKind;
+  entryId: ID;
+  mimeType: string;
+  /** verkleinertes Bild (max. Kantenlänge, JPEG) */
+  blob: Blob;
+  createdAt: string;
+}
+
+/** Anhang im Export: Binärdaten als Base64 (JSON-transportabel) */
+export interface ExportedAttachment {
+  id: ID;
+  profileId: ID;
+  entryKind: AttachmentEntryKind;
+  entryId: ID;
+  mimeType: string;
+  dataBase64: string;
+  createdAt: string;
+}
+
 /** Fragen-Merkliste für den nächsten Arzttermin */
 export interface Question {
   id: ID;
@@ -115,10 +141,11 @@ export interface Question {
   resolvedAt?: string;
 }
 
-/** Versioniertes Export-Format (Daten gehören den Nutzer:innen) */
+/** Versioniertes Export-Format (Daten gehören den Nutzer:innen).
+ *  v2 = ohne Anhänge, v3 = mit Foto-Anhängen (Base64). Import versteht beide. */
 export interface ExportBundle {
   format: 'care-diary-export';
-  version: 2;
+  version: 2 | 3;
   exportedAt: string;
   profiles: Profile[];
   medications: Medication[];
@@ -127,6 +154,8 @@ export interface ExportBundle {
   observations: Observation[];
   timeline: TimelineEntry[];
   questions: Question[];
+  /** ab v3 */
+  attachments?: ExportedAttachment[];
 }
 
 export function newId(): ID {

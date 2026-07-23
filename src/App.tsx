@@ -43,7 +43,10 @@ export function App() {
   return (
     <>
       <header className="app-header">
-        <h1>care-diary</h1>
+        <h1>
+          <img className="app-logo" src="./icon.svg" alt="" aria-hidden="true" />
+          care-diary
+        </h1>
         <span className="profile-badge">👤 {profile.name}</span>
       </header>
 

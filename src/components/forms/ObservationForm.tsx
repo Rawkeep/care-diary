@@ -1,11 +1,13 @@
 // Zustands-Erfassung: je Parameter eine 1–5-Skala; nur berührte Parameter
 // werden gespeichert (keine Pflichtfelder — Lücken sind okay).
 import { useState } from 'react';
+import { saveAttachments } from '../../db/attachments';
 import { db } from '../../db/db';
 import type { Observation, Profile } from '../../db/models';
 import { newId, nowIso } from '../../db/models';
 import type { ConditionPreset } from '../../presets/epilepsy';
 import { fromLocalInputValue, toLocalInputValue } from '../../utils/date';
+import { PhotoPicker } from '../PhotoPicker';
 
 type ScaleValue = 1 | 2 | 3 | 4 | 5;
 
@@ -21,6 +23,8 @@ export function ObservationForm({
   const [values, setValues] = useState<Record<string, ScaleValue>>({});
   const [at, setAt] = useState(toLocalInputValue(new Date()));
   const [note, setNote] = useState('');
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [saving, setSaving] = useState(false);
 
   function toggle(param: string, v: ScaleValue) {
     setValues((prev) => {
@@ -34,6 +38,7 @@ export function ObservationForm({
   const touched = Object.keys(values);
 
   async function save() {
+    setSaving(true);
     const atIso = fromLocalInputValue(at);
     const createdAt = nowIso();
     const rows: Observation[] = touched.map((param, idx) => ({
@@ -47,6 +52,8 @@ export function ObservationForm({
       createdAt,
     }));
     await db.observations.bulkAdd(rows);
+    // Fotos hängen am ersten Eintrag (wie die Notiz)
+    await saveAttachments(profile.id, 'observation', rows[0].id, photos);
     onDone();
   }
 
@@ -77,8 +84,14 @@ export function ObservationForm({
           placeholder="z. B. heute auffällig müde, neue Nebenwirkung beobachtet …" />
       </label>
 
-      <button className="btn" onClick={save} disabled={touched.length === 0}>
-        {touched.length === 0 ? 'Mindestens einen Wert wählen' : `Speichern (${touched.length})`}
+      <PhotoPicker files={photos} onChange={setPhotos} />
+
+      <button className="btn" onClick={save} disabled={touched.length === 0 || saving}>
+        {touched.length === 0
+          ? 'Mindestens einen Wert wählen'
+          : saving
+            ? 'Speichert …'
+            : `Speichern (${touched.length})`}
       </button>
     </div>
   );

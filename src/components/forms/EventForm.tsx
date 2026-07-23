@@ -1,12 +1,14 @@
 // Ereignis-Erfassung — im Akutfall vorbefüllt aus dem Timer (Start + Dauer),
 // Details werden in Ruhe ergänzt. Nur Typ + Zeitpunkt sind Pflicht.
 import { useState } from 'react';
+import { saveAttachments } from '../../db/attachments';
 import { db } from '../../db/db';
 import type { Profile } from '../../db/models';
 import { newId, nowIso } from '../../db/models';
 import type { ConditionPreset } from '../../presets/epilepsy';
 import { useAppStore } from '../../store/appStore';
 import { fromLocalInputValue, toLocalInputValue } from '../../utils/date';
+import { PhotoPicker } from '../PhotoPicker';
 
 export function EventForm({
   profile,
@@ -34,15 +36,19 @@ export function EventForm({
   const [emergencyMed, setEmergencyMed] = useState(false);
   const [postPhase, setPostPhase] = useState('');
   const [note, setNote] = useState('');
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [saving, setSaving] = useState(false);
 
   function toggleCircumstance(c: string) {
     setCircumstances((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
   }
 
   async function save() {
+    setSaving(true);
     const totalSeconds = Number(minutes || 0) * 60 + Number(seconds || 0);
+    const id = newId();
     await db.events.add({
-      id: newId(),
+      id,
       profileId: profile.id,
       type,
       startedAt: fromLocalInputValue(startedAt),
@@ -55,6 +61,7 @@ export function EventForm({
       note: note.trim() || undefined,
       createdAt: nowIso(),
     });
+    await saveAttachments(profile.id, 'event', id, photos);
     clearAcute();
     onDone();
   }
@@ -132,7 +139,11 @@ export function EventForm({
           placeholder="Was ist passiert? Was war anders als sonst?" />
       </label>
 
-      <button className="btn" onClick={save}>Speichern</button>
+      <PhotoPicker files={photos} onChange={setPhotos} />
+
+      <button className="btn" onClick={save} disabled={saving}>
+        {saving ? 'Speichert …' : 'Speichern'}
+      </button>
     </div>
   );
 }

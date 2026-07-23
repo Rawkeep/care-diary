@@ -2,6 +2,7 @@
 // Indizes auf [profileId+Zeit] tragen Verlaufslisten und Report-Zeiträume.
 import Dexie, { type Table } from 'dexie';
 import type {
+  Attachment,
   ExportBundle,
   HealthEvent,
   Intake,
@@ -12,6 +13,7 @@ import type {
   TimelineEntry,
 } from './models';
 import { nowIso } from './models';
+import { base64ToBlob, blobToBase64 } from '../utils/base64';
 
 export class CareDiaryDB extends Dexie {
   profiles!: Table<Profile, string>;
@@ -21,6 +23,7 @@ export class CareDiaryDB extends Dexie {
   observations!: Table<Observation, string>;
   timeline!: Table<TimelineEntry, string>;
   questions!: Table<Question, string>;
+  attachments!: Table<Attachment, string>;
 
   constructor() {
     super('care-diary');
@@ -36,14 +39,19 @@ export class CareDiaryDB extends Dexie {
     this.version(2).stores({
       questions: 'id, profileId',
     });
+    // v3: Foto-Anhänge zu Ereignissen/Zustandseinträgen (Blob bleibt lokal)
+    this.version(3).stores({
+      attachments: 'id, profileId, entryId',
+    });
   }
 }
 
 export const db = new CareDiaryDB();
 
-/** Vollständiger Export aller Daten (JSON) — jederzeit, versioniert. */
+/** Vollständiger Export aller Daten (JSON) — jederzeit, versioniert.
+ *  Foto-Anhänge werden als Base64 eingebettet (v3). */
 export async function buildExportBundle(): Promise<ExportBundle> {
-  const [profiles, medications, intakes, events, observations, timeline, questions] =
+  const [profiles, medications, intakes, events, observations, timeline, questions, attachments] =
     await Promise.all([
       db.profiles.toArray(),
       db.medications.toArray(),
@@ -52,10 +60,11 @@ export async function buildExportBundle(): Promise<ExportBundle> {
       db.observations.toArray(),
       db.timeline.toArray(),
       db.questions.toArray(),
+      db.attachments.toArray(),
     ]);
   return {
     format: 'care-diary-export',
-    version: 2,
+    version: 3,
     exportedAt: nowIso(),
     profiles,
     medications,
@@ -64,5 +73,38 @@ export async function buildExportBundle(): Promise<ExportBundle> {
     observations,
     timeline,
     questions,
+    attachments: await Promise.all(
+      attachments.map(async ({ blob, ...meta }) => ({
+        ...meta,
+        dataBase64: await blobToBase64(blob),
+      }))
+    ),
   };
+}
+
+/** Wiederherstellung eines Exports/Backups: fügt per ID ein bzw. überschreibt
+ *  (idempotent — mehrfacher Import derselben Datei ändert nichts weiter).
+ *  Bestehende Einträge mit anderen IDs bleiben erhalten. */
+export async function importBundle(bundle: ExportBundle): Promise<void> {
+  await db.transaction(
+    'rw',
+    [db.profiles, db.medications, db.intakes, db.events, db.observations, db.timeline, db.questions, db.attachments],
+    async () => {
+      await db.profiles.bulkPut(bundle.profiles);
+      await db.medications.bulkPut(bundle.medications);
+      await db.intakes.bulkPut(bundle.intakes);
+      await db.events.bulkPut(bundle.events);
+      await db.observations.bulkPut(bundle.observations);
+      await db.timeline.bulkPut(bundle.timeline);
+      await db.questions.bulkPut(bundle.questions);
+      if (bundle.attachments) {
+        await db.attachments.bulkPut(
+          bundle.attachments.map(({ dataBase64, ...meta }) => ({
+            ...meta,
+            blob: base64ToBlob(dataBase64, meta.mimeType),
+          }))
+        );
+      }
+    }
+  );
 }

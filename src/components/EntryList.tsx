@@ -1,9 +1,12 @@
 // Einheitliche Darstellung von Verlaufseinträgen (Einnahmen, Ereignisse, Zustand).
-import type { HealthEvent, Intake, IntakeStatus, Medication, Observation } from '../db/models';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../db/db';
+import type { Attachment, HealthEvent, Intake, IntakeStatus, Medication, Observation } from '../db/models';
 import type { ConditionPreset } from '../presets/epilepsy';
 import { eventTypeLabel } from '../presets/epilepsy';
 import type { DiaryItem } from '../utils/aggregate';
 import { fmtDuration, fmtTime } from '../utils/date';
+import { PhotoStrip } from './PhotoStrip';
 
 const INTAKE_STATUS_LABEL: Record<IntakeStatus, string> = {
   taken: 'genommen',
@@ -21,6 +24,18 @@ export function EntryList({
   medications: Medication[];
   preset: ConditionPreset;
 }) {
+  // Anhänge aller sichtbaren Einträge in einem Rutsch laden, nach Eintrag gruppiert
+  const entryIds = items.map((i) => i.ref.id);
+  const attachments = useLiveQuery(
+    () => db.attachments.where('entryId').anyOf(entryIds).toArray(),
+    [entryIds.join(',')]
+  );
+  const byEntry = new Map<string, Attachment[]>();
+  for (const a of attachments ?? []) {
+    byEntry.set(a.entryId, [...(byEntry.get(a.entryId) ?? []), a]);
+  }
+  const photosOf = (id: string) => byEntry.get(id) ?? [];
+
   if (items.length === 0) return <p className="empty">Noch keine Einträge.</p>;
   const medName = (id: string) => medications.find((m) => m.id === id)?.name ?? 'Medikament';
 
@@ -59,6 +74,7 @@ export function EntryList({
                   {parts.join(' · ')}
                   {e.note ? ` · ${e.note}` : ''}
                 </div>
+                <PhotoStrip attachments={photosOf(e.id)} />
               </div>
             </div>
           );
@@ -73,6 +89,7 @@ export function EntryList({
               <div className="meta">
                 {o.value}/5{o.note ? ` · ${o.note}` : ''}
               </div>
+              <PhotoStrip attachments={photosOf(o.id)} />
             </div>
           </div>
         );

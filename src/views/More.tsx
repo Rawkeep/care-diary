@@ -1,15 +1,27 @@
-// Mehr: Arztbericht, Fragen-Merkliste, App-Sperre, Profil, Export, Datenschutz.
-import { useState } from 'react';
+// Mehr: Arztbericht, Fragen-Merkliste, App-Sperre, Profil, Sicherung, Datenschutz.
+import { useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { buildExportBundle, db } from '../db/db';
+import { buildExportBundle, db, importBundle } from '../db/db';
 import type { Profile } from '../db/models';
 import { newId, nowIso } from '../db/models';
 import { useAppStore } from '../store/appStore';
+import { decryptBackup, encryptBackup, isBackupEnvelope } from '../utils/backup';
 import { dayKeyDaysAgo, localDayKey } from '../utils/date';
 import { clearPin, hasPin, setPin, verifyPin } from '../utils/pin';
+import { parseExportBundle } from '../utils/bundle';
+import { APP_VERSION } from '../version';
+
+function downloadFile(content: string, filename: string, type: string) {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export function More({ profile }: { profile: Profile }) {
-  const { openReport, lock } = useAppStore();
+  const { openReport, lock, showToast } = useAppStore();
 
   const questions = useLiveQuery(
     () => db.questions.where('profileId').equals(profile.id).toArray(),
@@ -68,15 +80,75 @@ export function More({ profile }: { profile: Profile }) {
     }
   }
 
+  // --- Sicherung & Wiederherstellung ---
+  const [backupPass, setBackupPass] = useState('');
+  const [backupBusy, setBackupBusy] = useState(false);
+  const [restoreText, setRestoreText] = useState<string | null>(null);
+  const [restoreNeedsPass, setRestoreNeedsPass] = useState(false);
+  const [restorePass, setRestorePass] = useState('');
+  const [restoreError, setRestoreError] = useState('');
+  const restoreInputRef = useRef<HTMLInputElement>(null);
+
+  const stamp = () => new Date().toISOString().slice(0, 10);
+
   async function exportJson() {
     const bundle = await buildExportBundle();
-    const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `care-diary-export-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadFile(JSON.stringify(bundle, null, 2), `care-diary-export-${stamp()}.json`, 'application/json');
+  }
+
+  async function exportEncrypted() {
+    if (backupPass.length < 8) return;
+    setBackupBusy(true);
+    try {
+      const bundle = await buildExportBundle();
+      const envelope = await encryptBackup(JSON.stringify(bundle), backupPass, nowIso());
+      downloadFile(JSON.stringify(envelope), `care-diary-backup-${stamp()}.cdbak`, 'application/json');
+      setBackupPass('');
+      showToast('✓ Verschlüsseltes Backup erstellt');
+    } finally {
+      setBackupBusy(false);
+    }
+  }
+
+  function pickRestoreFile(file: File | undefined) {
+    if (!file) return;
+    setRestoreError('');
+    setRestorePass('');
+    file.text().then((text) => {
+      setRestoreText(text);
+      let parsed: unknown = null;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        /* Fehlermeldung kommt beim Wiederherstellen aus parseExportBundle */
+      }
+      setRestoreNeedsPass(isBackupEnvelope(parsed));
+    });
+  }
+
+  async function restore() {
+    if (restoreText == null) return;
+    setRestoreError('');
+    try {
+      let jsonText = restoreText;
+      if (restoreNeedsPass) {
+        const envelope = JSON.parse(restoreText);
+        jsonText = await decryptBackup(envelope, restorePass);
+      }
+      const bundle = parseExportBundle(jsonText);
+      const count =
+        bundle.intakes.length + bundle.events.length + bundle.observations.length;
+      if (!window.confirm(
+        `Backup vom ${bundle.exportedAt.slice(0, 10)} mit ${count} Einträgen einspielen?\n` +
+        'Gleiche Einträge werden überschrieben, alles andere bleibt erhalten.'
+      )) return;
+      await importBundle(bundle);
+      setRestoreText(null);
+      setRestorePass('');
+      showToast('✓ Daten wiederhergestellt');
+    } catch (err) {
+      setRestoreError(err instanceof Error ? err.message : 'Wiederherstellung fehlgeschlagen.');
+    }
   }
 
   return (
@@ -186,11 +258,73 @@ export function More({ profile }: { profile: Profile }) {
       </div>
 
       <div className="card">
-        <h2>Datenexport</h2>
+        <h2>Sicherung (Backup)</h2>
         <p className="hint" style={{ marginTop: 0 }}>
-          Alle Daten als JSON-Datei sichern (Backup) — z. B. vor einem Gerätewechsel.
+          Empfohlen: verschlüsseltes Backup mit Passphrase (AES-256). Die Datei kann
+          bedenkenlos in einer Cloud oder per Mail abgelegt werden — lesbar ist sie
+          nur mit der Passphrase. <strong>Passphrase gut merken, sie ist nicht wiederherstellbar.</strong>
         </p>
-        <button className="btn" onClick={exportJson}>⬇ Alle Daten exportieren (JSON)</button>
+        <label className="field">
+          <span>Passphrase (mind. 8 Zeichen)</span>
+          <input
+            type="password"
+            value={backupPass}
+            onChange={(e) => setBackupPass(e.target.value)}
+            placeholder="z. B. drei-woerter-die-du-nie-vergisst"
+          />
+        </label>
+        <button className="btn" onClick={exportEncrypted} disabled={backupPass.length < 8 || backupBusy}>
+          {backupBusy ? 'Verschlüsselt …' : '🔐 Verschlüsseltes Backup erstellen (.cdbak)'}
+        </button>
+        <button className="btn secondary" onClick={exportJson}>
+          ⬇ Unverschlüsselter Export (JSON)
+        </button>
+      </div>
+
+      <div className="card">
+        <h2>Wiederherstellen</h2>
+        <p className="hint" style={{ marginTop: 0 }}>
+          Backup-Datei (.cdbak) oder JSON-Export einspielen — z. B. nach einem
+          Gerätewechsel. Gleiche Einträge werden überschrieben, alles andere bleibt.
+        </p>
+        <button className="btn secondary" onClick={() => restoreInputRef.current?.click()}>
+          📂 Datei auswählen
+        </button>
+        <input
+          ref={restoreInputRef}
+          type="file"
+          accept=".cdbak,.json,application/json"
+          hidden
+          onChange={(e) => {
+            pickRestoreFile(e.target.files?.[0]);
+            e.target.value = '';
+          }}
+        />
+        {restoreText != null && (
+          <>
+            {restoreNeedsPass && (
+              <label className="field" style={{ marginTop: 10 }}>
+                <span>Passphrase des Backups</span>
+                <input
+                  type="password"
+                  value={restorePass}
+                  onChange={(e) => setRestorePass(e.target.value)}
+                />
+              </label>
+            )}
+            {restoreError && <p className="hint" style={{ color: 'var(--danger)' }}>{restoreError}</p>}
+            <button
+              className="btn"
+              onClick={restore}
+              disabled={restoreNeedsPass && restorePass === ''}
+            >
+              Wiederherstellen
+            </button>
+            <button className="btn secondary" onClick={() => { setRestoreText(null); setRestoreError(''); }}>
+              Abbrechen
+            </button>
+          </>
+        )}
       </div>
 
       <div className="card">
@@ -205,7 +339,7 @@ export function More({ profile }: { profile: Profile }) {
         </p>
       </div>
 
-      <p className="hint" style={{ textAlign: 'center' }}>care-diary v0.2.0 (MVP)</p>
+      <p className="hint" style={{ textAlign: 'center' }}>care-diary v{APP_VERSION}</p>
     </>
   );
 }
