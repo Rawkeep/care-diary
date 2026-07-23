@@ -235,6 +235,14 @@ export function CareReport({ profile, preset }: { profile: Profile; preset: Cond
               {field('Kontakt für Rückfragen', 'contactsText',
                 'z. B. Mama: 0170 …, Papa: 0151 … — lieber einmal zu oft anrufen.')}
               {toggle('Ereignisarten erklären', 'includeEventTypes')}
+              <label className="check-row">
+                <input
+                  type="checkbox"
+                  checked={info.includeAllergies ?? true}
+                  onChange={(e) => update({ includeAllergies: e.target.checked })}
+                />
+                Allergien &amp; Unverträglichkeiten zeigen (im Profil gepflegt)
+              </label>
               {toggle('Notfallmedikation nennen', 'includeEmergencyMeds')}
               {toggle('Häufige Begleitumstände zeigen', 'includeTriggers')}
               {toggle('Aktuelle Häufigkeit zeigen (letzte 4 Wochen)', 'includeFrequency')}
@@ -281,6 +289,15 @@ export function CareReport({ profile, preset }: { profile: Profile; preset: Cond
             )}
             <p className="hint">{t.firstAidDisclaimer}</p>
           </div>
+
+          {(info.includeAllergies ?? true) && (profile.allergies ?? []).length > 0 && (
+            <div className="card">
+              <h2>{t.allergies}</h2>
+              <p style={{ margin: '4px 0', fontWeight: 600 }}>
+                ⚠ {(profile.allergies ?? []).join(' · ')}
+              </p>
+            </div>
+          )}
 
           {info.includeEmergencyMeds && emergencyMeds.length > 0 && (
             <div className="card">
@@ -366,8 +383,14 @@ function EmergencyCard({
   );
   const emergencyMeds = (medications ?? []).filter((m) => m.isEmergency && !m.endDate);
 
+  const allergies =
+    (info.includeAllergies ?? true) && (profile.allergies ?? []).length > 0
+      ? (profile.allergies ?? []).join(', ')
+      : null;
+
   const qrText = [
     `${t.cardTitle}: ${profile.name} — ${content.conditionLabel}`,
+    ...(allergies ? [`⚠ ${t.allergies}: ${allergies}`] : []),
     ...steps.map((s) => `• ${s}`),
     ...(info.includeEmergencyMeds && emergencyMeds.length > 0
       ? [`${t.cardMed}: ${emergencyMeds.map((m) => `${m.name} ${m.dose} ${m.unit}`).join(', ')}`]
@@ -387,6 +410,7 @@ function EmergencyCard({
         <div className="wallet-text">
           <div className="wallet-title">{t.cardTitle}</div>
           <div className="wallet-name">{profile.name} — {content.conditionLabel}</div>
+          {allergies && <div className="wallet-line wallet-allergy">⚠ {allergies}</div>}
           <ul className="wallet-steps">
             {steps.map((s, i) => (
               <li key={i}>{s}</li>

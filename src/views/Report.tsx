@@ -126,6 +126,11 @@ export function Report({ profile, preset }: { profile: Profile; preset: Conditio
         Von Patient:in/Angehörigen dokumentierte Beobachtungen (care-diary). Keine ärztliche
         Aufzeichnung, keine Diagnose — Grundlage für das ärztliche Gespräch.
       </p>
+      {(profile.allergies ?? []).length > 0 && (
+        <p style={{ fontWeight: 600, margin: '6px 0' }}>
+          ⚠ Allergien/Unverträglichkeiten (lt. Angehörigen): {(profile.allergies ?? []).join(' · ')}
+        </p>
+      )}
 
       <div className="card">
         <h2>Ereignisse im Zeitraum</h2>

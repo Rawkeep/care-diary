@@ -32,6 +32,7 @@ export interface ReportStrings {
   firstAidDisclaimer: string;
   emergencyMeds: string;
   emergencyMedsNote: string;
+  allergies: string;
   everyday: string;
   helps: string;
   avoid: string;
@@ -63,6 +64,7 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
     emergencyMeds: 'Notfallmedikation',
     emergencyMedsNote:
       'Nur nach Absprache mit den Angehörigen bzw. laut vereinbartem Vorgehen geben.',
+    allergies: 'Allergien & Unverträglichkeiten',
     everyday: 'Im Alltag',
     helps: 'Das hilft',
     avoid: 'Bitte vermeiden',
@@ -92,6 +94,7 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
       'General first-aid principles — individual medical instructions always take precedence.',
     emergencyMeds: 'Emergency medication',
     emergencyMedsNote: 'Give only as agreed with the family or according to the agreed plan.',
+    allergies: 'Allergies & intolerances',
     everyday: 'In everyday life',
     helps: 'This helps',
     avoid: 'Please avoid',
@@ -121,6 +124,7 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
       'Principes généraux de premiers secours — les consignes médicales individuelles priment toujours.',
     emergencyMeds: 'Médicament d’urgence',
     emergencyMedsNote: 'À donner uniquement en accord avec la famille ou selon le plan convenu.',
+    allergies: 'Allergies et intolérances',
     everyday: 'Au quotidien',
     helps: 'Ce qui aide',
     avoid: 'À éviter',
@@ -150,6 +154,7 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
       'Genel ilk yardım kuralları — kişiye özel tıbbi talimatlar her zaman önceliklidir.',
     emergencyMeds: 'Acil durum ilacı',
     emergencyMedsNote: 'Yalnızca aile ile mutabık kalınarak veya kararlaştırılan plana göre verin.',
+    allergies: 'Alerjiler ve intoleranslar',
     everyday: 'Günlük yaşamda',
     helps: 'Bunlar yardımcı olur',
     avoid: 'Lütfen kaçının',
@@ -179,6 +184,7 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
       'قواعد عامة للإسعافات الأولية — التعليمات الطبية الفردية لها الأولوية دائمًا.',
     emergencyMeds: 'دواء الطوارئ',
     emergencyMedsNote: 'يُعطى فقط بالاتفاق مع العائلة أو وفق الخطة المتفق عليها.',
+    allergies: 'الحساسية وعدم التحمل',
     everyday: 'في الحياة اليومية',
     helps: 'هذا يساعد',
     avoid: 'يُرجى تجنّب',
@@ -208,6 +214,7 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
       'Загальні правила першої допомоги — індивідуальні медичні вказівки завжди мають пріоритет.',
     emergencyMeds: 'Невідкладні ліки',
     emergencyMedsNote: 'Давати лише за домовленістю з родиною або згідно з узгодженим планом.',
+    allergies: 'Алергії та непереносимості',
     everyday: 'У повсякденні',
     helps: 'Це допомагає',
     avoid: 'Будь ласка, уникайте',
@@ -237,6 +244,7 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
       'Principios generales de primeros auxilios — las indicaciones médicas individuales siempre tienen prioridad.',
     emergencyMeds: 'Medicación de emergencia',
     emergencyMedsNote: 'Administrar solo según lo acordado con la familia o conforme al plan establecido.',
+    allergies: 'Alergias e intolerancias',
     everyday: 'En el día a día',
     helps: 'Esto ayuda',
     avoid: 'Evitad, por favor',

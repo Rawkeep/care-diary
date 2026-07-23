@@ -11,6 +11,12 @@ export interface Profile {
   birthDate?: string;
   /** Aktivierte Erkrankungs-Presets, z. B. ['epilepsy'] */
   conditions: string[];
+  /**
+   * Allergien & Unverträglichkeiten als Freitext-Einträge (z. B.
+   * „Erdnüsse (schwer)", „Laktose"). Stammdaten — erscheinen auf der
+   * Notfallkarte, im Umfeld-Bericht und im Arztbericht, nicht im Tagebuch.
+   */
+  allergies?: string[];
   createdAt: string;
 }
 
@@ -189,6 +195,8 @@ export interface CareReportVariant {
   includeEventTypes: boolean;
   includeTriggers: boolean;
   includeEmergencyMeds: boolean;
+  /** Allergien zeigen (Standard: an — sicherheitsrelevant); optional für Altbestand */
+  includeAllergies?: boolean;
   updatedAt: string;
 }
 

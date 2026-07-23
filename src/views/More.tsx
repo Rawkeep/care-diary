@@ -82,6 +82,16 @@ export function More({ profile }: { profile: Profile }) {
     }
   }
 
+  // --- Allergien (Profil-Stammdaten) ---
+  const [allergyText, setAllergyText] = useState('');
+  async function addAllergy() {
+    if (!allergyText.trim()) return;
+    await db.profiles.update(profile.id, {
+      allergies: [...(profile.allergies ?? []), allergyText.trim()],
+    });
+    setAllergyText('');
+  }
+
   // --- Darstellung (Theme) ---
   const [theme, setTheme] = useState<ThemePref>(getThemePref());
   function chooseTheme(p: ThemePref) {
@@ -187,6 +197,45 @@ export function More({ profile }: { profile: Profile }) {
         <p className="hint">
           Aktivierte Module: {profile.conditions.length > 0 ? profile.conditions.join(', ') : 'Allgemein'}
         </p>
+        <label className="field" style={{ marginTop: 8, marginBottom: 6 }}>
+          <span>Allergien &amp; Unverträglichkeiten (erscheinen auf Notfallkarte und in Berichten)</span>
+        </label>
+        {(profile.allergies ?? []).length > 0 && (
+          <div className="med-chips" style={{ marginBottom: 8 }}>
+            {(profile.allergies ?? []).map((a, i) => (
+              <button
+                key={`${a}-${i}`}
+                className="med-chip emergency"
+                onClick={() =>
+                  db.profiles.update(profile.id, {
+                    allergies: (profile.allergies ?? []).filter((_, j) => j !== i),
+                  })
+                }
+                aria-label={`${a} entfernen`}
+              >
+                ⚠ {a} ✕
+              </button>
+            ))}
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input
+            type="text"
+            value={allergyText}
+            onChange={(e) => setAllergyText(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addAllergy()}
+            placeholder="z. B. Erdnüsse (schwer), Laktose"
+            style={{ flex: 1 }}
+          />
+          <button
+            className="btn secondary"
+            style={{ width: 'auto', marginTop: 0 }}
+            onClick={addAllergy}
+            disabled={allergyText.trim() === ''}
+          >
+            ＋
+          </button>
+        </div>
       </div>
 
       <details className="group" open>

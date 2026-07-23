@@ -133,6 +133,10 @@ npm test             # Vitest (Aggregations-Kern)
   Formulars sofort erreichbar.
 - **SVG-Icon-Set** statt Emojis in Navigation und Schnellerfassung —
   gestochen scharf, folgt automatisch der Theme-Farbe.
+- **Allergien & Unverträglichkeiten** als Profil-Stammdaten (Mehr →
+  Profil): einmal gepflegt, erscheinen sie automatisch auf der
+  QR-Notfallkarte, im Umfeld-Bericht (abschaltbar, alle Sprachen) und im
+  Arztbericht — bewusst nicht im täglichen Tagebuch.
 - **Fragen-Merkliste** für den nächsten Termin (erscheint im Arztbericht).
 - **App-Sperre (PIN):** Zugriffsschutz auf geteilten Geräten (gesalzener
   SHA-256-Hash, keine Klartext-PIN; bewusst kein Verschlüsselungsersatz).

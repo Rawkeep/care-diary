@@ -483,6 +483,7 @@ textarea { resize: vertical; min-height: 64px; }
 .wallet-name { font-size: 9pt; font-weight: 700; }
 .wallet-steps { margin: 0; padding-left: 4mm; font-size: 7pt; line-height: 1.35; }
 .wallet-line { font-size: 7pt; font-weight: 600; overflow-wrap: break-word; }
+.wallet-allergy { color: #b33; }
 .wallet-qr { width: 21mm; height: 21mm; align-self: center; flex-shrink: 0; }
 
 /* Druck (Bericht → PDF über den Browser-Druckdialog) */
