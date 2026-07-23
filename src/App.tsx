@@ -4,6 +4,7 @@ import { presetFor } from './presets/epilepsy';
 import { useAppStore } from './store/appStore';
 import { LockScreen } from './components/LockScreen';
 import { Modal } from './components/Modal';
+import { Toast } from './components/Toast';
 import { EventForm } from './components/forms/EventForm';
 import { IntakeForm } from './components/forms/IntakeForm';
 import { ObservationForm } from './components/forms/ObservationForm';
@@ -62,6 +63,8 @@ export function App() {
           )}
         </Modal>
       )}
+
+      <Toast />
 
       <nav className="bottom-nav">
         {NAV.map((item) => (

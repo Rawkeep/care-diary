@@ -13,6 +13,14 @@ export interface ReportRange {
   to: string;
 }
 
+/** Bestätigungs-Toast, optional mit Rückgängig-Aktion (Ein-Tipp-Erfassung) */
+export interface Toast {
+  /** eindeutig je Anzeige — steuert den Auto-Dismiss-Timer */
+  id: number;
+  message: string;
+  undo?: () => void | Promise<void>;
+}
+
 interface AppState {
   view: View;
   activeProfileId: string | null;
@@ -24,6 +32,8 @@ interface AppState {
   locked: boolean;
   /** Offener Arztbericht (null = keiner) */
   reportRange: ReportRange | null;
+  /** Aktueller Bestätigungs-Toast (null = keiner) */
+  toast: Toast | null;
   setView: (v: View) => void;
   setActiveProfile: (id: string) => void;
   setOpenForm: (f: FormKind) => void;
@@ -33,6 +43,8 @@ interface AppState {
   unlock: () => void;
   openReport: (r: ReportRange) => void;
   closeReport: () => void;
+  showToast: (message: string, undo?: Toast['undo']) => void;
+  clearToast: () => void;
 }
 
 const PROFILE_KEY = 'care-diary.activeProfileId';
@@ -44,6 +56,7 @@ export const useAppStore = create<AppState>((set) => ({
   acuteStartedAt: null,
   locked: hasPin(),
   reportRange: null,
+  toast: null,
   setView: (view) => set({ view }),
   setActiveProfile: (id) => {
     localStorage.setItem(PROFILE_KEY, id);
@@ -56,4 +69,6 @@ export const useAppStore = create<AppState>((set) => ({
   unlock: () => set({ locked: false }),
   openReport: (reportRange) => set({ reportRange }),
   closeReport: () => set({ reportRange: null }),
+  showToast: (message, undo) => set({ toast: { id: Date.now(), message, undo } }),
+  clearToast: () => set({ toast: null }),
 }));

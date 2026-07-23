@@ -3,14 +3,17 @@ import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { EntryList } from '../components/EntryList';
 import { db } from '../db/db';
-import type { Profile } from '../db/models';
+import type { Medication, Profile } from '../db/models';
+import { nowIso } from '../db/models';
 import type { ConditionPreset } from '../presets/epilepsy';
 import { useAppStore } from '../store/appStore';
 import { itemsOfDay, mergeChronological } from '../utils/aggregate';
 import { fmtDuration, localDayKey } from '../utils/date';
+import { effectiveDose } from '../utils/dose';
+import { quickIntake } from '../utils/quickIntake';
 
 export function Home({ profile, preset }: { profile: Profile; preset: ConditionPreset }) {
-  const { setOpenForm, acuteStartedAt, startAcute } = useAppStore();
+  const { setOpenForm, acuteStartedAt, startAcute, showToast } = useAppStore();
 
   const intakes = useLiveQuery(() => db.intakes.where('profileId').equals(profile.id).toArray(), [profile.id]);
   const events = useLiveQuery(() => db.events.where('profileId').equals(profile.id).toArray(), [profile.id]);
@@ -41,6 +44,14 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
     ? Math.round((Date.now() - new Date(acuteStartedAt).getTime()) / 1000)
     : 0;
 
+  // Ein Tipp = erfasst. Rückgängig über den Toast, Details über das Formular.
+  const activeMeds = (medications ?? []).filter((m) => !m.endDate);
+  async function logNow(med: Medication) {
+    const intake = quickIntake(med);
+    await db.intakes.add(intake);
+    showToast(`✓ ${med.name} erfasst`, () => db.intakes.delete(intake.id));
+  }
+
   return (
     <>
       {acuteStartedAt ? (
@@ -52,6 +63,26 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
         <button className="acute-btn" onClick={startAcute}>
           ⚡ Akut: Ereignis beginnt jetzt
         </button>
+      )}
+
+      {activeMeds.length > 0 && (
+        <div className="med-quick">
+          {activeMeds.map((m) => (
+            <button
+              key={m.id}
+              className={m.isEmergency ? 'med-quick-btn emergency' : 'med-quick-btn'}
+              onClick={() => logNow(m)}
+            >
+              <span className="med-quick-name">
+                💊 {m.name}
+                {m.isEmergency ? ' · Notfall' : ''}
+              </span>
+              <span className="med-quick-dose">
+                {effectiveDose(m, nowIso())} {m.unit} — jetzt genommen
+              </span>
+            </button>
+          ))}
+        </div>
       )}
 
       <div className="quick-grid">

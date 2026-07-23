@@ -1,11 +1,24 @@
-# care-diary — MVP-Gerüst
+# care-diary
 
 Private, **lokal-first** Gesundheitsverlaufs-Dokumentation für chronisch
 Erkrankte und Angehörige. Alle Daten bleiben auf dem Gerät (IndexedDB) —
-kein Konto, keine Cloud, kein Egress. Konzept: [`../konzepte/gesundheits-doku-app/KONZEPT.md`](../konzepte/gesundheits-doku-app/KONZEPT.md).
+kein Konto, keine Cloud, kein Egress. Konzept: [`KONZEPT.md`](./KONZEPT.md).
 
 **Leitprinzip: Die App dokumentiert, der Arzt entscheidet.** Keine Diagnosen,
 keine Auswertung, keine Therapieempfehlung.
+
+## Sofort nutzen
+
+**➡️ https://rawkeep.github.io/care-diary/** — im Browser öffnen, fertig.
+Kein Konto, keine Installation nötig; alle Daten bleiben im Browser des
+eigenen Geräts.
+
+Als App aufs Handy: Seite öffnen → Browser-Menü → **„Zum Startbildschirm
+hinzufügen"** (iOS: Teilen-Symbol). Danach startet care-diary wie eine
+native App und funktioniert auch offline.
+
+> Wichtig: Da alle Daten lokal im Browser liegen, regelmäßig unter
+> **Mehr → Export** eine JSON-Sicherung erstellen (z. B. beim Gerätewechsel).
 
 ## Stack
 
@@ -26,6 +39,9 @@ npm test             # Vitest (Aggregations-Kern)
 
 - **Profil-Setup** (auch für betreute Person/Kind, optional Geburtsdatum),
   Epilepsie-Modul aktivierbar.
+- **Ein-Tipp-Einnahme:** je aktivem Medikament ein großer Button auf der
+  Startseite — ein Tipp erfasst „jetzt genommen" mit der laut Plan gültigen
+  Dosis; Fehltipps sind per **Rückgängig**-Toast sofort korrigierbar.
 - **Schnellerfassung** vom Startbildschirm: Einnahme 💊, Ereignis ⚡, Zustand 📝.
 - **Akut-Modus:** großer Start-Button mit laufendem Timer; beim Beenden ist
   das Ereignisformular mit Beginn + Dauer vorbefüllt.

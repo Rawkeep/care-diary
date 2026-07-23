@@ -82,6 +82,19 @@ main { flex: 1; padding: 8px 16px 90px; }
 .quick-btn .icon { font-size: 1.7rem; }
 .quick-btn:active { background: var(--surface-2); }
 
+/* Ein-Tipp-Einnahme: ein Button je aktivem Medikament */
+.med-quick { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.med-quick-btn {
+  width: 100%; text-align: left; font: inherit; cursor: pointer;
+  background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius);
+  padding: 13px 16px; color: var(--text);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.med-quick-btn:active { filter: brightness(0.94); }
+.med-quick-btn .med-quick-name { font-weight: 700; font-size: 1rem; }
+.med-quick-btn .med-quick-dose { font-size: 0.82rem; color: var(--text-dim); }
+.med-quick-btn.emergency { background: var(--danger-soft); border-color: var(--danger); }
+
 .acute-btn {
   width: 100%; border: none; border-radius: var(--radius); cursor: pointer;
   font: inherit; font-size: 1.05rem; font-weight: 700; padding: 18px;
@@ -208,6 +221,22 @@ textarea { resize: vertical; min-height: 64px; }
 .trend-empty { font-size: 10px; fill: var(--text-dim); }
 .trend-xaxis { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
 .trend-ranges button { padding: 8px; font-size: 0.8rem; }
+
+/* Bestätigungs-Toast (über der Bottom-Nav, große Touchziele) */
+.toast {
+  position: fixed; bottom: calc(72px + env(safe-area-inset-bottom)); left: 50%;
+  transform: translateX(-50%); width: calc(100% - 32px); max-width: 528px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--text); color: var(--bg);
+  border-radius: var(--radius); padding: 12px 16px; z-index: 60;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+}
+.toast-msg { font-weight: 600; font-size: 0.95rem; }
+.toast-undo {
+  background: none; border: none; cursor: pointer; font: inherit;
+  font-weight: 700; color: var(--bg); text-decoration: underline; padding: 8px 4px;
+  flex-shrink: 0;
+}
 
 /* Sperrbildschirm */
 .lock-screen {
