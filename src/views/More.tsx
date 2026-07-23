@@ -6,6 +6,7 @@ import type { Profile } from '../db/models';
 import { newId, nowIso } from '../db/models';
 import { useAppStore } from '../store/appStore';
 import { REMINDER_PREF_KEY, remindersEnabled } from '../components/ReminderManager';
+import { deleteProfileData } from '../demo/demoData';
 import { decryptBackup, encryptBackup, isBackupEnvelope } from '../utils/backup';
 import { dayKeyDaysAgo, localDayKey } from '../utils/date';
 import { clearPin, hasPin, setPin, verifyPin } from '../utils/pin';
@@ -30,7 +31,8 @@ function downloadFile(content: string, filename: string, type: string) {
 }
 
 export function More({ profile }: { profile: Profile }) {
-  const { openReport, openCareReport, openIntro, lock, showToast } = useAppStore();
+  const { openReport, openCareReport, openIntro, lock, showToast, setActiveProfile } =
+    useAppStore();
 
   const questions = useLiveQuery(
     () => db.questions.where('profileId').equals(profile.id).toArray(),
@@ -200,6 +202,28 @@ export function More({ profile }: { profile: Profile }) {
 
   return (
     <>
+      {profile.isDemo && (
+        <div className="card demo-banner">
+          <h2>Demo-Profil</h2>
+          <p className="hint" style={{ marginTop: 0 }}>
+            „{profile.name}" enthält nur Beispieldaten zum Ausprobieren. Ein Tipp entfernt
+            alles rückstandslos — echte Profile bleiben unberührt.
+          </p>
+          <button
+            className="btn danger"
+            onClick={async () => {
+              if (!window.confirm('Demo-Profil und alle Beispieldaten wirklich löschen?')) return;
+              await deleteProfileData(profile.id);
+              const rest = await db.profiles.toArray();
+              if (rest.length > 0) setActiveProfile(rest[0].id);
+              else window.location.reload();
+            }}
+          >
+            🗑 Demo-Daten löschen
+          </button>
+        </div>
+      )}
+
       <div className="card">
         <h2>Profil</h2>
         <p style={{ margin: '4px 0' }}>

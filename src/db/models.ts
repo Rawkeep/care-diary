@@ -17,6 +17,8 @@ export interface Profile {
    * Notfallkarte, im Umfeld-Bericht und im Arztbericht, nicht im Tagebuch.
    */
   allergies?: string[];
+  /** Demo-Profil mit Beispieldaten — komplett löschbar über „Mehr" */
+  isDemo?: boolean;
   createdAt: string;
 }
 

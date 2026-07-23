@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { db } from '../db/db';
 import { newId, nowIso } from '../db/models';
+import { createDemoProfile } from '../demo/demoData';
 import { GENERIC_PRESET, SELECTABLE_PRESETS } from '../presets/epilepsy';
 import { useAppStore } from '../store/appStore';
 
@@ -67,6 +68,16 @@ export function ProfileSetup() {
         <button className="btn" onClick={create} disabled={name.trim() === ''}>
           Profil anlegen
         </button>
+        <button
+          className="btn secondary"
+          onClick={async () => setActiveProfile(await createDemoProfile())}
+        >
+          🧪 Erst mal ansehen? Demo mit Beispieldaten laden
+        </button>
+        <p className="hint">
+          Das Demo-Profil zeigt die App mit 12 Wochen Beispieldaten und lässt sich unter
+          „Mehr" mit einem Tipp rückstandslos löschen.
+        </p>
       </div>
     </main>
   );

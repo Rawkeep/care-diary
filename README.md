@@ -9,7 +9,10 @@ keine Auswertung, keine Therapieempfehlung.
 
 Beim ersten Start führt eine **Mini-Anleitung** (vier Karten, einfache
 Sprache) durch die Grundidee — jederzeit wieder aufrufbar unter
-„Mehr → Kurzanleitung".
+„Mehr → Kurzanleitung". Zum Ausprobieren gibt es ein **Demo-Profil**
+mit 12 Wochen Beispieldaten (inkl. laufender Absetzung) — ladbar beim
+Setup oder über den Profil-Wechsler, rückstandslos löschbar mit einem
+Tipp unter „Mehr".
 
 ## Sofort nutzen
 

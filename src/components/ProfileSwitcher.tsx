@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { db } from '../db/db';
 import type { Profile } from '../db/models';
 import { newId, nowIso } from '../db/models';
+import { createDemoProfile } from '../demo/demoData';
 import { GENERIC_PRESET, presetFor, SELECTABLE_PRESETS } from '../presets/epilepsy';
 import { useAppStore } from '../store/appStore';
 import { Modal } from './Modal';
@@ -92,9 +93,19 @@ export function ProfileSwitcher({
           <button className="btn secondary" onClick={() => setAdding(false)}>Abbrechen</button>
         </>
       ) : (
-        <button className="btn secondary" onClick={() => setAdding(true)}>
-          ＋ Weiteres Profil anlegen
-        </button>
+        <>
+          <button className="btn secondary" onClick={() => setAdding(true)}>
+            ＋ Weiteres Profil anlegen
+          </button>
+          {!profiles.some((p) => p.isDemo) && (
+            <button
+              className="btn secondary"
+              onClick={async () => switchTo(await createDemoProfile())}
+            >
+              🧪 Demo-Profil laden (Beispieldaten)
+            </button>
+          )}
+        </>
       )}
     </Modal>
   );

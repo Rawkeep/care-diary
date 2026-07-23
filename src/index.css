@@ -197,6 +197,10 @@ main { flex: 1; padding: 8px 16px 90px; }
 }
 .capture-count { flex-basis: 100%; font-size: 0.85rem; font-weight: 600; color: var(--accent-strong); }
 
+/* Demo-Banner */
+.card.demo-banner { border-color: var(--danger); background: color-mix(in srgb, var(--danger-soft) 35%, var(--surface)); }
+.card.demo-banner h2 { color: var(--danger); }
+
 /* Aufklappbare Gruppen auf „Mehr" */
 details.group { margin-bottom: 12px; }
 details.group > summary {
