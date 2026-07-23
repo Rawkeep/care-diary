@@ -111,6 +111,15 @@ npm test             # Vitest (Aggregations-Kern)
   vereinbartes Vorgehen, was hilft/was vermeiden, Kontakt. Datensparsam
   per Schalter (Häufigkeit/Trigger/Notfallmedikation optional); Skalen,
   Gewicht und Nebenwirkungen erscheinen dort grundsätzlich nicht.
+  **Varianten je Empfängerkreis** (z. B. Schule vs. Großeltern) mit
+  eigener Sprache — Struktur, Ereignisarten und Erste Hilfe sind auf
+  **Deutsch, Englisch, Französisch, Türkisch, Arabisch (RTL),
+  Ukrainisch und Spanisch** verfügbar.
+- **QR-Notfallkarte** im Scheckkartenformat (drucken, ausschneiden,
+  Portemonnaie/Schulranzen): Kurzanweisungen, Notfallmedikation, Kontakt —
+  der QR-Code enthält dieselben Infos als Klartext, offline lesbar mit
+  jeder Kamera-App, nichts wird hochgeladen.
+- **Darstellung wählbar:** System / Hell / Dunkel unter „Mehr".
 - **Fragen-Merkliste** für den nächsten Termin (erscheint im Arztbericht).
 - **App-Sperre (PIN):** Zugriffsschutz auf geteilten Geräten (gesalzener
   SHA-256-Hash, keine Klartext-PIN; bewusst kein Verschlüsselungsersatz).

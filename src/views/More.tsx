@@ -10,6 +10,7 @@ import { decryptBackup, encryptBackup, isBackupEnvelope } from '../utils/backup'
 import { dayKeyDaysAgo, localDayKey } from '../utils/date';
 import { clearPin, hasPin, setPin, verifyPin } from '../utils/pin';
 import { parseExportBundle } from '../utils/bundle';
+import { applyThemePref, getThemePref, type ThemePref } from '../utils/theme';
 import { APP_VERSION } from '../version';
 
 function downloadFile(content: string, filename: string, type: string) {
@@ -79,6 +80,13 @@ export function More({ profile }: { profile: Profile }) {
     } else {
       setPinError('Falsche PIN.');
     }
+  }
+
+  // --- Darstellung (Theme) ---
+  const [theme, setTheme] = useState<ThemePref>(getThemePref());
+  function chooseTheme(p: ThemePref) {
+    applyThemePref(p);
+    setTheme(p);
   }
 
   // --- Erinnerungen ---
@@ -283,6 +291,28 @@ export function More({ profile }: { profile: Profile }) {
         <p className="hint">
           Aktivierte Module: {profile.conditions.length > 0 ? profile.conditions.join(', ') : 'Allgemein'}
         </p>
+      </div>
+
+      <div className="card">
+        <h2>Darstellung</h2>
+        <p className="hint" style={{ marginTop: 0 }}>
+          „System" folgt der Hell/Dunkel-Einstellung des Geräts.
+        </p>
+        <div className="tabs">
+          {([
+            ['system', 'System'],
+            ['light', '☀️ Hell'],
+            ['dark', '🌙 Dunkel'],
+          ] as [ThemePref, string][]).map(([value, label]) => (
+            <button
+              key={value}
+              className={theme === value ? 'active' : ''}
+              onClick={() => chooseTheme(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="card">

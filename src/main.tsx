@@ -1,7 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
+import { applyThemePref, getThemePref } from './utils/theme';
 import './index.css';
+
+// Manuelle Theme-Wahl vor dem ersten Render anwenden (kein Flackern)
+applyThemePref(getThemePref());
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

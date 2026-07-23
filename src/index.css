@@ -19,8 +19,10 @@
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Dunkle Token — greifen via System-Einstellung (sofern nicht manuell
+   „hell" gewählt) und identisch bei manueller Wahl (.theme-dark). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.theme-light) {
     --bg: #14141b;
     --surface: #1e1e28;
     --surface-2: #2a2a36;
@@ -35,6 +37,21 @@
     --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 10px rgba(0, 0, 0, 0.25);
     --shadow-2: 0 10px 32px rgba(0, 0, 0, 0.55);
   }
+}
+:root.theme-dark {
+  --bg: #14141b;
+  --surface: #1e1e28;
+  --surface-2: #2a2a36;
+  --text: #f1f1f5;
+  --text-dim: #a09fac;
+  --border: #34343f;
+  --accent: #7fd1b9;
+  --accent-strong: #98e0cb;
+  --accent-soft: #22443b;
+  --danger: #e8927c;
+  --danger-soft: #472b23;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 10px rgba(0, 0, 0, 0.25);
+  --shadow-2: 0 10px 32px rgba(0, 0, 0, 0.55);
 }
 
 * { box-sizing: border-box; }
@@ -380,6 +397,20 @@ textarea { resize: vertical; min-height: 64px; }
 .lock-screen input {
   text-align: center; font-size: 1.3rem; letter-spacing: 0.35em; max-width: 220px;
 }
+
+/* Notfallkarte (Scheckkartenformat 85,6 × 54 mm) — druckt immer hell */
+.wallet-card {
+  display: flex; gap: 4mm; align-items: stretch;
+  width: 85.6mm; min-height: 54mm; padding: 4mm;
+  background: #fff; color: #111; border: 1px solid #999; border-radius: 3mm;
+  margin: 12px auto 8px; box-shadow: var(--shadow-1);
+}
+.wallet-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1mm; }
+.wallet-title { font-size: 8pt; font-weight: 800; letter-spacing: 0.08em; color: #b33; }
+.wallet-name { font-size: 9pt; font-weight: 700; }
+.wallet-steps { margin: 0; padding-left: 4mm; font-size: 7pt; line-height: 1.35; }
+.wallet-line { font-size: 7pt; font-weight: 600; overflow-wrap: break-word; }
+.wallet-qr { width: 21mm; height: 21mm; align-self: center; flex-shrink: 0; }
 
 /* Druck (Bericht → PDF über den Browser-Druckdialog) */
 @media print {

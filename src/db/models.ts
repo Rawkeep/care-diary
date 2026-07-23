@@ -160,11 +160,39 @@ export interface ExportedAttachment {
 }
 
 /**
- * Inhalte des Umfeld-Berichts (Schule, Betreuung, Familie, Freunde) —
- * von den Angehörigen gepflegt, bewusst getrennt von medizinischen Daten.
- * Die include*-Schalter setzen Datensparsamkeit um: nur Angehakte Teile
- * erscheinen im Bericht.
+ * Umfeld-Bericht-Variante — je Empfängerkreis eine (z. B. „Schule",
+ * „Großeltern"), mit eigener Sprache und eigenen Datensparsamkeits-
+ * Schaltern. Von den Angehörigen gepflegt, getrennt von medizinischen
+ * Daten.
  */
+/** Sprachen des Umfeld-Berichts (Struktur, Ereignisarten, Erste Hilfe) */
+export type CareReportLanguage = 'de' | 'en' | 'fr' | 'tr' | 'ar' | 'uk' | 'es';
+
+export interface CareReportVariant {
+  id: ID;
+  profileId: ID;
+  /** Empfängerkreis, z. B. „Schule" */
+  name: string;
+  /** Sprache des Berichts (Struktur + Ereignisarten + Erste Hilfe) */
+  language: CareReportLanguage;
+  /** „Worum es geht" in eigenen Worten */
+  aboutText?: string;
+  /** Was im Alltag hilft */
+  helpsText?: string;
+  /** Was bitte vermeiden */
+  avoidText?: string;
+  /** Individuell mit dem Arzt vereinbartes Vorgehen */
+  doctorPlanText?: string;
+  /** Kontakt für Rückfragen (Eltern/Angehörige) */
+  contactsText?: string;
+  includeFrequency: boolean;
+  includeEventTypes: boolean;
+  includeTriggers: boolean;
+  includeEmergencyMeds: boolean;
+  updatedAt: string;
+}
+
+/** Altformat (Export v5, eine Variante je Profil) — nur noch für den Import */
 export interface CareInfo {
   /** ein Datensatz je Profil */
   profileId: ID;
@@ -197,11 +225,11 @@ export interface Question {
 
 /** Versioniertes Export-Format (Daten gehören den Nutzer:innen).
  *  v2 = Basis, v3 = + Foto-Anhänge (Base64), v4 = + Messwerte und
- *  Nebenwirkungs-Notizen, v5 = + Umfeld-Bericht-Inhalte.
- *  Import versteht alle Versionen. */
+ *  Nebenwirkungs-Notizen, v5 = + Umfeld-Bericht (eine Variante),
+ *  v6 = Umfeld-Bericht-Varianten je Empfänger. Import versteht alle. */
 export interface ExportBundle {
   format: 'care-diary-export';
-  version: 2 | 3 | 4 | 5;
+  version: 2 | 3 | 4 | 5 | 6;
   exportedAt: string;
   profiles: Profile[];
   medications: Medication[];
@@ -215,8 +243,23 @@ export interface ExportBundle {
   /** ab v4 */
   measurements?: Measurement[];
   sideEffects?: SideEffectNote[];
-  /** ab v5 */
+  /** nur v5 (Altformat, wird beim Import konvertiert) */
   careInfo?: CareInfo[];
+  /** ab v6 */
+  careReports?: CareReportVariant[];
+}
+
+/** v5-Datensatz → Standard-Variante (deterministische ID ⇒ Import idempotent) */
+export function careInfoToVariant(info: CareInfo): CareReportVariant {
+  const { profileId, updatedAt, ...rest } = info;
+  return {
+    id: `${profileId}-standard`,
+    profileId,
+    name: 'Standard',
+    language: 'de',
+    updatedAt,
+    ...rest,
+  };
 }
 
 export function newId(): ID {

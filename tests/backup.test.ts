@@ -74,6 +74,11 @@ describe('parseExportBundle', () => {
         JSON.stringify({ ...minimal, version: 5, attachments: [], measurements: [], sideEffects: [], careInfo: [] })
       ).version
     ).toBe(5);
+    expect(
+      parseExportBundle(
+        JSON.stringify({ ...minimal, version: 6, attachments: [], measurements: [], sideEffects: [], careReports: [] })
+      ).version
+    ).toBe(6);
   });
 
   it('lehnt fremde/kaputte Dateien verständlich ab', () => {
@@ -95,5 +100,10 @@ describe('parseExportBundle', () => {
         JSON.stringify({ ...minimal, version: 5, attachments: [], measurements: [], sideEffects: [] })
       )
     ).toThrow(/careInfo/);
+    expect(
+      () => parseExportBundle(
+        JSON.stringify({ ...minimal, version: 6, attachments: [], measurements: [], sideEffects: [] })
+      )
+    ).toThrow(/careReports/);
   });
 });

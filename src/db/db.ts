@@ -4,6 +4,7 @@ import Dexie, { type Table } from 'dexie';
 import type {
   Attachment,
   CareInfo,
+  CareReportVariant,
   ExportBundle,
   HealthEvent,
   Intake,
@@ -15,7 +16,7 @@ import type {
   SideEffectNote,
   TimelineEntry,
 } from './models';
-import { nowIso } from './models';
+import { careInfoToVariant, nowIso } from './models';
 import { base64ToBlob, blobToBase64 } from '../utils/base64';
 
 export class CareDiaryDB extends Dexie {
@@ -29,7 +30,7 @@ export class CareDiaryDB extends Dexie {
   attachments!: Table<Attachment, string>;
   measurements!: Table<Measurement, string>;
   sideEffects!: Table<SideEffectNote, string>;
-  careInfo!: Table<CareInfo, string>;
+  careReports!: Table<CareReportVariant, string>;
 
   constructor() {
     super('care-diary');
@@ -58,6 +59,22 @@ export class CareDiaryDB extends Dexie {
     this.version(5).stores({
       careInfo: 'profileId',
     });
+    // v6: Umfeld-Bericht-Varianten je Empfänger; bestehende Inhalte werden
+    // als Variante „Standard" übernommen
+    this.version(6)
+      .stores({
+        careReports: 'id, profileId',
+      })
+      .upgrade(async (tx) => {
+        const old = await tx.table<CareInfo, string>('careInfo').toArray();
+        if (old.length > 0) {
+          await tx.table('careReports').bulkPut(old.map(careInfoToVariant));
+        }
+      });
+    // v7: Alt-Tabelle entfernen (erst nach der Übernahme in v6)
+    this.version(7).stores({
+      careInfo: null,
+    });
   }
 }
 
@@ -66,7 +83,7 @@ export const db = new CareDiaryDB();
 /** Vollständiger Export aller Daten (JSON) — jederzeit, versioniert.
  *  Foto-Anhänge werden als Base64 eingebettet (v3). */
 export async function buildExportBundle(): Promise<ExportBundle> {
-  const [profiles, medications, intakes, events, observations, timeline, questions, attachments, measurements, sideEffects, careInfo] =
+  const [profiles, medications, intakes, events, observations, timeline, questions, attachments, measurements, sideEffects, careReports] =
     await Promise.all([
       db.profiles.toArray(),
       db.medications.toArray(),
@@ -78,11 +95,11 @@ export async function buildExportBundle(): Promise<ExportBundle> {
       db.attachments.toArray(),
       db.measurements.toArray(),
       db.sideEffects.toArray(),
-      db.careInfo.toArray(),
+      db.careReports.toArray(),
     ]);
   return {
     format: 'care-diary-export',
-    version: 5,
+    version: 6,
     exportedAt: nowIso(),
     profiles,
     medications,
@@ -99,7 +116,7 @@ export async function buildExportBundle(): Promise<ExportBundle> {
     ),
     measurements,
     sideEffects,
-    careInfo,
+    careReports,
   };
 }
 
@@ -109,7 +126,7 @@ export async function buildExportBundle(): Promise<ExportBundle> {
 export async function importBundle(bundle: ExportBundle): Promise<void> {
   await db.transaction(
     'rw',
-    [db.profiles, db.medications, db.intakes, db.events, db.observations, db.timeline, db.questions, db.attachments, db.measurements, db.sideEffects, db.careInfo],
+    [db.profiles, db.medications, db.intakes, db.events, db.observations, db.timeline, db.questions, db.attachments, db.measurements, db.sideEffects, db.careReports],
     async () => {
       await db.profiles.bulkPut(bundle.profiles);
       await db.medications.bulkPut(bundle.medications);
@@ -128,7 +145,9 @@ export async function importBundle(bundle: ExportBundle): Promise<void> {
       }
       if (bundle.measurements) await db.measurements.bulkPut(bundle.measurements);
       if (bundle.sideEffects) await db.sideEffects.bulkPut(bundle.sideEffects);
-      if (bundle.careInfo) await db.careInfo.bulkPut(bundle.careInfo);
+      // v5-Altformat: eine Variante je Profil → „Standard" (deterministische ID)
+      if (bundle.careInfo) await db.careReports.bulkPut(bundle.careInfo.map(careInfoToVariant));
+      if (bundle.careReports) await db.careReports.bulkPut(bundle.careReports);
     }
   );
 }
