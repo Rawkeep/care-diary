@@ -5,7 +5,7 @@ import { create } from 'zustand';
 import { hasPin } from '../utils/pin';
 
 export type View = 'home' | 'history' | 'meds' | 'more';
-export type FormKind = 'intake' | 'event' | 'observation' | null;
+export type FormKind = 'intake' | 'event' | 'observation' | 'weight' | null;
 
 /** Berichtszeitraum als lokale Day-Keys (YYYY-MM-DD, inklusiv) */
 export interface ReportRange {

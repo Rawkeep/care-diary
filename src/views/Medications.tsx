@@ -8,11 +8,15 @@ import { db } from '../db/db';
 import type { Medication, Profile } from '../db/models';
 import { newId, nowIso } from '../db/models';
 import { effectiveDose } from '../utils/dose';
-import { fmtDayKey, localDayKey } from '../utils/date';
+import { fmtDate, fmtDayKey, localDayKey } from '../utils/date';
 
 export function Medications({ profile }: { profile: Profile }) {
   const medications = useLiveQuery(
     () => db.medications.where('profileId').equals(profile.id).toArray(),
+    [profile.id]
+  );
+  const sideEffects = useLiveQuery(
+    () => db.sideEffects.where('profileId').equals(profile.id).toArray(),
     [profile.id]
   );
 
@@ -28,6 +32,9 @@ export function Medications({ profile }: { profile: Profile }) {
   const [stepDate, setStepDate] = useState(localDayKey(new Date().toISOString()));
   const [stepDose, setStepDose] = useState('');
   const [stepNote, setStepNote] = useState('');
+
+  const [effectsFor, setEffectsFor] = useState<string | null>(null);
+  const [effectText, setEffectText] = useState('');
 
   async function add() {
     await db.medications.add({
@@ -66,7 +73,28 @@ export function Medications({ profile }: { profile: Profile }) {
     await db.medications.update(med.id, { doseSteps: steps });
   }
 
+  async function addSideEffect(medicationId: string) {
+    if (!effectText.trim()) return;
+    await db.sideEffects.add({
+      id: newId(),
+      profileId: profile.id,
+      medicationId,
+      text: effectText.trim(),
+      at: nowIso(),
+      createdAt: nowIso(),
+    });
+    setEffectText('');
+  }
+
+  async function removeSideEffect(id: string) {
+    await db.sideEffects.delete(id);
+  }
+
   if (!medications) return null;
+  const effectsOf = (medId: string) =>
+    (sideEffects ?? [])
+      .filter((s) => s.medicationId === medId)
+      .sort((a, b) => b.at.localeCompare(a.at));
   const active = medications.filter((m) => !m.endDate);
   const ended = medications.filter((m) => m.endDate);
 
@@ -97,10 +125,51 @@ export function Medications({ profile }: { profile: Profile }) {
                   Plan
                 </button>
                 <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
+                  onClick={() => setEffectsFor(effectsFor === m.id ? null : m.id)}>
+                  {effectsOf(m.id).length > 0 ? `⚠ ${effectsOf(m.id).length}` : '⚠'}
+                </button>
+                <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
                   onClick={() => endMedication(m.id)}>
                   Absetzen
                 </button>
               </div>
+
+              {effectsFor === m.id && (
+                <div className="card" style={{ marginTop: 6 }}>
+                  <h2>Beobachtete Auffälligkeiten unter {m.name}</h2>
+                  <p className="hint" style={{ marginTop: 0 }}>
+                    Mögliche Nebenwirkungen dokumentieren — z. B. Gewichtszunahme, Müdigkeit,
+                    Verhaltensänderung, undeutlichere Aussprache. Das ist ein dokumentierter
+                    Verdacht fürs Arztgespräch, keine Kausalaussage. Erscheint im Arztbericht
+                    beim Medikament.
+                  </p>
+                  {effectsOf(m.id).length === 0 && <p className="empty">Noch nichts notiert.</p>}
+                  {effectsOf(m.id).map((s) => (
+                    <div key={s.id} className="entry kind-observation">
+                      <div className="body">
+                        <div className="title" style={{ fontWeight: 400 }}>{s.text}</div>
+                        <div className="meta">{fmtDate(s.at)}</div>
+                      </div>
+                      <button className="btn secondary"
+                        style={{ width: 'auto', padding: '6px 10px', marginTop: 0 }}
+                        onClick={() => removeSideEffect(s.id)} aria-label="Notiz entfernen">
+                        🗑
+                      </button>
+                    </div>
+                  ))}
+                  <label className="field" style={{ marginTop: 8 }}>
+                    <span>Neue Beobachtung</span>
+                    <input type="text" value={effectText}
+                      onChange={(e) => setEffectText(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && addSideEffect(m.id)}
+                      placeholder="z. B. seit 2 Wochen deutlich mehr Appetit" />
+                  </label>
+                  <button className="btn" onClick={() => addSideEffect(m.id)}
+                    disabled={effectText.trim() === ''}>
+                    ＋ Beobachtung notieren
+                  </button>
+                </div>
+              )}
 
               {planFor === m.id && (
                 <div className="card" style={{ marginTop: 6 }}>

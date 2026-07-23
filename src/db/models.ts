@@ -91,6 +91,34 @@ export interface Observation {
   createdAt: string;
 }
 
+/** Messwert über die Zeit (z. B. Gewicht) — u. a. für Nebenwirkungs-Beobachtung */
+export type MeasurementKind = 'weight';
+
+export interface Measurement {
+  id: ID;
+  profileId: ID;
+  kind: MeasurementKind;
+  value: number;
+  unit: string;
+  at: string;
+  note?: string;
+  createdAt: string;
+}
+
+/**
+ * Beobachtete Auffälligkeit unter einem Medikament (z. B. Gewichtszunahme,
+ * Verhaltensänderung). Dokumentierter Verdacht für das Arztgespräch —
+ * die App stellt keine Kausalzusammenhänge fest.
+ */
+export interface SideEffectNote {
+  id: ID;
+  profileId: ID;
+  medicationId: ID;
+  text: string;
+  at: string;
+  createdAt: string;
+}
+
 export type TimelineKind = 'milestone' | 'diagnosis' | 'hospital' | 'appointment' | 'other';
 
 export interface TimelineEntry {
@@ -142,10 +170,11 @@ export interface Question {
 }
 
 /** Versioniertes Export-Format (Daten gehören den Nutzer:innen).
- *  v2 = ohne Anhänge, v3 = mit Foto-Anhängen (Base64). Import versteht beide. */
+ *  v2 = Basis, v3 = + Foto-Anhänge (Base64), v4 = + Messwerte und
+ *  Nebenwirkungs-Notizen. Import versteht alle Versionen. */
 export interface ExportBundle {
   format: 'care-diary-export';
-  version: 2 | 3;
+  version: 2 | 3 | 4;
   exportedAt: string;
   profiles: Profile[];
   medications: Medication[];
@@ -156,6 +185,9 @@ export interface ExportBundle {
   questions: Question[];
   /** ab v3 */
   attachments?: ExportedAttachment[];
+  /** ab v4 */
+  measurements?: Measurement[];
+  sideEffects?: SideEffectNote[];
 }
 
 export function newId(): ID {

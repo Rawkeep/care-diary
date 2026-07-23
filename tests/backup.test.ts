@@ -59,11 +59,16 @@ describe('parseExportBundle', () => {
     questions: [],
   };
 
-  it('akzeptiert v2 (ohne Anhänge) und v3 (mit Anhängen)', () => {
+  it('akzeptiert v2 (ohne Anhänge), v3 (mit Anhängen) und v4 (mit Messwerten)', () => {
     expect(parseExportBundle(JSON.stringify(minimal)).version).toBe(2);
     expect(
       parseExportBundle(JSON.stringify({ ...minimal, version: 3, attachments: [] })).version
     ).toBe(3);
+    expect(
+      parseExportBundle(
+        JSON.stringify({ ...minimal, version: 4, attachments: [], measurements: [], sideEffects: [] })
+      ).version
+    ).toBe(4);
   });
 
   it('lehnt fremde/kaputte Dateien verständlich ab', () => {
@@ -77,5 +82,8 @@ describe('parseExportBundle', () => {
     expect(() => parseExportBundle(JSON.stringify({ ...minimal, version: 3 }))).toThrow(
       /attachments/
     );
+    expect(
+      () => parseExportBundle(JSON.stringify({ ...minimal, version: 4, attachments: [] }))
+    ).toThrow(/measurements/);
   });
 });

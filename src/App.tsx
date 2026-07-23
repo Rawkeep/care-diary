@@ -8,6 +8,7 @@ import { Toast } from './components/Toast';
 import { EventForm } from './components/forms/EventForm';
 import { IntakeForm } from './components/forms/IntakeForm';
 import { ObservationForm } from './components/forms/ObservationForm';
+import { WeightForm } from './components/forms/WeightForm';
 import { Home } from './views/Home';
 import { History } from './views/History';
 import { Medications } from './views/Medications';
@@ -23,7 +24,12 @@ const NAV: { view: View; icon: string; label: string }[] = [
   { view: 'more', icon: '⚙️', label: 'Mehr' },
 ];
 
-const FORM_TITLES = { intake: 'Einnahme erfassen', event: 'Ereignis erfassen', observation: 'Zustand erfassen' } as const;
+const FORM_TITLES = {
+  intake: 'Einnahme erfassen',
+  event: 'Ereignis erfassen',
+  observation: 'Zustand erfassen',
+  weight: 'Gewicht erfassen',
+} as const;
 
 export function App() {
   const { view, setView, activeProfileId, openForm, setOpenForm, locked, reportRange } =
@@ -64,6 +70,7 @@ export function App() {
           {openForm === 'observation' && (
             <ObservationForm profile={profile} preset={preset} onDone={() => setOpenForm(null)} />
           )}
+          {openForm === 'weight' && <WeightForm profile={profile} onDone={() => setOpenForm(null)} />}
         </Modal>
       )}
 

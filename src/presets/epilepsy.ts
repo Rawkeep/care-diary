@@ -80,6 +80,8 @@ export const EPILEPSY_PRESET: ConditionPreset = {
     { key: 'mood', label: 'Stimmung', scaleHint: ['sehr schlecht', 'sehr gut'] },
     { key: 'sleep', label: 'Schlaf (letzte Nacht)', scaleHint: ['sehr schlecht', 'sehr gut'] },
     { key: 'appetite', label: 'Appetit', scaleHint: ['kein Appetit', 'normal/gut'] },
+    { key: 'behavior', label: 'Verhalten', scaleHint: ['sehr auffällig', 'unauffällig'] },
+    { key: 'speech', label: 'Aussprache / Sprache', scaleHint: ['sehr undeutlich', 'klar wie sonst'] },
   ],
 };
 

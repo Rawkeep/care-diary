@@ -23,16 +23,23 @@ export function TrendChart({
   days,
   points,
   smoothed,
+  domain = [1, 5],
+  ticks = [1, 3, 5],
 }: {
   title: string;
   days: string[];
   points: TrendPoint[];
   smoothed: TrendPoint[];
+  /** Werteskala [min, max] — Standard: Zustands-Skala 1–5 */
+  domain?: [number, number];
+  ticks?: number[];
 }) {
   const [hover, setHover] = useState<TrendPoint | null>(null);
   const n = Math.max(days.length - 1, 1);
+  const [dMin, dMax] = domain;
+  const span = Math.max(dMax - dMin, 1e-9);
   const x = (i: number) => L + (i / n) * (W - L - R);
-  const y = (v: number) => T + ((5 - v) / 4) * (H - T - B);
+  const y = (v: number) => T + ((dMax - v) / span) * (H - T - B);
 
   const path = smoothed
     .map((p, i) => `${i === 0 ? 'M' : 'L'}${x(p.dayIndex).toFixed(1)},${y(p.value).toFixed(1)}`)
@@ -66,7 +73,7 @@ export function TrendChart({
         onPointerMove={onMove}
         onPointerLeave={() => setHover(null)}
       >
-        {[1, 3, 5].map((v) => (
+        {ticks.map((v) => (
           <g key={v}>
             <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} className="trend-grid" />
             <text x={L - 6} y={y(v) + 3} className="trend-ytick" textAnchor="end">

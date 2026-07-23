@@ -8,6 +8,7 @@ import { nowIso } from '../db/models';
 import type { ConditionPreset } from '../presets/epilepsy';
 import { useAppStore } from '../store/appStore';
 import { itemsOfDay, mergeChronological } from '../utils/aggregate';
+import { daysSinceLastEvent } from '../utils/correlation';
 import { fmtDuration, localDayKey } from '../utils/date';
 import { effectiveDose } from '../utils/dose';
 import { quickIntake } from '../utils/quickIntake';
@@ -35,6 +36,7 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
   }, [acuteStartedAt]);
 
   const todayKey = localDayKey(new Date().toISOString());
+  const eventFreeDays = daysSinceLastEvent(events ?? [], todayKey);
   const todayItems = itemsOfDay(
     mergeChronological(intakes ?? [], events ?? [], observations ?? []),
     todayKey
@@ -85,7 +87,7 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
         </div>
       )}
 
-      <div className="quick-grid">
+      <div className="quick-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
         <button className="quick-btn" onClick={() => setOpenForm('intake')}>
           <span className="icon">💊</span>Einnahme
         </button>
@@ -95,7 +97,20 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
         <button className="quick-btn" onClick={() => setOpenForm('observation')}>
           <span className="icon">📝</span>Zustand
         </button>
+        <button className="quick-btn" onClick={() => setOpenForm('weight')}>
+          <span className="icon">⚖️</span>Gewicht
+        </button>
       </div>
+
+      {eventFreeDays != null && (
+        <div className={eventFreeDays === 0 ? 'streak-badge today' : 'streak-badge'}>
+          {eventFreeDays === 0
+            ? '⚡ Heute ein Ereignis dokumentiert'
+            : eventFreeDays === 1
+              ? '🕊 1 Tag ohne Ereignis'
+              : `🕊 ${eventFreeDays} Tage ohne Ereignis`}
+        </div>
+      )}
 
       <div className="card">
         <h2>Heute</h2>

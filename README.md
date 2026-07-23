@@ -49,7 +49,19 @@ npm test             # Vitest (Aggregations-Kern)
   Checkliste, Aura/Nachphase/Notfallmedikation.
 - **Medikamente:** anlegen, Standarddosis, Schema, Notfallmedikation,
   absetzen (Historie bleibt erhalten).
-- **Zustands-Skalen** (1–5, je Preset) mit Auffälligkeits-Notiz.
+- **Zustands-Skalen** (1–5, je Preset) mit Auffälligkeits-Notiz — bei
+  Epilepsie inkl. **Verhalten** und **Aussprache/Sprache**.
+- **Gewichts-Erfassung** (⚖️, z. B. zur Beobachtung von Gewichtszunahme
+  unter einem Medikament) mit eigener Verlaufskurve.
+- **Nebenwirkungs-Notizen je Medikament** („Beobachtete Auffälligkeiten"):
+  dokumentierter Verdacht fürs Arztgespräch, erscheint im Arztbericht beim
+  jeweiligen Medikament — keine Kausalaussage.
+- **Muster sichtbar machen (nur beschreibend):** Tageszeit-Verteilung der
+  Ereignisse (nachts/morgens/…, inkl. „aus dem Schlaf heraus"), „X Tage
+  ohne Ereignis" auf der Startseite und der Vergleich **Zustand an
+  ereignisfreien Tagen vs. Ereignistag + Folgetag** je Parameter.
+  Die App zählt und gruppiert nur — die Einordnung gehört ins ärztliche
+  Gespräch.
 - **Verlauf:** chronologisch nach Tagen gruppiert + Ereignis-Zähler je Art.
 - **Foto-Anhänge** an Ereignissen und Zustandseinträgen (Kamera oder Galerie,
   automatisch verkleinert, Vollbild-Ansicht) — z. B. Hautbilder, Befunde,

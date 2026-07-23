@@ -23,7 +23,7 @@ export function parseExportBundle(text: string): ExportBundle {
   if (b?.format !== 'care-diary-export') {
     throw new Error('Keine care-diary-Export-Datei (format fehlt oder falsch).');
   }
-  if (b.version !== 2 && b.version !== 3) {
+  if (b.version !== 2 && b.version !== 3 && b.version !== 4) {
     throw new Error(`Unbekannte Export-Version: ${String(b.version)}.`);
   }
   for (const table of TABLES) {
@@ -31,8 +31,11 @@ export function parseExportBundle(text: string): ExportBundle {
       throw new Error(`Export unvollständig: „${table}" fehlt.`);
     }
   }
-  if (b.version === 3 && !Array.isArray(b.attachments)) {
-    throw new Error('Export unvollständig: „attachments" fehlt (v3).');
+  if (b.version >= 3 && !Array.isArray(b.attachments)) {
+    throw new Error('Export unvollständig: „attachments" fehlt (ab v3).');
+  }
+  if (b.version >= 4 && (!Array.isArray(b.measurements) || !Array.isArray(b.sideEffects))) {
+    throw new Error('Export unvollständig: „measurements"/„sideEffects" fehlt (ab v4).');
   }
   return b as ExportBundle;
 }

@@ -18,8 +18,11 @@ import {
   observationStats,
   totalEventDurationSeconds,
 } from '../utils/aggregate';
+import { SLOT_LABEL, SLOT_ORDER, timeOfDayHistogram } from '../utils/correlation';
 import { effectiveDose } from '../utils/dose';
 import { fmtDate, fmtDayKey, fmtDuration, fmtTime, localDayKey } from '../utils/date';
+
+const fmtKg = (v: number) => v.toFixed(1).replace('.', ',');
 
 const STATUS_LABEL: Record<IntakeStatus, string> = {
   taken: 'genommen',
@@ -44,8 +47,17 @@ export function Report({ profile, preset }: { profile: Profile; preset: Conditio
     () => db.questions.where('profileId').equals(profile.id).toArray(),
     [profile.id]
   );
+  const measurements = useLiveQuery(
+    () => db.measurements.where('profileId').equals(profile.id).toArray(),
+    [profile.id]
+  );
+  const sideEffects = useLiveQuery(
+    () => db.sideEffects.where('profileId').equals(profile.id).toArray(),
+    [profile.id]
+  );
 
-  if (!reportRange || !intakes || !events || !observations || !medications || !questions) return null;
+  if (!reportRange || !intakes || !events || !observations || !medications || !questions || !measurements || !sideEffects)
+    return null;
   const { from, to } = reportRange;
 
   const evts = inDayRange(events, (e) => e.startedAt, from, to).sort((a, b) =>
@@ -59,6 +71,18 @@ export function Report({ profile, preset }: { profile: Profile; preset: Conditio
   const byDay = eventCountByDay(evts);
   const statusByMed = intakeStatusByMedication(intakesR);
   const stats = [...observationStats(obsR).entries()];
+  const slots = timeOfDayHistogram(evts);
+  const fromSleep = evts.filter((e) => e.circumstances.includes('Aus dem Schlaf heraus')).length;
+  const weightR = inDayRange(
+    measurements.filter((m) => m.kind === 'weight'),
+    (m) => m.at,
+    from,
+    to
+  ).sort((a, b) => a.at.localeCompare(b.at));
+  const weightFirst = weightR[0];
+  const weightLast = weightR[weightR.length - 1];
+  const effectsOf = (medId: string) =>
+    sideEffects.filter((s) => s.medicationId === medId).sort((a, b) => a.at.localeCompare(b.at));
 
   // Kalender auf dokumentierte Daten begrenzen (max. 12 Monate anzeigen)
   const dataDays = [
@@ -133,6 +157,35 @@ export function Report({ profile, preset }: { profile: Profile; preset: Conditio
 
       {evts.length > 0 && (
         <div className="card">
+          <h2>Tageszeit der Ereignisse</h2>
+          <table>
+            <thead>
+              <tr><th>Tageszeit</th><th>Anzahl</th><th>Anteil</th></tr>
+            </thead>
+            <tbody>
+              {SLOT_ORDER.map((slot) => (
+                <tr key={slot}>
+                  <td>{SLOT_LABEL[slot]}</td>
+                  <td>{slots[slot]}×</td>
+                  <td>{Math.round((slots[slot] / evts.length) * 100)} %</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {fromSleep > 0 && (
+            <p className="hint">
+              Bei {fromSleep} von {evts.length} Ereignissen wurde „Aus dem Schlaf heraus" als
+              Begleitumstand dokumentiert.
+            </p>
+          )}
+          <p className="hint">
+            Uhrzeit der Erfassung („Beginn"). Beschreibende Verteilung — keine Kausalaussage.
+          </p>
+        </div>
+      )}
+
+      {evts.length > 0 && (
+        <div className="card">
           <h2>Ereignis-Kalender</h2>
           {months.length > shownMonths.length && (
             <p className="hint">Anzeige auf die letzten 12 Monate begrenzt.</p>
@@ -178,10 +231,39 @@ export function Report({ profile, preset }: { profile: Profile; preset: Conditio
                     .join(', ')}
                 </div>
               )}
+              {effectsOf(m.id).length > 0 && (
+                <div className="hint">
+                  Beobachtete Auffälligkeiten (dokumentierter Verdacht, keine Kausalaussage):{' '}
+                  {effectsOf(m.id)
+                    .map((s) => `${fmtDayKey(localDayKey(s.at))}: ${s.text}`)
+                    .join(' · ')}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
+
+      {weightR.length > 0 && (
+        <div className="card">
+          <h2>Gewicht</h2>
+          <p style={{ margin: '4px 0' }}>
+            {fmtDayKey(localDayKey(weightFirst.at))}: <strong>{fmtKg(weightFirst.value)} kg</strong>
+            {weightR.length > 1 && (
+              <>
+                {' '}→ {fmtDayKey(localDayKey(weightLast.at))}:{' '}
+                <strong>{fmtKg(weightLast.value)} kg</strong>{' '}
+                ({weightLast.value >= weightFirst.value ? '+' : '−'}
+                {fmtKg(Math.abs(weightLast.value - weightFirst.value))} kg)
+              </>
+            )}
+          </p>
+          <p className="hint">
+            {weightR.length} Messung{weightR.length === 1 ? '' : 'en'} im Zeitraum — Verlaufskurve
+            im Abschnitt „Zustands-Verlauf".
+          </p>
+        </div>
+      )}
 
       {stats.length > 0 && (
         <div className="card">
