@@ -1,6 +1,7 @@
 // Heute-Ansicht: Akut-Button, Schnellerfassung in ≤ 3 Taps, Tagesüberblick.
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { CaptureButtons } from '../components/CaptureButtons';
 import { EntryList } from '../components/EntryList';
 import {
   IconDone,
@@ -23,7 +24,8 @@ import { orderMedsForHome } from '../utils/medOrder';
 import { quickIntake } from '../utils/quickIntake';
 
 export function Home({ profile, preset }: { profile: Profile; preset: ConditionPreset }) {
-  const { setOpenForm, acuteStartedAt, startAcute, showToast } = useAppStore();
+  const { setOpenForm, acuteStartedAt, startAcute, showToast, acuteMedia, addAcuteMedia } =
+    useAppStore();
 
   const intakes = useLiveQuery(() => db.intakes.where('profileId').equals(profile.id).toArray(), [profile.id]);
   const events = useLiveQuery(() => db.events.where('profileId').equals(profile.id).toArray(), [profile.id]);
@@ -76,10 +78,20 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
   return (
     <>
       {acuteStartedAt ? (
-        <button className="acute-btn running" onClick={() => setOpenForm('event')}>
-          ⏱ Ereignis läuft — tippen zum Beenden &amp; Erfassen
-          <span className="acute-timer">{fmtDuration(elapsed)}</span>
-        </button>
+        <>
+          <button className="acute-btn running" onClick={() => setOpenForm('event')}>
+            ⏱ Ereignis läuft — tippen zum Beenden &amp; Erfassen
+            <span className="acute-timer">{fmtDuration(elapsed)}</span>
+          </button>
+          {/* Aufnahme zuerst: Kamera direkt, das Formular kommt nach dem Ereignis */}
+          <CaptureButtons
+            count={acuteMedia.length}
+            onCapture={(files) => {
+              addAcuteMedia(files);
+              showToast(`✓ Aufnahme angehängt (${files.length})`);
+            }}
+          />
+        </>
       ) : (
         <button className="acute-btn" onClick={startAcute}>
           <IconEvent size={20} className="inline-icon" /> Akut: Ereignis beginnt jetzt

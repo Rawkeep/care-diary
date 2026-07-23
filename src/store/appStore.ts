@@ -28,6 +28,12 @@ interface AppState {
   openForm: FormKind;
   /** Laufender Akut-Timer (ISO-Start) — überlebt Navigation innerhalb der Sitzung */
   acuteStartedAt: string | null;
+  /**
+   * Während des Akut-Timers aufgenommene Medien (Video/Foto) — werden beim
+   * Speichern des Ereignisses als Anhänge übernommen. Nur im Speicher:
+   * ein App-Neustart während des Ereignisses verwirft sie.
+   */
+  acuteMedia: File[];
   /** PIN-Sperre aktiv? Beim Start gesperrt, wenn eine PIN gesetzt ist. */
   locked: boolean;
   /** Offener Arztbericht (null = keiner) */
@@ -41,6 +47,7 @@ interface AppState {
   setOpenForm: (f: FormKind) => void;
   startAcute: () => void;
   clearAcute: () => void;
+  addAcuteMedia: (files: File[]) => void;
   lock: () => void;
   unlock: () => void;
   openReport: (r: ReportRange) => void;
@@ -58,6 +65,7 @@ export const useAppStore = create<AppState>((set) => ({
   activeProfileId: localStorage.getItem(PROFILE_KEY),
   openForm: null,
   acuteStartedAt: null,
+  acuteMedia: [],
   locked: hasPin(),
   reportRange: null,
   toast: null,
@@ -68,8 +76,9 @@ export const useAppStore = create<AppState>((set) => ({
     set({ activeProfileId: id });
   },
   setOpenForm: (openForm) => set({ openForm }),
-  startAcute: () => set({ acuteStartedAt: new Date().toISOString() }),
-  clearAcute: () => set({ acuteStartedAt: null }),
+  startAcute: () => set({ acuteStartedAt: new Date().toISOString(), acuteMedia: [] }),
+  clearAcute: () => set({ acuteStartedAt: null, acuteMedia: [] }),
+  addAcuteMedia: (files) => set((s) => ({ acuteMedia: [...s.acuteMedia, ...files] })),
   lock: () => set({ locked: true }),
   unlock: () => set({ locked: false }),
   openReport: (reportRange) => set({ reportRange }),

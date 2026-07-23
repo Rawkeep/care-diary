@@ -177,6 +177,18 @@ main { flex: 1; padding: 8px 16px 90px; }
 /* Heute erledigt: bleibt tippbar (Bedarfs-Extradosis), tritt aber zurück */
 .med-quick-btn.muted { opacity: 0.62; box-shadow: none; }
 
+/* Sofort-Aufnahme im Akutfall */
+.capture-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.capture-btn {
+  flex: 1; min-width: 120px; font: inherit; font-weight: 700; cursor: pointer;
+  padding: 14px; border-radius: var(--radius);
+  background: var(--surface); color: var(--danger);
+  border: 2px solid var(--danger); box-shadow: var(--shadow-1);
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+.capture-btn:active { transform: scale(0.97); background: var(--danger-soft); }
+.capture-count { flex-basis: 100%; font-size: 0.85rem; font-weight: 600; color: var(--accent-strong); }
+
 /* Aufklappbare Gruppen auf „Mehr" */
 details.group { margin-bottom: 12px; }
 details.group > summary {

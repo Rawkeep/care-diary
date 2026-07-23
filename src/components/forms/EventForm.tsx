@@ -23,7 +23,7 @@ export function EventForm({
   existing?: HealthEvent;
   onDone: () => void;
 }) {
-  const { acuteStartedAt, clearAcute } = useAppStore();
+  const { acuteStartedAt, clearAcute, acuteMedia } = useAppStore();
   const acuteDuration = !existing && acuteStartedAt
     ? Math.max(1, Math.round((Date.now() - new Date(acuteStartedAt).getTime()) / 1000))
     : null;
@@ -46,7 +46,8 @@ export function EventForm({
     existing?.postPhaseMinutes != null ? String(existing.postPhaseMinutes) : ''
   );
   const [note, setNote] = useState(existing?.note ?? '');
-  const [photos, setPhotos] = useState<File[]>([]);
+  // Während des Akut-Timers aufgenommene Medien sind schon da (Aufnahme zuerst)
+  const [photos, setPhotos] = useState<File[]>(existing ? [] : acuteMedia);
   const [audioClips, setAudioClips] = useState<Blob[]>([]);
   const [saving, setSaving] = useState(false);
   // Kurz-Modus beim Neu-Erfassen: erst Art + Zeit, Details auf Wunsch —
@@ -113,9 +114,13 @@ export function EventForm({
         </div>
       </label>
 
+      {/* Aufnahmen sind zeitkritisch — immer sichtbar, auch im Kurz-Modus */}
+      <PhotoPicker files={photos} onChange={setPhotos} />
+      <AudioRecorder clips={audioClips} onChange={setAudioClips} />
+
       {!detailed && (
         <button type="button" className="btn secondary" onClick={() => setDetailed(true)}>
-          ＋ Details hinzufügen (Schwere, Umstände, Fotos …)
+          ＋ Details hinzufügen (Schwere, Umstände, Nachphase …)
         </button>
       )}
 
@@ -160,8 +165,6 @@ export function EventForm({
           placeholder="Was ist passiert? Was war anders als sonst?" />
       </label>
 
-      <PhotoPicker files={photos} onChange={setPhotos} />
-      <AudioRecorder clips={audioClips} onChange={setAudioClips} />
       </>)}
 
       <button className="btn" onClick={save} disabled={saving}>
