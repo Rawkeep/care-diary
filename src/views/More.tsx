@@ -22,7 +22,7 @@ function downloadFile(content: string, filename: string, type: string) {
 }
 
 export function More({ profile }: { profile: Profile }) {
-  const { openReport, lock, showToast } = useAppStore();
+  const { openReport, openCareReport, lock, showToast } = useAppStore();
 
   const questions = useLiveQuery(
     () => db.questions.where('profileId').equals(profile.id).toArray(),
@@ -182,6 +182,17 @@ export function More({ profile }: { profile: Profile }) {
           <button className="quick-btn" onClick={() => report(182)}>📄 Letzte 6 Monate</button>
           <button className="quick-btn" onClick={() => report(null)}>📄 Gesamter Verlauf</button>
         </div>
+      </div>
+
+      <div className="card">
+        <h2>Bericht fürs Umfeld</h2>
+        <p className="hint" style={{ marginTop: 0 }}>
+          „So könnt ihr {profile.name} unterstützen" — ein laienverständliches Blatt für
+          Schule, Betreuung, Familie und Freunde: was die Erkrankung bedeutet, was im
+          Moment hilft, was im Alltag guttut. Ihr bestimmt, was hineinkommt — Skalen,
+          Gewicht und Nebenwirkungen bleiben grundsätzlich draußen.
+        </p>
+        <button className="btn" onClick={openCareReport}>🤝 Umfeld-Bericht öffnen</button>
       </div>
 
       <div className="card">

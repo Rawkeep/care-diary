@@ -12,6 +12,7 @@ import { EventForm } from './components/forms/EventForm';
 import { IntakeForm } from './components/forms/IntakeForm';
 import { ObservationForm } from './components/forms/ObservationForm';
 import { WeightForm } from './components/forms/WeightForm';
+import { CareReport } from './views/CareReport';
 import { Home } from './views/Home';
 import { History } from './views/History';
 import { Medications } from './views/Medications';
@@ -35,7 +36,7 @@ const FORM_TITLES = {
 } as const;
 
 export function App() {
-  const { view, setView, activeProfileId, openForm, setOpenForm, locked, reportRange } =
+  const { view, setView, activeProfileId, openForm, setOpenForm, locked, reportRange, careReportOpen } =
     useAppStore();
   const profiles = useLiveQuery(() => db.profiles.toArray(), []);
   const [showProfiles, setShowProfiles] = useState(false);
@@ -47,8 +48,9 @@ export function App() {
   const profile = profiles.find((p) => p.id === activeProfileId) ?? profiles[0];
   const preset = presetFor(profile.conditions);
 
-  // Bericht ersetzt die komplette Shell (druckfreundlich, keine Navigation)
+  // Berichte ersetzen die komplette Shell (druckfreundlich, keine Navigation)
   if (reportRange) return <Report profile={profile} preset={preset} />;
+  if (careReportOpen) return <CareReport profile={profile} preset={preset} />;
 
   return (
     <>

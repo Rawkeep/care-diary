@@ -34,6 +34,8 @@ interface AppState {
   reportRange: ReportRange | null;
   /** Aktueller Bestätigungs-Toast (null = keiner) */
   toast: Toast | null;
+  /** Umfeld-Bericht (Schule/Betreuung/Familie) geöffnet? */
+  careReportOpen: boolean;
   setView: (v: View) => void;
   setActiveProfile: (id: string) => void;
   setOpenForm: (f: FormKind) => void;
@@ -45,6 +47,8 @@ interface AppState {
   closeReport: () => void;
   showToast: (message: string, undo?: Toast['undo']) => void;
   clearToast: () => void;
+  openCareReport: () => void;
+  closeCareReport: () => void;
 }
 
 const PROFILE_KEY = 'care-diary.activeProfileId';
@@ -57,6 +61,7 @@ export const useAppStore = create<AppState>((set) => ({
   locked: hasPin(),
   reportRange: null,
   toast: null,
+  careReportOpen: false,
   setView: (view) => set({ view }),
   setActiveProfile: (id) => {
     localStorage.setItem(PROFILE_KEY, id);
@@ -71,4 +76,6 @@ export const useAppStore = create<AppState>((set) => ({
   closeReport: () => set({ reportRange: null }),
   showToast: (message, undo) => set({ toast: { id: Date.now(), message, undo } }),
   clearToast: () => set({ toast: null }),
+  openCareReport: () => set({ careReportOpen: true }),
+  closeCareReport: () => set({ careReportOpen: false }),
 }));

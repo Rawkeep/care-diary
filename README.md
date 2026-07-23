@@ -105,6 +105,12 @@ npm test             # Vitest (Aggregations-Kern)
   Die App rechnet bewusst keine Pläne aus — sie bildet die Verordnung ab.
 - **Lebens-Historie:** Meilensteine, Diagnosen, Klinikaufenthalte und
   Arzttermine rückwirkend nachtragen (auch mit ungefährem Datum), ab Geburt.
+- **Umfeld-Bericht** („So könnt ihr … unterstützen"): laienverständliches,
+  druckbares Blatt für Schule, Betreuung, Familie und Freunde — Erklärung
+  der Ereignisarten, Erste-Hilfe-Grundregeln je Modul, individuell
+  vereinbartes Vorgehen, was hilft/was vermeiden, Kontakt. Datensparsam
+  per Schalter (Häufigkeit/Trigger/Notfallmedikation optional); Skalen,
+  Gewicht und Nebenwirkungen erscheinen dort grundsätzlich nicht.
 - **Fragen-Merkliste** für den nächsten Termin (erscheint im Arztbericht).
 - **App-Sperre (PIN):** Zugriffsschutz auf geteilten Geräten (gesalzener
   SHA-256-Hash, keine Klartext-PIN; bewusst kein Verschlüsselungsersatz).

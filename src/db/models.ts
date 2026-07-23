@@ -159,6 +159,32 @@ export interface ExportedAttachment {
   createdAt: string;
 }
 
+/**
+ * Inhalte des Umfeld-Berichts (Schule, Betreuung, Familie, Freunde) —
+ * von den Angehörigen gepflegt, bewusst getrennt von medizinischen Daten.
+ * Die include*-Schalter setzen Datensparsamkeit um: nur Angehakte Teile
+ * erscheinen im Bericht.
+ */
+export interface CareInfo {
+  /** ein Datensatz je Profil */
+  profileId: ID;
+  /** „Worum es geht" in eigenen Worten */
+  aboutText?: string;
+  /** Was im Alltag hilft */
+  helpsText?: string;
+  /** Was bitte vermeiden */
+  avoidText?: string;
+  /** Individuell mit dem Arzt vereinbartes Vorgehen */
+  doctorPlanText?: string;
+  /** Kontakt für Rückfragen (Eltern/Angehörige) */
+  contactsText?: string;
+  includeFrequency: boolean;
+  includeEventTypes: boolean;
+  includeTriggers: boolean;
+  includeEmergencyMeds: boolean;
+  updatedAt: string;
+}
+
 /** Fragen-Merkliste für den nächsten Arzttermin */
 export interface Question {
   id: ID;
@@ -171,10 +197,11 @@ export interface Question {
 
 /** Versioniertes Export-Format (Daten gehören den Nutzer:innen).
  *  v2 = Basis, v3 = + Foto-Anhänge (Base64), v4 = + Messwerte und
- *  Nebenwirkungs-Notizen. Import versteht alle Versionen. */
+ *  Nebenwirkungs-Notizen, v5 = + Umfeld-Bericht-Inhalte.
+ *  Import versteht alle Versionen. */
 export interface ExportBundle {
   format: 'care-diary-export';
-  version: 2 | 3 | 4;
+  version: 2 | 3 | 4 | 5;
   exportedAt: string;
   profiles: Profile[];
   medications: Medication[];
@@ -188,6 +215,8 @@ export interface ExportBundle {
   /** ab v4 */
   measurements?: Measurement[];
   sideEffects?: SideEffectNote[];
+  /** ab v5 */
+  careInfo?: CareInfo[];
 }
 
 export function newId(): ID {

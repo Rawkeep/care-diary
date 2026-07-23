@@ -23,6 +23,11 @@ export interface ConditionPreset {
   eventTypes: EventTypeDef[];
   circumstances: string[];
   observationParams: ObservationParamDef[];
+  /**
+   * Allgemeine Erste-Hilfe-Grundregeln in Laiensprache (für den
+   * Umfeld-Bericht). Individuelle ärztliche Anweisungen gehen immer vor.
+   */
+  firstAid: string[];
 }
 
 export const EPILEPSY_PRESET: ConditionPreset = {
@@ -83,6 +88,15 @@ export const EPILEPSY_PRESET: ConditionPreset = {
     { key: 'behavior', label: 'Verhalten', scaleHint: ['sehr auffällig', 'unauffällig'] },
     { key: 'speech', label: 'Aussprache / Sprache', scaleHint: ['sehr undeutlich', 'klar wie sonst'] },
   ],
+  firstAid: [
+    'Ruhe bewahren — die meisten Anfälle hören von selbst wieder auf.',
+    'Auf die Uhr schauen und die Dauer merken.',
+    'Gefährliche Gegenstände wegräumen, Kopf weich lagern (z. B. Jacke).',
+    'Nicht festhalten und nichts in den Mund stecken.',
+    'Nach dem Anfall in die stabile Seitenlage bringen und dableiben, bis die Person wieder ganz da ist.',
+    'Notruf 112: wenn der Anfall länger als 5 Minuten dauert, direkt ein weiterer folgt, eine Verletzung passiert ist oder es der erste Anfall überhaupt ist.',
+    'Danach den Eltern/Angehörigen kurz Bescheid geben — Uhrzeit und Dauer helfen sehr.',
+  ],
 };
 
 /** Migräne-Preset — zweiter Anwendungsfall nach demselben Muster */
@@ -134,6 +148,13 @@ export const MIGRAINE_PRESET: ConditionPreset = {
     { key: 'sleep', label: 'Schlaf (letzte Nacht)', scaleHint: ['sehr schlecht', 'sehr gut'] },
     { key: 'concentration', label: 'Konzentration', scaleHint: ['sehr schwer', 'wie sonst'] },
   ],
+  firstAid: [
+    'Einen ruhigen, abgedunkelten Ort ermöglichen — Licht und Lärm verschlimmern oft.',
+    'Wasser anbieten; wenn vereinbart, das Medikament laut Plan.',
+    'Nicht drängen („reiß dich zusammen" hilft nicht — es ist keine Frage des Willens).',
+    'Zeit geben: Rückzug ist keine Unhöflichkeit, sondern Selbstschutz.',
+    'Bei ungewohnt heftigen oder ganz neuen Symptomen die Angehörigen informieren.',
+  ],
 };
 
 /** Generisches Fallback-Preset für Profile ohne aktivierte Erkrankung */
@@ -150,6 +171,11 @@ export const GENERIC_PRESET: ConditionPreset = {
     { key: 'mood', label: 'Stimmung', scaleHint: ['sehr schlecht', 'sehr gut'] },
     { key: 'sleep', label: 'Schlaf (letzte Nacht)', scaleHint: ['sehr schlecht', 'sehr gut'] },
     { key: 'pain', label: 'Schmerzen', scaleHint: ['keine', 'sehr stark'] },
+  ],
+  firstAid: [
+    'Ruhe bewahren und bei der Person bleiben.',
+    'Nichts erzwingen — Zeit und ein ruhiger Ort helfen meist am ehesten.',
+    'Bei Unsicherheit oder ungewohnt heftigen Symptomen die Angehörigen informieren.',
   ],
 };
 

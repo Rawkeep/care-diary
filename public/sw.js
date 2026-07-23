@@ -1,7 +1,7 @@
 /* care-diary Service Worker — Offline-Fähigkeit (Runtime-Cache).
    Strategie: network-first mit Cache-Fallback; nur same-origin GET.
    Bei App-Updates CACHE-Version erhöhen. */
-const CACHE = 'care-diary-v8';
+const CACHE = 'care-diary-v9';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./'])));

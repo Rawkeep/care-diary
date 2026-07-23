@@ -3,6 +3,7 @@
 import Dexie, { type Table } from 'dexie';
 import type {
   Attachment,
+  CareInfo,
   ExportBundle,
   HealthEvent,
   Intake,
@@ -28,6 +29,7 @@ export class CareDiaryDB extends Dexie {
   attachments!: Table<Attachment, string>;
   measurements!: Table<Measurement, string>;
   sideEffects!: Table<SideEffectNote, string>;
+  careInfo!: Table<CareInfo, string>;
 
   constructor() {
     super('care-diary');
@@ -52,6 +54,10 @@ export class CareDiaryDB extends Dexie {
       measurements: 'id, profileId, at, [profileId+at]',
       sideEffects: 'id, profileId, medicationId',
     });
+    // v5: Umfeld-Bericht-Inhalte (ein Datensatz je Profil)
+    this.version(5).stores({
+      careInfo: 'profileId',
+    });
   }
 }
 
@@ -60,7 +66,7 @@ export const db = new CareDiaryDB();
 /** Vollständiger Export aller Daten (JSON) — jederzeit, versioniert.
  *  Foto-Anhänge werden als Base64 eingebettet (v3). */
 export async function buildExportBundle(): Promise<ExportBundle> {
-  const [profiles, medications, intakes, events, observations, timeline, questions, attachments, measurements, sideEffects] =
+  const [profiles, medications, intakes, events, observations, timeline, questions, attachments, measurements, sideEffects, careInfo] =
     await Promise.all([
       db.profiles.toArray(),
       db.medications.toArray(),
@@ -72,10 +78,11 @@ export async function buildExportBundle(): Promise<ExportBundle> {
       db.attachments.toArray(),
       db.measurements.toArray(),
       db.sideEffects.toArray(),
+      db.careInfo.toArray(),
     ]);
   return {
     format: 'care-diary-export',
-    version: 4,
+    version: 5,
     exportedAt: nowIso(),
     profiles,
     medications,
@@ -92,6 +99,7 @@ export async function buildExportBundle(): Promise<ExportBundle> {
     ),
     measurements,
     sideEffects,
+    careInfo,
   };
 }
 
@@ -101,7 +109,7 @@ export async function buildExportBundle(): Promise<ExportBundle> {
 export async function importBundle(bundle: ExportBundle): Promise<void> {
   await db.transaction(
     'rw',
-    [db.profiles, db.medications, db.intakes, db.events, db.observations, db.timeline, db.questions, db.attachments, db.measurements, db.sideEffects],
+    [db.profiles, db.medications, db.intakes, db.events, db.observations, db.timeline, db.questions, db.attachments, db.measurements, db.sideEffects, db.careInfo],
     async () => {
       await db.profiles.bulkPut(bundle.profiles);
       await db.medications.bulkPut(bundle.medications);
@@ -120,6 +128,7 @@ export async function importBundle(bundle: ExportBundle): Promise<void> {
       }
       if (bundle.measurements) await db.measurements.bulkPut(bundle.measurements);
       if (bundle.sideEffects) await db.sideEffects.bulkPut(bundle.sideEffects);
+      if (bundle.careInfo) await db.careInfo.bulkPut(bundle.careInfo);
     }
   );
 }
