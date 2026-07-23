@@ -1,0 +1,75 @@
+// Heute-Ansicht: Akut-Button, Schnellerfassung in ≤ 3 Taps, Tagesüberblick.
+import { useEffect, useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { EntryList } from '../components/EntryList';
+import { db } from '../db/db';
+import type { Profile } from '../db/models';
+import type { ConditionPreset } from '../presets/epilepsy';
+import { useAppStore } from '../store/appStore';
+import { itemsOfDay, mergeChronological } from '../utils/aggregate';
+import { fmtDuration, localDayKey } from '../utils/date';
+
+export function Home({ profile, preset }: { profile: Profile; preset: ConditionPreset }) {
+  const { setOpenForm, acuteStartedAt, startAcute } = useAppStore();
+
+  const intakes = useLiveQuery(() => db.intakes.where('profileId').equals(profile.id).toArray(), [profile.id]);
+  const events = useLiveQuery(() => db.events.where('profileId').equals(profile.id).toArray(), [profile.id]);
+  const observations = useLiveQuery(
+    () => db.observations.where('profileId').equals(profile.id).toArray(),
+    [profile.id]
+  );
+  const medications = useLiveQuery(
+    () => db.medications.where('profileId').equals(profile.id).toArray(),
+    [profile.id]
+  );
+
+  // Sekündliches Re-Render nur bei laufendem Akut-Timer
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!acuteStartedAt) return;
+    const t = setInterval(() => setTick((n) => n + 1), 1000);
+    return () => clearInterval(t);
+  }, [acuteStartedAt]);
+
+  const todayKey = localDayKey(new Date().toISOString());
+  const todayItems = itemsOfDay(
+    mergeChronological(intakes ?? [], events ?? [], observations ?? []),
+    todayKey
+  );
+
+  const elapsed = acuteStartedAt
+    ? Math.round((Date.now() - new Date(acuteStartedAt).getTime()) / 1000)
+    : 0;
+
+  return (
+    <>
+      {acuteStartedAt ? (
+        <button className="acute-btn running" onClick={() => setOpenForm('event')}>
+          ⏱ Ereignis läuft — tippen zum Beenden &amp; Erfassen
+          <span className="acute-timer">{fmtDuration(elapsed)}</span>
+        </button>
+      ) : (
+        <button className="acute-btn" onClick={startAcute}>
+          ⚡ Akut: Ereignis beginnt jetzt
+        </button>
+      )}
+
+      <div className="quick-grid">
+        <button className="quick-btn" onClick={() => setOpenForm('intake')}>
+          <span className="icon">💊</span>Einnahme
+        </button>
+        <button className="quick-btn" onClick={() => setOpenForm('event')}>
+          <span className="icon">⚡</span>Ereignis
+        </button>
+        <button className="quick-btn" onClick={() => setOpenForm('observation')}>
+          <span className="icon">📝</span>Zustand
+        </button>
+      </div>
+
+      <div className="card">
+        <h2>Heute</h2>
+        <EntryList items={todayItems} medications={medications ?? []} preset={preset} />
+      </div>
+    </>
+  );
+}
