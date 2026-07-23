@@ -125,10 +125,12 @@ npm test             # Vitest (Aggregations-Kern)
   von gestern sind kein Problem mehr.
 - **Kurz-Modus beim Ereignis:** erst Art + Zeitpunkt speichern, Details
   (Schwere, Umstände, Nachphase) auf Wunsch oder später über „Bearbeiten".
-- **Aufnahme zuerst:** Läuft der Akut-Timer, öffnen 🎥/📷 direkt die
-  Kamera — Aufnahmen hängen sich automatisch an das Ereignis, sobald es
-  gespeichert wird. Foto/Video und Sprachnotiz sind auch im Kurz-Modus
-  sofort erreichbar.
+- **Aufnahme zuerst:** Läuft der Akut-Timer, starten 🎥/📷/🎙 direkt
+  Kamera bzw. Mikrofon — Aufnahmen hängen sich automatisch an das
+  Ereignis, sobald es gespeichert wird. Die Sprachnotiz ist bewusst
+  gleichrangig: sprechen statt tippen, gerade für alle, denen Schreiben
+  schwerfällt. Foto/Video und Sprachnotiz sind auch im Kurz-Modus des
+  Formulars sofort erreichbar.
 - **SVG-Icon-Set** statt Emojis in Navigation und Schnellerfassung —
   gestochen scharf, folgt automatisch der Theme-Farbe.
 - **Fragen-Merkliste** für den nächsten Termin (erscheint im Arztbericht).

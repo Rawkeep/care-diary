@@ -46,9 +46,14 @@ export function EventForm({
     existing?.postPhaseMinutes != null ? String(existing.postPhaseMinutes) : ''
   );
   const [note, setNote] = useState(existing?.note ?? '');
-  // Während des Akut-Timers aufgenommene Medien sind schon da (Aufnahme zuerst)
-  const [photos, setPhotos] = useState<File[]>(existing ? [] : acuteMedia);
-  const [audioClips, setAudioClips] = useState<Blob[]>([]);
+  // Während des Akut-Timers aufgenommene Medien sind schon da (Aufnahme
+  // zuerst) — Fotos/Videos und Sprachnotizen getrennt einsortiert
+  const [photos, setPhotos] = useState<File[]>(
+    existing ? [] : acuteMedia.filter((f) => !f.type.startsWith('audio/'))
+  );
+  const [audioClips, setAudioClips] = useState<Blob[]>(
+    existing ? [] : acuteMedia.filter((f) => f.type.startsWith('audio/'))
+  );
   const [saving, setSaving] = useState(false);
   // Kurz-Modus beim Neu-Erfassen: erst Art + Zeit, Details auf Wunsch —
   // im Stress zählt Speichern, nicht Vollständigkeit. Bearbeiten zeigt alles.
