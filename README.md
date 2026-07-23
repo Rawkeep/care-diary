@@ -7,6 +7,10 @@ kein Konto, keine Cloud, kein Egress. Konzept: [`KONZEPT.md`](./KONZEPT.md).
 **Leitprinzip: Die App dokumentiert, der Arzt entscheidet.** Keine Diagnosen,
 keine Auswertung, keine Therapieempfehlung.
 
+Beim ersten Start führt eine **Mini-Anleitung** (vier Karten, einfache
+Sprache) durch die Grundidee — jederzeit wieder aufrufbar unter
+„Mehr → Kurzanleitung".
+
 ## Sofort nutzen
 
 **➡️ https://rawkeep.github.io/care-diary/** — im Browser öffnen, fertig.

@@ -30,7 +30,7 @@ function downloadFile(content: string, filename: string, type: string) {
 }
 
 export function More({ profile }: { profile: Profile }) {
-  const { openReport, openCareReport, lock, showToast } = useAppStore();
+  const { openReport, openCareReport, openIntro, lock, showToast } = useAppStore();
 
   const questions = useLiveQuery(
     () => db.questions.where('profileId').equals(profile.id).toArray(),
@@ -357,6 +357,15 @@ export function More({ profile }: { profile: Profile }) {
             )}
           </>
         )}
+      </div>
+
+      <div className="card">
+        <h2>Kurzanleitung</h2>
+        <p className="hint" style={{ marginTop: 0 }}>
+          Die vier Karten vom ersten Start — jederzeit zum Nachschauen oder zum Zeigen,
+          wenn jemand Neues die App bedient.
+        </p>
+        <button className="btn secondary" onClick={openIntro}>📖 Kurzanleitung ansehen</button>
       </div>
 
       <div className="card">

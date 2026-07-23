@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { LockScreen } from './components/LockScreen';
 import { Modal } from './components/Modal';
 import { IconHistory, IconMore, IconPill, IconToday } from './components/icons';
+import { Onboarding } from './components/Onboarding';
 import { ProfileSwitcher } from './components/ProfileSwitcher';
 import { ReminderManager } from './components/ReminderManager';
 import { Toast } from './components/Toast';
@@ -41,6 +42,7 @@ export function App() {
     useAppStore();
   const profiles = useLiveQuery(() => db.profiles.toArray(), []);
   const [showProfiles, setShowProfiles] = useState(false);
+  const { introOpen, closeIntro } = useAppStore();
 
   if (locked) return <LockScreen />;
   if (!profiles) return null; // DB lädt (Millisekunden)
@@ -52,6 +54,9 @@ export function App() {
   // Berichte ersetzen die komplette Shell (druckfreundlich, keine Navigation)
   if (reportRange) return <Report profile={profile} preset={preset} />;
   if (careReportOpen) return <CareReport profile={profile} preset={preset} />;
+
+  // Mini-Anleitung beim ersten Start (nach dem Anlegen des Profils)
+  if (introOpen) return <Onboarding onDone={closeIntro} />;
 
   return (
     <>

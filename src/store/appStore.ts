@@ -2,6 +2,7 @@
 // hier nur Navigations-/Sitzungszustand. activeProfileId wird als unkritischer
 // Zeiger in localStorage gehalten (keine Gesundheitsdaten).
 import { create } from 'zustand';
+import { needsOnboarding } from '../components/Onboarding';
 import { hasPin } from '../utils/pin';
 
 export type View = 'home' | 'history' | 'meds' | 'more';
@@ -42,6 +43,8 @@ interface AppState {
   toast: Toast | null;
   /** Umfeld-Bericht (Schule/Betreuung/Familie) geöffnet? */
   careReportOpen: boolean;
+  /** Mini-Anleitung sichtbar? (erster Start oder über „Mehr" aufgerufen) */
+  introOpen: boolean;
   setView: (v: View) => void;
   setActiveProfile: (id: string) => void;
   setOpenForm: (f: FormKind) => void;
@@ -56,6 +59,8 @@ interface AppState {
   clearToast: () => void;
   openCareReport: () => void;
   closeCareReport: () => void;
+  openIntro: () => void;
+  closeIntro: () => void;
 }
 
 const PROFILE_KEY = 'care-diary.activeProfileId';
@@ -70,6 +75,7 @@ export const useAppStore = create<AppState>((set) => ({
   reportRange: null,
   toast: null,
   careReportOpen: false,
+  introOpen: needsOnboarding(),
   setView: (view) => set({ view }),
   setActiveProfile: (id) => {
     localStorage.setItem(PROFILE_KEY, id);
@@ -87,4 +93,6 @@ export const useAppStore = create<AppState>((set) => ({
   clearToast: () => set({ toast: null }),
   openCareReport: () => set({ careReportOpen: true }),
   closeCareReport: () => set({ careReportOpen: false }),
+  openIntro: () => set({ introOpen: true }),
+  closeIntro: () => set({ introOpen: false }),
 }));
