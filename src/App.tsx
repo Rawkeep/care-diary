@@ -5,6 +5,7 @@ import { useAppStore } from './store/appStore';
 import { useState } from 'react';
 import { LockScreen } from './components/LockScreen';
 import { Modal } from './components/Modal';
+import { IconHistory, IconMore, IconPill, IconToday } from './components/icons';
 import { ProfileSwitcher } from './components/ProfileSwitcher';
 import { ReminderManager } from './components/ReminderManager';
 import { Toast } from './components/Toast';
@@ -21,11 +22,11 @@ import { ProfileSetup } from './views/ProfileSetup';
 import { Report } from './views/Report';
 import type { View } from './store/appStore';
 
-const NAV: { view: View; icon: string; label: string }[] = [
-  { view: 'home', icon: '📋', label: 'Heute' },
-  { view: 'history', icon: '📅', label: 'Verlauf' },
-  { view: 'meds', icon: '💊', label: 'Medikamente' },
-  { view: 'more', icon: '⚙️', label: 'Mehr' },
+const NAV: { view: View; icon: JSX.Element; label: string }[] = [
+  { view: 'home', icon: <IconToday />, label: 'Heute' },
+  { view: 'history', icon: <IconHistory />, label: 'Verlauf' },
+  { view: 'meds', icon: <IconPill />, label: 'Medikamente' },
+  { view: 'more', icon: <IconMore />, label: 'Mehr' },
 ];
 
 const FORM_TITLES = {
@@ -102,7 +103,7 @@ export function App() {
             className={view === item.view ? 'active' : ''}
             onClick={() => setView(item.view)}
           >
-            <span className="icon">{item.icon}</span>
+            <span className="icon" aria-hidden="true">{item.icon}</span>
             {item.label}
           </button>
         ))}

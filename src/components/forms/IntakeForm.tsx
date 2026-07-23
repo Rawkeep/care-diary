@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
-import type { IntakeStatus, Profile } from '../../db/models';
+import type { Intake, IntakeStatus, Profile } from '../../db/models';
 import { newId, nowIso } from '../../db/models';
 import { effectiveDose } from '../../utils/dose';
 import { fromLocalInputValue, toLocalInputValue } from '../../utils/date';
@@ -13,18 +13,32 @@ const STATUS_OPTIONS: { value: IntakeStatus; label: string }[] = [
   { value: 'vomited', label: 'Erbrochen' },
 ];
 
-export function IntakeForm({ profile, onDone }: { profile: Profile; onDone: () => void }) {
+export function IntakeForm({
+  profile,
+  existing,
+  onDone,
+}: {
+  profile: Profile;
+  /** gesetzt = bestehenden Eintrag bearbeiten statt neu anlegen */
+  existing?: Intake;
+  onDone: () => void;
+}) {
   const medications = useLiveQuery(
     () => db.medications.where('profileId').equals(profile.id).toArray(),
     [profile.id]
   );
-  const activeMeds = (medications ?? []).filter((m) => !m.endDate);
+  // Beim Bearbeiten auch abgesetzte Medikamente zulassen (Historie!)
+  const activeMeds = (medications ?? []).filter(
+    (m) => !m.endDate || m.id === existing?.medicationId
+  );
 
-  const [medicationId, setMedicationId] = useState('');
-  const [status, setStatus] = useState<IntakeStatus>('taken');
-  const [amount, setAmount] = useState('');
-  const [at, setAt] = useState(toLocalInputValue(new Date()));
-  const [note, setNote] = useState('');
+  const [medicationId, setMedicationId] = useState(existing?.medicationId ?? '');
+  const [status, setStatus] = useState<IntakeStatus>(existing?.status ?? 'taken');
+  const [amount, setAmount] = useState(existing ? String(existing.amount) : '');
+  const [at, setAt] = useState(
+    toLocalInputValue(existing ? new Date(existing.at) : new Date())
+  );
+  const [note, setNote] = useState(existing?.note ?? '');
 
   if (!medications) return null;
   if (activeMeds.length === 0) {
@@ -41,8 +55,8 @@ export function IntakeForm({ profile, onDone }: { profile: Profile; onDone: () =
   const effectiveAmount = amount === '' ? plannedDose : Number(amount);
 
   async function save() {
-    await db.intakes.add({
-      id: newId(),
+    await db.intakes.put({
+      id: existing?.id ?? newId(),
       profileId: profile.id,
       medicationId: med.id,
       at: fromLocalInputValue(at),
@@ -50,7 +64,7 @@ export function IntakeForm({ profile, onDone }: { profile: Profile; onDone: () =
       unit: med.unit,
       status,
       note: note.trim() || undefined,
-      createdAt: nowIso(),
+      createdAt: existing?.createdAt ?? nowIso(),
     });
     onDone();
   }

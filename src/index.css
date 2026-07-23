@@ -177,6 +177,33 @@ main { flex: 1; padding: 8px 16px 90px; }
 /* Heute erledigt: bleibt tippbar (Bedarfs-Extradosis), tritt aber zurück */
 .med-quick-btn.muted { opacity: 0.62; box-shadow: none; }
 
+/* Aufklappbare Gruppen auf „Mehr" */
+details.group { margin-bottom: 12px; }
+details.group > summary {
+  cursor: pointer; list-style: none; user-select: none;
+  font-size: 0.95rem; font-weight: 700; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 13px 16px; margin-bottom: 10px;
+  box-shadow: var(--shadow-1); position: relative;
+}
+details.group > summary::-webkit-details-marker { display: none; }
+details.group > summary::after {
+  content: '›'; position: absolute; right: 16px; top: 50%;
+  transform: translateY(-50%) rotate(90deg); transition: transform 0.15s ease;
+  color: var(--text-dim); font-size: 1.1rem;
+}
+details.group[open] > summary::after { transform: translateY(-50%) rotate(-90deg); }
+details.group > .card { margin-left: 0; }
+
+/* Tappbare Verlaufszeilen (Bearbeiten/Löschen) */
+.entry.tappable { cursor: pointer; }
+.entry.tappable:active { background: var(--surface-2); }
+
+/* Inline-SVG-Icons in Textzeilen */
+.inline-icon { vertical-align: -3px; }
+.bottom-nav button .icon svg { display: block; }
+.quick-btn .icon svg { display: block; }
+
 /* Kompakte Med-Chips (erledigt / Bedarf) — ein Tipp erfasst weiterhin */
 .med-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .med-chip {

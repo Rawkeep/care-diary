@@ -2,6 +2,14 @@
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { EntryList } from '../components/EntryList';
+import {
+  IconDone,
+  IconEmergency,
+  IconEvent,
+  IconPill,
+  IconState,
+  IconWeight,
+} from '../components/icons';
 import { db } from '../db/db';
 import type { Medication, Profile } from '../db/models';
 import { nowIso } from '../db/models';
@@ -74,7 +82,7 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
         </button>
       ) : (
         <button className="acute-btn" onClick={startAcute}>
-          ⚡ Akut: Ereignis beginnt jetzt
+          <IconEvent size={20} className="inline-icon" /> Akut: Ereignis beginnt jetzt
         </button>
       )}
 
@@ -97,7 +105,8 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
                   return (
                     <button key={m.id} className={classes} onClick={() => logNow(m)}>
                       <span className="med-quick-name">
-                        💊 {m.name}
+                        {m.isEmergency ? <IconEmergency size={18} className="inline-icon" /> : <IconPill size={18} className="inline-icon" />}
+                        {' '}{m.name}
                         {m.isEmergency ? ' · Notfall' : ''}
                       </span>
                       <span className="med-quick-dose">
@@ -122,7 +131,14 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
                     onClick={() => logNow(m)}
                     aria-label={`${m.name} jetzt genommen erfassen`}
                   >
-                    {m.isEmergency ? '🚨' : done ? '✓' : '💊'} {m.name}
+                    {m.isEmergency ? (
+                      <IconEmergency size={15} className="inline-icon" />
+                    ) : done ? (
+                      <IconDone size={15} className="inline-icon" />
+                    ) : (
+                      <IconPill size={15} className="inline-icon" />
+                    )}{' '}
+                    {m.name}
                   </button>
                 ))}
               </div>
@@ -134,16 +150,16 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
       <div className="quick-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
         {/* Reihenfolge nach Nutzungshäufigkeit: täglich → selten */}
         <button className="quick-btn" onClick={() => setOpenForm('intake')}>
-          <span className="icon">💊</span>Einnahme
+          <span className="icon"><IconPill size={30} /></span>Einnahme
         </button>
         <button className="quick-btn" onClick={() => setOpenForm('observation')}>
-          <span className="icon">📝</span>Zustand
+          <span className="icon"><IconState size={30} /></span>Zustand
         </button>
         <button className="quick-btn" onClick={() => setOpenForm('event')}>
-          <span className="icon">⚡</span>Ereignis
+          <span className="icon"><IconEvent size={30} /></span>Ereignis
         </button>
         <button className="quick-btn" onClick={() => setOpenForm('weight')}>
-          <span className="icon">⚖️</span>Gewicht
+          <span className="icon"><IconWeight size={30} /></span>Gewicht
         </button>
       </div>
 
@@ -159,7 +175,7 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
 
       <div className="card">
         <h2>Heute</h2>
-        <EntryList items={todayItems} medications={medications ?? []} preset={preset} />
+        <EntryList items={todayItems} medications={medications ?? []} preset={preset} profile={profile} />
       </div>
     </>
   );

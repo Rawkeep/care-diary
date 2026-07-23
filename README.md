@@ -120,6 +120,13 @@ npm test             # Vitest (Aggregations-Kern)
   der QR-Code enthält dieselben Infos als Klartext, offline lesbar mit
   jeder Kamera-App, nichts wird hochgeladen.
 - **Darstellung wählbar:** System / Hell / Dunkel unter „Mehr".
+- **Einträge bearbeiten & löschen:** Tippen auf einen Verlaufseintrag
+  öffnet Bearbeiten/Löschen (Anhänge werden mit entfernt) — Tippfehler
+  von gestern sind kein Problem mehr.
+- **Kurz-Modus beim Ereignis:** erst Art + Zeitpunkt speichern, Details
+  (Schwere, Umstände, Fotos) auf Wunsch oder später über „Bearbeiten".
+- **SVG-Icon-Set** statt Emojis in Navigation und Schnellerfassung —
+  gestochen scharf, folgt automatisch der Theme-Farbe.
 - **Fragen-Merkliste** für den nächsten Termin (erscheint im Arztbericht).
 - **App-Sperre (PIN):** Zugriffsschutz auf geteilten Geräten (gesalzener
   SHA-256-Hash, keine Klartext-PIN; bewusst kein Verschlüsselungsersatz).

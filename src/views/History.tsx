@@ -73,7 +73,7 @@ export function History({ profile, preset }: { profile: Profile; preset: Conditi
       {[...days.entries()].map(([dayKey, dayItems]) => (
         <div key={dayKey} className="day-group">
           <p className="day-title">{fmtDate(dayItems[0].at)}</p>
-          <EntryList items={dayItems} medications={medications ?? []} preset={preset} />
+          <EntryList items={dayItems} medications={medications ?? []} preset={preset} profile={profile} />
         </div>
       ))}
     </>

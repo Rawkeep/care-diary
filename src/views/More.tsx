@@ -179,6 +179,19 @@ export function More({ profile }: { profile: Profile }) {
   return (
     <>
       <div className="card">
+        <h2>Profil</h2>
+        <p style={{ margin: '4px 0' }}>
+          <strong>{profile.name}</strong>
+          {profile.birthDate ? ` · geboren ${profile.birthDate}` : ''}
+        </p>
+        <p className="hint">
+          Aktivierte Module: {profile.conditions.length > 0 ? profile.conditions.join(', ') : 'Allgemein'}
+        </p>
+      </div>
+
+      <details className="group" open>
+        <summary>Berichte &amp; Fragen</summary>
+      <div className="card">
         <h2>Arztbericht</h2>
         <p className="hint" style={{ marginTop: 0 }}>
           Strukturierter Verlaufsbericht zum Ausdrucken oder als PDF — inklusive
@@ -234,7 +247,10 @@ export function More({ profile }: { profile: Profile }) {
           ＋ Frage hinzufügen
         </button>
       </div>
+      </details>
 
+      <details className="group">
+        <summary>Einstellungen</summary>
       <div className="card">
         <h2>App-Sperre (PIN)</h2>
         {pinMode === 'set' && (
@@ -280,17 +296,6 @@ export function More({ profile }: { profile: Profile }) {
             )}
           </>
         )}
-      </div>
-
-      <div className="card">
-        <h2>Profil</h2>
-        <p style={{ margin: '4px 0' }}>
-          <strong>{profile.name}</strong>
-          {profile.birthDate ? ` · geboren ${profile.birthDate}` : ''}
-        </p>
-        <p className="hint">
-          Aktivierte Module: {profile.conditions.length > 0 ? profile.conditions.join(', ') : 'Allgemein'}
-        </p>
       </div>
 
       <div className="card">
@@ -351,6 +356,10 @@ export function More({ profile }: { profile: Profile }) {
         </p>
       </div>
 
+      </details>
+
+      <details className="group">
+        <summary>Daten — Backup &amp; Datenschutz</summary>
       <div className="card">
         <h2>Sicherung (Backup)</h2>
         <p className="hint" style={{ marginTop: 0 }}>
@@ -432,6 +441,8 @@ export function More({ profile }: { profile: Profile }) {
           oder Therapieentscheidung.
         </p>
       </div>
+
+      </details>
 
       <p className="hint" style={{ textAlign: 'center' }}>care-diary v{APP_VERSION}</p>
     </>

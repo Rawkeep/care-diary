@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { saveAttachments } from '../../db/attachments';
 import { db } from '../../db/db';
-import type { Profile } from '../../db/models';
+import type { HealthEvent, Profile } from '../../db/models';
 import { newId, nowIso } from '../../db/models';
 import type { ConditionPreset } from '../../presets/epilepsy';
 import { useAppStore } from '../../store/appStore';
@@ -14,32 +14,44 @@ import { PhotoPicker } from '../PhotoPicker';
 export function EventForm({
   profile,
   preset,
+  existing,
   onDone,
 }: {
   profile: Profile;
   preset: ConditionPreset;
+  /** gesetzt = bestehendes Ereignis bearbeiten statt neu anlegen */
+  existing?: HealthEvent;
   onDone: () => void;
 }) {
   const { acuteStartedAt, clearAcute } = useAppStore();
-  const acuteDuration = acuteStartedAt
+  const acuteDuration = !existing && acuteStartedAt
     ? Math.max(1, Math.round((Date.now() - new Date(acuteStartedAt).getTime()) / 1000))
     : null;
+  const existingDuration = existing?.durationSeconds ?? null;
 
-  const [type, setType] = useState(preset.eventTypes[0].key);
+  const [type, setType] = useState(existing?.type ?? preset.eventTypes[0].key);
   const [startedAt, setStartedAt] = useState(
-    toLocalInputValue(acuteStartedAt ? new Date(acuteStartedAt) : new Date())
+    toLocalInputValue(
+      existing ? new Date(existing.startedAt) : acuteStartedAt ? new Date(acuteStartedAt) : new Date()
+    )
   );
-  const [minutes, setMinutes] = useState(acuteDuration ? String(Math.floor(acuteDuration / 60)) : '');
-  const [seconds, setSeconds] = useState(acuteDuration ? String(acuteDuration % 60) : '');
-  const [severity, setSeverity] = useState<1 | 2 | 3 | 4 | 5 | undefined>(undefined);
-  const [circumstances, setCircumstances] = useState<string[]>([]);
-  const [aura, setAura] = useState(false);
-  const [emergencyMed, setEmergencyMed] = useState(false);
-  const [postPhase, setPostPhase] = useState('');
-  const [note, setNote] = useState('');
+  const initialDuration = existingDuration ?? acuteDuration;
+  const [minutes, setMinutes] = useState(initialDuration ? String(Math.floor(initialDuration / 60)) : '');
+  const [seconds, setSeconds] = useState(initialDuration ? String(initialDuration % 60) : '');
+  const [severity, setSeverity] = useState<1 | 2 | 3 | 4 | 5 | undefined>(existing?.severity);
+  const [circumstances, setCircumstances] = useState<string[]>(existing?.circumstances ?? []);
+  const [aura, setAura] = useState(existing?.aura ?? false);
+  const [emergencyMed, setEmergencyMed] = useState(existing?.emergencyMedicationGiven ?? false);
+  const [postPhase, setPostPhase] = useState(
+    existing?.postPhaseMinutes != null ? String(existing.postPhaseMinutes) : ''
+  );
+  const [note, setNote] = useState(existing?.note ?? '');
   const [photos, setPhotos] = useState<File[]>([]);
   const [audioClips, setAudioClips] = useState<Blob[]>([]);
   const [saving, setSaving] = useState(false);
+  // Kurz-Modus beim Neu-Erfassen: erst Art + Zeit, Details auf Wunsch —
+  // im Stress zählt Speichern, nicht Vollständigkeit. Bearbeiten zeigt alles.
+  const [detailed, setDetailed] = useState(Boolean(existing));
 
   function toggleCircumstance(c: string) {
     setCircumstances((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
@@ -48,8 +60,8 @@ export function EventForm({
   async function save() {
     setSaving(true);
     const totalSeconds = Number(minutes || 0) * 60 + Number(seconds || 0);
-    const id = newId();
-    await db.events.add({
+    const id = existing?.id ?? newId();
+    await db.events.put({
       id,
       profileId: profile.id,
       type,
@@ -61,10 +73,10 @@ export function EventForm({
       emergencyMedicationGiven: emergencyMed || undefined,
       postPhaseMinutes: postPhase !== '' ? Number(postPhase) : undefined,
       note: note.trim() || undefined,
-      createdAt: nowIso(),
+      createdAt: existing?.createdAt ?? nowIso(),
     });
     await saveAttachments(profile.id, 'event', id, [...photos, ...audioClips]);
-    clearAcute();
+    if (!existing) clearAcute();
     onDone();
   }
 
@@ -101,6 +113,13 @@ export function EventForm({
         </div>
       </label>
 
+      {!detailed && (
+        <button type="button" className="btn secondary" onClick={() => setDetailed(true)}>
+          ＋ Details hinzufügen (Schwere, Umstände, Fotos …)
+        </button>
+      )}
+
+      {detailed && (<>
       <label className="field"><span>Schweregrad (optional)</span></label>
       <div className="scale" role="radiogroup" aria-label="Schweregrad">
         {([1, 2, 3, 4, 5] as const).map((v) => (
@@ -143,10 +162,17 @@ export function EventForm({
 
       <PhotoPicker files={photos} onChange={setPhotos} />
       <AudioRecorder clips={audioClips} onChange={setAudioClips} />
+      </>)}
 
       <button className="btn" onClick={save} disabled={saving}>
         {saving ? 'Speichert …' : 'Speichern'}
       </button>
+      {!detailed && (
+        <p className="hint">
+          Art + Zeitpunkt reichen fürs Erste — Details lassen sich später über
+          „Bearbeiten" im Verlauf ergänzen.
+        </p>
+      )}
     </div>
   );
 }

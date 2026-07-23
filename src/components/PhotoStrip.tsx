@@ -22,8 +22,10 @@ export function PhotoStrip({ attachments }: { attachments: Attachment[] }) {
     .map((a, i) => ({ a, i }))
     .filter(({ a }) => a.mimeType.startsWith('video/'));
 
+  // stopPropagation: Anhänge liegen in tappbaren Verlaufszeilen — Medien
+  // bedienen darf nicht gleichzeitig den Bearbeiten-Dialog öffnen.
   return (
-    <>
+    <div onClick={(e) => e.stopPropagation()}>
       {images.length > 0 && (
         <div className="photo-strip">
           {images.map(({ a, i }, n) => (
@@ -47,6 +49,6 @@ export function PhotoStrip({ attachments }: { attachments: Attachment[] }) {
           </button>
         </div>
       )}
-    </>
+    </div>
   );
 }
