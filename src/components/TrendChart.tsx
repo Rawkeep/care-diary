@@ -135,20 +135,38 @@ export function TrendChart({
   );
 }
 
-/** Schmaler Ereignis-Streifen auf derselben Zeitachse — Phasen im Kontext */
-export function EventStrip({ days, counts }: { days: string[]; counts: Map<string, number> }) {
-  const SH = 24;
+export interface DoseMark {
+  day: string;
+  label: string;
+}
+
+/** Schmaler Ereignis-Streifen auf derselben Zeitachse — Phasen im Kontext.
+ *  Optional mit Dosiswechsel-Markern (Ausschleichen/Einschleichen sichtbar). */
+export function EventStrip({
+  days,
+  counts,
+  doseMarks = [],
+}: {
+  days: string[];
+  counts: Map<string, number>;
+  doseMarks?: DoseMark[];
+}) {
+  const SH = 30;
   const n = Math.max(days.length - 1, 1);
   const x = (i: number) => L + (i / n) * (W - L - R);
   const max = Math.max(1, ...counts.values());
+  const dayIndex = new Map(days.map((d, i) => [d, i]));
+  const marksInRange = doseMarks.filter((m) => dayIndex.has(m.day));
 
   return (
     <div className="trend">
       <div className="trend-head">
-        <span className="trend-title">⚡ Ereignisse</span>
+        <span className="trend-title">
+          ⚡ Ereignisse{marksInRange.length > 0 ? ' · ◆ Dosiswechsel' : ''}
+        </span>
       </div>
-      <svg viewBox={`0 0 ${W} ${SH}`} className="trend-svg" role="img" aria-label="Ereignisse im Zeitraum">
-        <line x1={L} x2={W - R} y1={SH - 5} y2={SH - 5} className="trend-grid" />
+      <svg viewBox={`0 0 ${W} ${SH}`} className="trend-svg" role="img" aria-label="Ereignisse und Dosiswechsel im Zeitraum">
+        <line x1={L} x2={W - R} y1={SH - 11} y2={SH - 11} className="trend-grid" />
         {days.map((day, i) => {
           const count = counts.get(day) ?? 0;
           if (count === 0) return null;
@@ -157,13 +175,26 @@ export function EventStrip({ days, counts }: { days: string[]; counts: Map<strin
               key={day}
               x1={x(i)}
               x2={x(i)}
-              y1={SH - 5}
+              y1={SH - 11}
               y2={4}
               className="trend-event"
               style={{ opacity: 0.45 + 0.55 * (count / max) }}
             >
               <title>{`${fmtDayKey(day)}: ${count}×`}</title>
             </line>
+          );
+        })}
+        {marksInRange.map((m, idx) => {
+          const cx = x(dayIndex.get(m.day)!);
+          const cy = SH - 5;
+          return (
+            <path
+              key={`${m.day}-${idx}`}
+              d={`M${cx},${cy - 3.6} L${cx + 3.2},${cy} L${cx},${cy + 3.6} L${cx - 3.2},${cy} Z`}
+              className="trend-dosemark"
+            >
+              <title>{`${fmtDayKey(m.day)}: ${m.label}`}</title>
+            </path>
           );
         })}
       </svg>

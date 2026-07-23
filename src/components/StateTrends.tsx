@@ -44,8 +44,12 @@ export function StateTrends({
     () => db.measurements.where('profileId').equals(profile.id).toArray(),
     [profile.id]
   );
+  const medications = useLiveQuery(
+    () => db.medications.where('profileId').equals(profile.id).toArray(),
+    [profile.id]
+  );
 
-  if (!observations || !events || !measurements) return null;
+  if (!observations || !events || !measurements || !medications) return null;
 
   const to = fixedRange?.to ?? localDayKey(new Date().toISOString());
   const from = fixedRange?.from ?? dayKeyDaysAgo(rangeDays - 1);
@@ -66,6 +70,14 @@ export function StateTrends({
   }
 
   const counts = eventCountByDay(evR);
+
+  // Dosiswechsel (Ausschleichen/Einschleichen) als Marker auf der Zeitachse
+  const doseMarks = medications.flatMap((med) =>
+    (med.doseSteps ?? []).map((s) => ({
+      day: s.fromDate,
+      label: `${med.name}: ${s.dose} ${med.unit}`,
+    }))
+  );
 
   // Gewichtsverlauf im selben Fenster (eigene Werteskala)
   const weightR = inDayRange(
@@ -124,7 +136,7 @@ export function StateTrends({
       ) : (
         <>
           {truncated && <p className="hint">Anzeige auf die letzten 12 Monate begrenzt.</p>}
-          <EventStrip days={days} counts={counts} />
+          <EventStrip days={days} counts={counts} doseMarks={doseMarks} />
           {obsR.length > 0 &&
             preset.observationParams.map((p) => {
               const points = seriesForParam(obsR, p.key, days);

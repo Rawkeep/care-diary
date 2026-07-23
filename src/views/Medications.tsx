@@ -11,6 +11,7 @@ import { newId, nowIso } from '../db/models';
 import { effectiveDose } from '../utils/dose';
 import { fmtDate, fmtDayKey, localDayKey } from '../utils/date';
 import { parseSchedule } from '../utils/schedule';
+import { DIRECTION_LABEL, taperInfo, taperPhases } from '../utils/taper';
 
 const SLOT_WORDS: Record<string, string> = { morning: 'morgens', noon: 'mittags', evening: 'abends' };
 
@@ -31,6 +32,10 @@ export function Medications({ profile }: { profile: Profile }) {
   );
   const sideEffects = useLiveQuery(
     () => db.sideEffects.where('profileId').equals(profile.id).toArray(),
+    [profile.id]
+  );
+  const events = useLiveQuery(
+    () => db.events.where('profileId').equals(profile.id).toArray(),
     [profile.id]
   );
 
@@ -121,6 +126,8 @@ export function Medications({ profile }: { profile: Profile }) {
         {active.map((m) => {
           const steps = m.doseSteps ?? [];
           const current = effectiveDose(m, new Date().toISOString());
+          const todayKey = localDayKey(new Date().toISOString());
+          const taper = taperInfo(m, todayKey);
           return (
             <div key={m.id} style={{ marginBottom: 6 }}>
               <div className="entry kind-intake" style={{ marginBottom: 0 }}>
@@ -140,6 +147,19 @@ export function Medications({ profile }: { profile: Profile }) {
                         ? `⏱ ${rhythmWords(m.schedule)} (${m.schedule})`
                         : '⏱ kein fester Rhythmus — über „Rhythmus" einstellen'}
                   </div>
+                  {taper && (
+                    <div className="meta taper">
+                      {taper.direction === 'down' ? '⤵' : taper.direction === 'up' ? '⤴' : '↔'}{' '}
+                      {DIRECTION_LABEL[taper.direction]}
+                      {taper.reached
+                        ? ` — Ziel ${taper.targetDose} ${m.unit} erreicht (seit ${fmtDayKey(taper.endDate)})`
+                        : ` — Stufe ${Math.max(taper.currentIndex + 1, 0)} von ${taper.steps.length}, aktuell ${taper.currentDose} ${m.unit}` +
+                          (taper.daysUntilNext != null
+                            ? ` · nächste Stufe (${taper.nextDose} ${m.unit}) in ${taper.daysUntilNext} Tag${taper.daysUntilNext === 1 ? '' : 'en'}`
+                            : '') +
+                          ` · Ziel ${taper.targetDose} ${m.unit} in ${taper.daysUntilEnd} Tag${taper.daysUntilEnd === 1 ? '' : 'en'} (${fmtDayKey(taper.endDate)})`}
+                    </div>
+                  )}
                 </div>
                 {!m.isEmergency && (
                   <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
@@ -231,19 +251,38 @@ export function Medications({ profile }: { profile: Profile }) {
                     Standarddosis bei der Einnahme-Erfassung. Sie berechnet selbst keine Pläne.
                   </p>
                   {steps.length === 0 && <p className="empty">Noch keine Stufen hinterlegt.</p>}
-                  {steps.map((s, idx) => (
-                    <div key={`${s.fromDate}-${idx}`} className="entry kind-intake">
-                      <div className="body">
-                        <div className="title">ab {fmtDayKey(s.fromDate)}: {s.dose} {m.unit}</div>
-                        {s.note && <div className="meta">{s.note}</div>}
+                  {taperPhases(m, events ?? [], todayKey).map((phase, idx) => {
+                    const s = steps[idx];
+                    const isCurrent = taper && taper.currentIndex === idx;
+                    return (
+                      <div key={`${s.fromDate}-${idx}`} className={isCurrent ? 'entry kind-intake phase-current' : 'entry kind-intake'}>
+                        <div className="body">
+                          <div className="title">
+                            ab {fmtDayKey(s.fromDate)}: {s.dose} {m.unit}
+                            {isCurrent ? ' — aktuelle Stufe' : ''}
+                          </div>
+                          {s.note && <div className="meta">{s.note}</div>}
+                          <div className="meta">
+                            {phase.upcoming
+                              ? 'steht noch bevor'
+                              : `${phase.eventCount === 0 ? 'kein Ereignis' : `${phase.eventCount} Ereignis${phase.eventCount === 1 ? '' : 'se'}`} in dieser Phase dokumentiert`}
+                          </div>
+                        </div>
+                        <button className="btn secondary"
+                          style={{ width: 'auto', padding: '6px 10px', marginTop: 0 }}
+                          onClick={() => removeStep(m, idx)} aria-label="Stufe entfernen">
+                          🗑
+                        </button>
                       </div>
-                      <button className="btn secondary"
-                        style={{ width: 'auto', padding: '6px 10px', marginTop: 0 }}
-                        onClick={() => removeStep(m, idx)} aria-label="Stufe entfernen">
-                        🗑
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
+                  {steps.length > 0 && (
+                    <p className="hint">
+                      Die Ereigniszähler zeigen, was während der einzelnen Phasen dokumentiert
+                      wurde — Details im Verlauf (Dosiswechsel sind dort markiert). Die Bewertung
+                      gehört ins ärztliche Gespräch.
+                    </p>
+                  )}
                   <div style={{ display: 'flex', gap: 8 }}>
                     <label className="field" style={{ flex: 1 }}>
                       <span>Gültig ab</span>

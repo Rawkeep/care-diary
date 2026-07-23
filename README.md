@@ -53,6 +53,13 @@ npm test             # Vitest (Aggregations-Kern)
   Epilepsie inkl. **Verhalten** und **Aussprache/Sprache**.
 - **Gewichts-Erfassung** (⚖️, z. B. zur Beobachtung von Gewichtszunahme
   unter einem Medikament) mit eigener Verlaufskurve.
+- **Ausschleich-/Einschleich-Begleitung:** Der dokumentierte
+  Dosisänderungs-Plan wird zur begleiteten Reise — Richtung
+  (⤵ Ausschleichen / ⤴ Einschleichen), aktuelle Stufe, nächste Stufe
+  („in n Tagen"), Prognose („Ziel 0 mg in n Tagen am DD.MM."),
+  Ereigniszähler je Phase („was ist während Stufe 2 passiert?") und
+  ◆-Dosiswechsel-Marker im Zustands-Verlauf neben den Ereignissen.
+  Die App plant nicht selbst — sie bildet die ärztliche Verordnung ab.
 - **Nebenwirkungs-Notizen je Medikament** („Beobachtete Auffälligkeiten"):
   dokumentierter Verdacht fürs Arztgespräch, erscheint im Arztbericht beim
   jeweiligen Medikament — keine Kausalaussage.

@@ -253,6 +253,8 @@ details.group > .card { margin-left: 0; }
 .sched-value { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 28px; }
 .meta.rhythm { color: var(--accent-strong); font-weight: 600; }
 .meta.rhythm.none { color: var(--text-dim); font-weight: 400; }
+.meta.taper { color: var(--text); font-weight: 600; }
+.entry.phase-current { border-color: var(--accent); background: color-mix(in srgb, var(--accent-soft) 40%, var(--surface)); }
 
 /* Sprachnotizen */
 .audio-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -413,6 +415,7 @@ textarea { resize: vertical; min-height: 64px; }
 .trend-last { font-size: 10px; font-weight: 700; fill: var(--accent); }
 .trend-cross { stroke: var(--text-dim); stroke-dasharray: 3 3; }
 .trend-event { stroke: var(--danger); stroke-width: 3; stroke-linecap: round; }
+.trend-dosemark { fill: var(--accent-strong); }
 .trend-line2 { fill: none; stroke: var(--danger); stroke-width: 2; stroke-dasharray: 5 4; stroke-linejoin: round; stroke-linecap: round; }
 .trend-dot2 { fill: var(--danger); opacity: 0.45; }
 .trend-legend { display: flex; gap: 16px; font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
