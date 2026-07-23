@@ -4,6 +4,7 @@ import { db } from '../../db/db';
 import type { Intake, IntakeStatus, Profile } from '../../db/models';
 import { newId, nowIso } from '../../db/models';
 import { effectiveDose } from '../../utils/dose';
+import { IconClock, IconDone, IconGauge, IconNote, IconPill } from '../icons';
 import { fromLocalInputValue, toLocalInputValue } from '../../utils/date';
 
 const STATUS_OPTIONS: { value: IntakeStatus; label: string }[] = [
@@ -72,7 +73,7 @@ export function IntakeForm({
   return (
     <div>
       <label className="field">
-        <span>Medikament</span>
+        <span><IconPill size={16} className="inline-icon" /> Medikament</span>
         <select value={med.id} onChange={(e) => setMedicationId(e.target.value)}>
           {activeMeds.map((m) => (
             <option key={m.id} value={m.id}>
@@ -82,7 +83,7 @@ export function IntakeForm({
         </select>
       </label>
       <label className="field">
-        <span>Status</span>
+        <span><IconDone size={16} className="inline-icon" /> Status</span>
         <select value={status} onChange={(e) => setStatus(e.target.value as IntakeStatus)}>
           {STATUS_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -90,16 +91,16 @@ export function IntakeForm({
         </select>
       </label>
       <label className="field">
-        <span>Menge ({med.unit}) — leer = Dosis laut Plan: {plannedDose}</span>
+        <span><IconGauge size={16} className="inline-icon" /> Menge ({med.unit}) — leer = Dosis laut Plan: {plannedDose}</span>
         <input type="number" inputMode="decimal" min="0" step="any" value={amount}
           onChange={(e) => setAmount(e.target.value)} placeholder={String(plannedDose)} />
       </label>
       <label className="field">
-        <span>Zeitpunkt</span>
+        <span><IconClock size={16} className="inline-icon" /> Zeitpunkt</span>
         <input type="datetime-local" value={at} onChange={(e) => setAt(e.target.value)} />
       </label>
       <label className="field">
-        <span>Notiz (optional)</span>
+        <span><IconNote size={16} className="inline-icon" /> Notiz (optional)</span>
         <textarea value={note} onChange={(e) => setNote(e.target.value)} />
       </label>
       <button className="btn" onClick={save} disabled={!Number.isFinite(effectiveAmount)}>

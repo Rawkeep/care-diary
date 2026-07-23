@@ -9,6 +9,7 @@ import type { ConditionPreset } from '../../presets/epilepsy';
 import { useAppStore } from '../../store/appStore';
 import { fromLocalInputValue, toLocalInputValue } from '../../utils/date';
 import { AudioRecorder } from '../AudioRecorder';
+import { IconClock, IconEvent, IconGauge, IconNote, IconStopwatch, IconTags } from '../icons';
 import { PhotoPicker } from '../PhotoPicker';
 
 export function EventForm({
@@ -88,7 +89,7 @@ export function EventForm({
 
   return (
     <div>
-      <label className="field"><span>Art des Ereignisses</span></label>
+      <label className="field"><span><IconEvent size={16} className="inline-icon" /> Art des Ereignisses</span></label>
       <div className="choice-list">
         {preset.eventTypes.map((t) => (
           <div
@@ -105,12 +106,12 @@ export function EventForm({
       </div>
 
       <label className="field">
-        <span>Beginn</span>
+        <span><IconClock size={16} className="inline-icon" /> Beginn</span>
         <input type="datetime-local" value={startedAt} onChange={(e) => setStartedAt(e.target.value)} />
       </label>
 
       <label className="field">
-        <span>Dauer (Minuten / Sekunden){acuteDuration ? ' — aus Timer übernommen' : ''}</span>
+        <span><IconStopwatch size={16} className="inline-icon" /> Dauer (Minuten / Sekunden){acuteDuration ? ' — aus Timer übernommen' : ''}</span>
         <div style={{ display: 'flex', gap: 8 }}>
           <input type="number" inputMode="numeric" min="0" placeholder="Min" value={minutes}
             onChange={(e) => setMinutes(e.target.value)} />
@@ -130,7 +131,7 @@ export function EventForm({
       )}
 
       {detailed && (<>
-      <label className="field"><span>Schweregrad (optional)</span></label>
+      <label className="field"><span><IconGauge size={16} className="inline-icon" /> Schweregrad (optional)</span></label>
       <div className="scale" role="radiogroup" aria-label="Schweregrad">
         {([1, 2, 3, 4, 5] as const).map((v) => (
           <button key={v} className={severity === v ? 'selected' : ''}
@@ -141,7 +142,7 @@ export function EventForm({
       </div>
       <div className="scale-hint"><span>leicht</span><span>sehr schwer</span></div>
 
-      <label className="field" style={{ marginTop: 12 }}><span>Begleitumstände (Beobachtung)</span></label>
+      <label className="field" style={{ marginTop: 12 }}><span><IconTags size={16} className="inline-icon" /> Begleitumstände (Beobachtung)</span></label>
       {preset.circumstances.map((c) => (
         <label key={c} className="check-row">
           <input type="checkbox" checked={circumstances.includes(c)} onChange={() => toggleCircumstance(c)} />
@@ -159,13 +160,13 @@ export function EventForm({
       </label>
 
       <label className="field" style={{ marginTop: 8 }}>
-        <span>Nachphase in Minuten (Schlaf/Verwirrtheit, optional)</span>
+        <span><IconStopwatch size={16} className="inline-icon" /> Nachphase in Minuten (Schlaf/Verwirrtheit, optional)</span>
         <input type="number" inputMode="numeric" min="0" value={postPhase}
           onChange={(e) => setPostPhase(e.target.value)} />
       </label>
 
       <label className="field">
-        <span>Notiz (optional)</span>
+        <span><IconNote size={16} className="inline-icon" /> Notiz (optional)</span>
         <textarea value={note} onChange={(e) => setNote(e.target.value)}
           placeholder="Was ist passiert? Was war anders als sonst?" />
       </label>

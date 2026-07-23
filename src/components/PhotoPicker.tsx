@@ -2,6 +2,7 @@
 // Dateien, Vorschau mit Entfernen — die Dateien hält das Formular, gespeichert
 // wird erst mit dem Eintrag (Fotos verkleinert, Videos unverändert).
 import { useEffect, useRef, useState } from 'react';
+import { IconCamera } from './icons';
 
 /** Obergrenze je Video — schützt die lokale Datenbank vor Riesen-Dateien */
 const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
@@ -43,7 +44,7 @@ export function PhotoPicker({
   return (
     <div className="photo-picker">
       <label className="field" style={{ marginBottom: 6 }}>
-        <span>Fotos / Videos (optional) — z. B. Hautbild, Befund, kurzes Video des Ereignisses</span>
+        <span><IconCamera size={16} className="inline-icon" /> Fotos / Videos (optional) — z. B. Hautbild, Befund, kurzes Video des Ereignisses</span>
       </label>
       {files.length > 0 && (
         <div className="photo-strip">

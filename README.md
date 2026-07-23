@@ -119,7 +119,12 @@ npm test             # Vitest (Aggregations-Kern)
   Portemonnaie/Schulranzen): Kurzanweisungen, Notfallmedikation, Kontakt —
   der QR-Code enthält dieselben Infos als Klartext, offline lesbar mit
   jeder Kamera-App, nichts wird hochgeladen.
-- **Darstellung wählbar:** System / Hell / Dunkel unter „Mehr".
+- **Darstellung wählbar:** System / Hell / Dunkel und **Schriftgröße**
+  (Normal / Groß / Sehr groß) unter „Mehr" — die ganze App skaliert mit.
+- **Barrierefreiheit:** großer runder Akut-Knopf mit Zoom-Rückmeldung,
+  Symbole an allen Formularfeldern (visuelle Anker beim Ausfüllen),
+  aria-Labels für Icon-Knöpfe, sichtbare Fokus-Ringe, respektiert
+  prefers-reduced-motion.
 - **Einträge bearbeiten & löschen:** Tippen auf einen Verlaufseintrag
   öffnet Bearbeiten/Löschen (Anhänge werden mit entfernt) — Tippfehler
   von gestern sind kein Problem mehr.

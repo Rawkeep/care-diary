@@ -10,7 +10,14 @@ import { decryptBackup, encryptBackup, isBackupEnvelope } from '../utils/backup'
 import { dayKeyDaysAgo, localDayKey } from '../utils/date';
 import { clearPin, hasPin, setPin, verifyPin } from '../utils/pin';
 import { parseExportBundle } from '../utils/bundle';
-import { applyThemePref, getThemePref, type ThemePref } from '../utils/theme';
+import {
+  applyFontPref,
+  applyThemePref,
+  getFontPref,
+  getThemePref,
+  type FontPref,
+  type ThemePref,
+} from '../utils/theme';
 import { APP_VERSION } from '../version';
 
 function downloadFile(content: string, filename: string, type: string) {
@@ -92,11 +99,16 @@ export function More({ profile }: { profile: Profile }) {
     setAllergyText('');
   }
 
-  // --- Darstellung (Theme) ---
+  // --- Darstellung (Theme + Schriftgröße) ---
   const [theme, setTheme] = useState<ThemePref>(getThemePref());
   function chooseTheme(p: ThemePref) {
     applyThemePref(p);
     setTheme(p);
+  }
+  const [fontPref, setFontPref] = useState<FontPref>(getFontPref());
+  function chooseFont(p: FontPref) {
+    applyFontPref(p);
+    setFontPref(p);
   }
 
   // --- Erinnerungen ---
@@ -362,6 +374,24 @@ export function More({ profile }: { profile: Profile }) {
               key={value}
               className={theme === value ? 'active' : ''}
               onClick={() => chooseTheme(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <label className="field" style={{ marginTop: 10, marginBottom: 6 }}>
+          <span>Schriftgröße</span>
+        </label>
+        <div className="tabs">
+          {([
+            ['normal', 'Normal'],
+            ['large', 'Groß'],
+            ['xlarge', 'Sehr groß'],
+          ] as [FontPref, string][]).map(([value, label]) => (
+            <button
+              key={value}
+              className={fontPref === value ? 'active' : ''}
+              onClick={() => chooseFont(value)}
             >
               {label}
             </button>

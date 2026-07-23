@@ -67,6 +67,10 @@ body {
   line-height: 1.45;
 }
 
+/* Schriftgröße (Barrierefreiheit): skaliert die rem-Basis der ganzen App */
+:root.font-large { font-size: 112.5%; }
+:root.font-xlarge { font-size: 127%; }
+
 /* Sichtbarer, klarer Tastatur-/Screenreader-Fokus */
 :focus-visible {
   outline: 2px solid var(--accent);
@@ -256,18 +260,33 @@ details.group > .card { margin-left: 0; }
 .audio-remove { width: auto !important; padding: 8px 12px !important; margin-top: 0 !important; flex-shrink: 0; }
 .audio-clip { display: block; width: 100%; height: 36px; margin-top: 8px; }
 
-.acute-btn {
-  width: 100%; border: none; border-radius: var(--radius); cursor: pointer;
-  font: inherit; font-size: 1.06rem; font-weight: 800; letter-spacing: -0.01em; padding: 18px;
-  background: var(--danger-soft); color: var(--danger); margin-bottom: 12px;
-  box-shadow: var(--shadow-1); transition: transform 0.1s ease, filter 0.15s ease;
+/* Akut: großer runder Panik-Knopf — prominent, mit Zoom beim Betätigen */
+.acute-wrap { display: flex; justify-content: center; padding: 6px 0 4px; margin-bottom: 10px; }
+.acute-circle {
+  width: 172px; height: 172px; border-radius: 50%; border: none; cursor: pointer;
+  font: inherit; color: var(--danger);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--danger-soft) 62%, var(--surface)), var(--danger-soft));
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  box-shadow: var(--shadow-1), 0 0 0 10px color-mix(in srgb, var(--danger) 9%, transparent);
+  transition: transform 0.12s ease, box-shadow 0.15s ease;
+  -webkit-user-select: none; user-select: none;
 }
-.acute-btn:active { transform: scale(0.985); filter: brightness(0.96); }
-.acute-btn.running {
-  background: linear-gradient(135deg, var(--danger), color-mix(in srgb, var(--danger) 78%, #000));
-  color: #fff; box-shadow: var(--shadow-2);
+.acute-circle:active {
+  transform: scale(1.09); /* „auszoomen" beim Drücken — wächst der Hand entgegen */
+  box-shadow: var(--shadow-2), 0 0 0 16px color-mix(in srgb, var(--danger) 14%, transparent);
 }
-.acute-timer { font-variant-numeric: tabular-nums; font-size: 1.5rem; display: block; margin-top: 4px; }
+.acute-circle .acute-label { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.01em; }
+.acute-circle .acute-sub { font-size: 0.78rem; font-weight: 600; opacity: 0.85; max-width: 130px; text-align: center; }
+.acute-circle.running {
+  background: linear-gradient(145deg, var(--danger), color-mix(in srgb, var(--danger) 72%, #000));
+  color: #fff;
+  animation: acute-pulse 1.8s ease-in-out infinite;
+}
+@keyframes acute-pulse {
+  0%, 100% { box-shadow: var(--shadow-2), 0 0 0 10px color-mix(in srgb, var(--danger) 16%, transparent); }
+  50% { box-shadow: var(--shadow-2), 0 0 0 22px color-mix(in srgb, var(--danger) 8%, transparent); }
+}
+.acute-timer { font-variant-numeric: tabular-nums; font-size: 2rem; font-weight: 800; display: block; }
 
 /* Verlaufsliste */
 .day-group { margin-bottom: 16px; }

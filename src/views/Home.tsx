@@ -79,10 +79,16 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
     <>
       {acuteStartedAt ? (
         <>
-          <button className="acute-btn running" onClick={() => setOpenForm('event')}>
-            ⏱ Ereignis läuft — tippen zum Beenden &amp; Erfassen
-            <span className="acute-timer">{fmtDuration(elapsed)}</span>
-          </button>
+          <div className="acute-wrap">
+            <button
+              className="acute-circle running"
+              onClick={() => setOpenForm('event')}
+              aria-label="Ereignis beenden und erfassen"
+            >
+              <span className="acute-timer">{fmtDuration(elapsed)}</span>
+              <span className="acute-sub">läuft — tippen zum Erfassen</span>
+            </button>
+          </div>
           {/* Aufnahme zuerst: Kamera direkt, das Formular kommt nach dem Ereignis */}
           <CaptureButtons
             count={acuteMedia.length}
@@ -93,9 +99,13 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
           />
         </>
       ) : (
-        <button className="acute-btn" onClick={startAcute}>
-          <IconEvent size={20} className="inline-icon" /> Akut: Ereignis beginnt jetzt
-        </button>
+        <div className="acute-wrap">
+          <button className="acute-circle" onClick={startAcute} aria-label="Akut: Ereignis beginnt jetzt">
+            <IconEvent size={40} />
+            <span className="acute-label">Akut</span>
+            <span className="acute-sub">Ereignis beginnt jetzt</span>
+          </button>
+        </div>
       )}
 
       {orderedMeds.length > 0 && (() => {

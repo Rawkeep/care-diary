@@ -143,20 +143,30 @@ export function Medications({ profile }: { profile: Profile }) {
                 </div>
                 {!m.isEmergency && (
                   <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
-                    onClick={() => setRhythmFor(rhythmFor === m.id ? null : m.id)}>
+                    onClick={() => setRhythmFor(rhythmFor === m.id ? null : m.id)}
+                    aria-label={`Einnahme-Rhythmus von ${m.name} einstellen`}
+                    aria-expanded={rhythmFor === m.id}
+                    title="Einnahme-Rhythmus">
                     ⏱
                   </button>
                 )}
                 <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
-                  onClick={() => setPlanFor(planFor === m.id ? null : m.id)}>
+                  onClick={() => setPlanFor(planFor === m.id ? null : m.id)}
+                  aria-label={`Dosisänderungs-Plan von ${m.name}`}
+                  aria-expanded={planFor === m.id}
+                  title="Dosisänderungs-Plan">
                   Plan
                 </button>
                 <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
-                  onClick={() => setEffectsFor(effectsFor === m.id ? null : m.id)}>
+                  onClick={() => setEffectsFor(effectsFor === m.id ? null : m.id)}
+                  aria-label={`Beobachtete Auffälligkeiten unter ${m.name}`}
+                  aria-expanded={effectsFor === m.id}
+                  title="Beobachtete Auffälligkeiten">
                   {effectsOf(m.id).length > 0 ? `⚠ ${effectsOf(m.id).length}` : '⚠'}
                 </button>
                 <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
-                  onClick={() => endMedication(m.id)}>
+                  onClick={() => endMedication(m.id)}
+                  aria-label={`${m.name} absetzen (Historie bleibt erhalten)`}>
                   Absetzen
                 </button>
               </div>

@@ -5,6 +5,7 @@ import { db } from '../../db/db';
 import type { Profile } from '../../db/models';
 import { newId, nowIso } from '../../db/models';
 import { fromLocalInputValue, toLocalInputValue } from '../../utils/date';
+import { IconClock, IconNote, IconWeight } from '../icons';
 
 export function WeightForm({ profile, onDone }: { profile: Profile; onDone: () => void }) {
   const [value, setValue] = useState('');
@@ -31,7 +32,7 @@ export function WeightForm({ profile, onDone }: { profile: Profile; onDone: () =
   return (
     <div>
       <label className="field">
-        <span>Gewicht (kg)</span>
+        <span><IconWeight size={16} className="inline-icon" /> Gewicht (kg)</span>
         <input
           type="number"
           inputMode="decimal"
@@ -44,11 +45,11 @@ export function WeightForm({ profile, onDone }: { profile: Profile; onDone: () =
         />
       </label>
       <label className="field">
-        <span>Zeitpunkt</span>
+        <span><IconClock size={16} className="inline-icon" /> Zeitpunkt</span>
         <input type="datetime-local" value={at} onChange={(e) => setAt(e.target.value)} />
       </label>
       <label className="field">
-        <span>Notiz (optional, z. B. „nach dem Frühstück gewogen")</span>
+        <span><IconNote size={16} className="inline-icon" /> Notiz (optional, z. B. „nach dem Frühstück gewogen")</span>
         <input type="text" value={note} onChange={(e) => setNote(e.target.value)} />
       </label>
       <p className="hint">

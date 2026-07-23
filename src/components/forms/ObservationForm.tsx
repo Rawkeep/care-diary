@@ -8,6 +8,7 @@ import { newId, nowIso } from '../../db/models';
 import type { ConditionPreset } from '../../presets/epilepsy';
 import { fromLocalInputValue, toLocalInputValue } from '../../utils/date';
 import { AudioRecorder } from '../AudioRecorder';
+import { IconClock, IconNote } from '../icons';
 import { PhotoPicker } from '../PhotoPicker';
 
 type ScaleValue = 1 | 2 | 3 | 4 | 5;
@@ -77,11 +78,11 @@ export function ObservationForm({
       ))}
 
       <label className="field">
-        <span>Zeitpunkt</span>
+        <span><IconClock size={16} className="inline-icon" /> Zeitpunkt</span>
         <input type="datetime-local" value={at} onChange={(e) => setAt(e.target.value)} />
       </label>
       <label className="field">
-        <span>Auffälligkeit / Notiz (optional)</span>
+        <span><IconNote size={16} className="inline-icon" /> Auffälligkeit / Notiz (optional)</span>
         <textarea value={note} onChange={(e) => setNote(e.target.value)}
           placeholder="z. B. heute auffällig müde, neue Nebenwirkung beobachtet …" />
       </label>

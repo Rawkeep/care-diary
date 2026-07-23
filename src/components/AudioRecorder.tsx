@@ -2,6 +2,7 @@
 // drin ist: ein Tipp startet, ein Tipp stoppt. Gespeichert wird die Aufnahme
 // als Anhang beim Eintrag (lokal, wie Fotos).
 import { useEffect, useRef, useState } from 'react';
+import { IconMic } from './icons';
 
 export function AudioRecorder({
   clips,
@@ -79,7 +80,7 @@ export function AudioRecorder({
   return (
     <div className="photo-picker">
       <label className="field" style={{ marginBottom: 6 }}>
-        <span>Sprachnotiz (optional) — sprechen statt tippen</span>
+        <span><IconMic size={16} className="inline-icon" /> Sprachnotiz (optional) — sprechen statt tippen</span>
       </label>
       {clips.map((_, i) => (
         <div key={i} className="audio-row">

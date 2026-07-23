@@ -117,6 +117,77 @@ export function IconDone(p: IconProps) {
   );
 }
 
+/** Uhrzeit: Uhr */
+export function IconClock(p: IconProps) {
+  return (
+    <Base {...p}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
+    </Base>
+  );
+}
+
+/** Dauer: Stoppuhr */
+export function IconStopwatch(p: IconProps) {
+  return (
+    <Base {...p}>
+      <circle cx="12" cy="13.5" r="7.5" />
+      <path d="M12 10v3.8l2.6 1.5M9.5 2.5h5M12 2.5V6" />
+    </Base>
+  );
+}
+
+/** Schweregrad: Tacho */
+export function IconGauge(p: IconProps) {
+  return (
+    <Base {...p}>
+      <path d="M4.5 17.5a8.5 8.5 0 1 1 15 0" />
+      <path d="m12 14 3.8-4.2" />
+      <circle cx="12" cy="14.5" r="1.4" />
+    </Base>
+  );
+}
+
+/** Umstände: Etiketten */
+export function IconTags(p: IconProps) {
+  return (
+    <Base {...p}>
+      <path d="M3 11V4h7l9 9-7 7-9-9Z" />
+      <circle cx="7.5" cy="8.5" r="1.2" />
+    </Base>
+  );
+}
+
+/** Notiz: Textzeilen */
+export function IconNote(p: IconProps) {
+  return (
+    <Base {...p}>
+      <rect x="4" y="3.5" width="16" height="17" rx="2.5" />
+      <path d="M8 9h8M8 13h8M8 17h5" />
+    </Base>
+  );
+}
+
+/** Kamera */
+export function IconCamera(p: IconProps) {
+  return (
+    <Base {...p}>
+      <path d="M4 8h3l1.6-2.4A1.5 1.5 0 0 1 9.9 5h4.2a1.5 1.5 0 0 1 1.3.6L17 8h3a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a1 1 0 0 1 1-1Z" />
+      <circle cx="12" cy="13.5" r="3.6" />
+    </Base>
+  );
+}
+
+/** Mikrofon */
+export function IconMic(p: IconProps) {
+  return (
+    <Base {...p}>
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M9 21h6" />
+    </Base>
+  );
+}
+
 /** Bearbeiten: Stift */
 export function IconEdit(p: IconProps) {
   return (
