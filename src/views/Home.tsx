@@ -11,8 +11,8 @@ import { itemsOfDay, mergeChronological } from '../utils/aggregate';
 import { daysSinceLastEvent } from '../utils/correlation';
 import { fmtDuration, localDayKey } from '../utils/date';
 import { effectiveDose } from '../utils/dose';
+import { orderMedsForHome } from '../utils/medOrder';
 import { quickIntake } from '../utils/quickIntake';
-import { openSlotLabels, parseSchedule, takenToday } from '../utils/schedule';
 
 export function Home({ profile, preset }: { profile: Profile; preset: ConditionPreset }) {
   const { setOpenForm, acuteStartedAt, startAcute, showToast } = useAppStore();
@@ -48,7 +48,17 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
     : 0;
 
   // Ein Tipp = erfasst. Rückgängig über den Toast, Details über das Formular.
-  const activeMeds = (medications ?? []).filter((m) => !m.endDate);
+  // Reihenfolge kontextabhängig: fällig oben, erledigt gedimmt unten,
+  // Notfallmedikation im Akutfall ganz vorn (stabile Zonen drumherum).
+  const now = new Date();
+  const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const orderedMeds = orderMedsForHome(
+    medications ?? [],
+    intakes ?? [],
+    todayKey,
+    hhmm,
+    acuteStartedAt != null
+  );
   async function logNow(med: Medication) {
     const intake = quickIntake(med);
     await db.intakes.add(intake);
@@ -68,18 +78,19 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
         </button>
       )}
 
-      {activeMeds.length > 0 && (
+      {orderedMeds.length > 0 && (
         <div className="med-quick">
-          {activeMeds.map((m) => {
-            // Sanfte Erinnerung: was ist laut Schema („1-0-1") heute noch offen?
-            const plan = m.isEmergency ? null : parseSchedule(m.schedule);
-            const open = plan ? openSlotLabels(plan, takenToday(intakes ?? [], m.id, todayKey)) : [];
+          {orderedMeds.map(({ med: m, open, due, done }) => {
+            const classes = [
+              'med-quick-btn',
+              m.isEmergency ? 'emergency' : '',
+              due ? 'due' : '',
+              done ? 'muted' : '',
+            ]
+              .filter(Boolean)
+              .join(' ');
             return (
-              <button
-                key={m.id}
-                className={m.isEmergency ? 'med-quick-btn emergency' : 'med-quick-btn'}
-                onClick={() => logNow(m)}
-              >
+              <button key={m.id} className={classes} onClick={() => logNow(m)}>
                 <span className="med-quick-name">
                   💊 {m.name}
                   {m.isEmergency ? ' · Notfall' : ''}
@@ -87,9 +98,13 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
                 <span className="med-quick-dose">
                   {effectiveDose(m, nowIso())} {m.unit} — jetzt genommen
                 </span>
-                {plan && (
-                  <span className={open.length > 0 ? 'med-quick-status open' : 'med-quick-status done'}>
-                    {open.length > 0 ? `⏰ heute noch offen: ${open.join(', ')}` : '✓ heute erledigt'}
+                {(open.length > 0 || done) && (
+                  <span className={done ? 'med-quick-status done' : 'med-quick-status open'}>
+                    {done
+                      ? '✓ heute erledigt'
+                      : due
+                        ? `⏰ jetzt fällig: ${open.join(', ')}`
+                        : `heute noch offen: ${open.join(', ')}`}
                   </span>
                 )}
               </button>
@@ -99,14 +114,15 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
       )}
 
       <div className="quick-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+        {/* Reihenfolge nach Nutzungshäufigkeit: täglich → selten */}
         <button className="quick-btn" onClick={() => setOpenForm('intake')}>
           <span className="icon">💊</span>Einnahme
         </button>
-        <button className="quick-btn" onClick={() => setOpenForm('event')}>
-          <span className="icon">⚡</span>Ereignis
-        </button>
         <button className="quick-btn" onClick={() => setOpenForm('observation')}>
           <span className="icon">📝</span>Zustand
+        </button>
+        <button className="quick-btn" onClick={() => setOpenForm('event')}>
+          <span className="icon">⚡</span>Ereignis
         </button>
         <button className="quick-btn" onClick={() => setOpenForm('weight')}>
           <span className="icon">⚖️</span>Gewicht

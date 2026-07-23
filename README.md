@@ -84,7 +84,12 @@ npm test             # Vitest (Aggregations-Kern)
 - **Erinnerungen:** Tagesstatus auf den Medikamenten-Buttons, App-Badge
   mit offenen Einnahmen und optionale Benachrichtigungen zu festen
   Zeitfenstern (8/13/19 Uhr), solange die App geöffnet ist. Push bei
-  geschlossener App folgt mit den nativen Builds.
+  geschlossener App folgt mit den nativen Builds (siehe `NATIVE.md`).
+- **Kontextabhängige Knopf-Ordnung** auf „Heute": stabile Zonen
+  (Akut-Button immer ganz oben, Schnell-Raster wandert nie), nur die
+  Medikamenten-Liste sortiert sich — jetzt Fälliges zuerst (markiert),
+  Erledigtes rutscht gedimmt nach unten, und läuft der Akut-Timer,
+  springt die Notfallmedikation an die Spitze.
 - **Verschlüsseltes Backup** (.cdbak): AES-256-GCM mit Passphrase
   (PBKDF2), sicher ablegbar auch in Cloud/Mail; **Wiederherstellen** von
   Backup- und JSON-Dateien direkt in der App (idempotenter Import).

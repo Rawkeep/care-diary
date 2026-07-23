@@ -152,6 +152,13 @@ main { flex: 1; padding: 8px 16px 90px; }
 .med-quick-btn .med-quick-status.open { color: var(--danger); }
 .med-quick-btn .med-quick-status.done { color: var(--accent-strong); }
 .med-quick-btn.emergency { background: var(--danger-soft); border-color: var(--danger); }
+/* Jetzt fällig: deutlich, aber ruhig — kräftiger Rand statt Blinken */
+.med-quick-btn.due {
+  border-width: 2px; border-color: var(--accent-strong);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent), var(--shadow-1);
+}
+/* Heute erledigt: bleibt tippbar (Bedarfs-Extradosis), tritt aber zurück */
+.med-quick-btn.muted { opacity: 0.62; box-shadow: none; }
 
 /* Sprachnotizen */
 .audio-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
