@@ -177,6 +177,36 @@ main { flex: 1; padding: 8px 16px 90px; }
 /* Heute erledigt: bleibt tippbar (Bedarfs-Extradosis), tritt aber zurück */
 .med-quick-btn.muted { opacity: 0.62; box-shadow: none; }
 
+/* Kompakte Med-Chips (erledigt / Bedarf) — ein Tipp erfasst weiterhin */
+.med-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.med-chip {
+  font: inherit; font-size: 0.86rem; font-weight: 600; cursor: pointer;
+  color: var(--text-dim); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 999px; padding: 8px 14px;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+.med-chip:active { transform: scale(0.95); background: var(--surface-2); }
+.med-chip.emergency { color: var(--danger); border-color: var(--danger); background: var(--danger-soft); }
+
+/* Rhythmus-Stepper (Einnahmeschema) */
+.sched-editor { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.sched-slot { text-align: center; }
+.sched-label { display: block; font-size: 0.78rem; color: var(--text-dim); font-weight: 600; margin-bottom: 4px; }
+.sched-stepper {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 2px;
+}
+.sched-stepper button {
+  width: 38px; height: 38px; border: none; border-radius: 10px; cursor: pointer;
+  font-size: 1.05rem; font-weight: 700; color: var(--accent-strong);
+  background: var(--surface); box-shadow: var(--shadow-1);
+}
+.sched-stepper button:disabled { opacity: 0.35; box-shadow: none; }
+.sched-stepper button:active { transform: scale(0.94); }
+.sched-value { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 28px; }
+.meta.rhythm { color: var(--accent-strong); font-weight: 600; }
+.meta.rhythm.none { color: var(--text-dim); font-weight: 400; }
+
 /* Sprachnotizen */
 .audio-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .audio-row audio { flex: 1; min-width: 0; height: 40px; }

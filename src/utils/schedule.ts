@@ -18,6 +18,12 @@ const SLOT_LABELS: [keyof Omit<SchedulePlan, 'slots'>, string][] = [
   ['evening', 'abends'],
 ];
 
+/** Plan → kompaktes Schema „1-0-1" (Dezimalzahlen mit Komma, z. B. „0,5-0-1") */
+export function formatSchedule(plan: Pick<SchedulePlan, 'morning' | 'noon' | 'evening'>): string {
+  const f = (n: number) => String(n).replace('.', ',');
+  return `${f(plan.morning)}-${f(plan.noon)}-${f(plan.evening)}`;
+}
+
 /** „1-0-1" → Plan; null bei leerem/nicht parsebarem Schema */
 export function parseSchedule(schedule?: string): SchedulePlan | null {
   if (!schedule) return null;

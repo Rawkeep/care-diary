@@ -4,11 +4,25 @@
 // selbst keine Pläne aus.
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { ScheduleEditor } from '../components/ScheduleEditor';
 import { db } from '../db/db';
 import type { Medication, Profile } from '../db/models';
 import { newId, nowIso } from '../db/models';
 import { effectiveDose } from '../utils/dose';
 import { fmtDate, fmtDayKey, localDayKey } from '../utils/date';
+import { parseSchedule } from '../utils/schedule';
+
+const SLOT_WORDS: Record<string, string> = { morning: 'morgens', noon: 'mittags', evening: 'abends' };
+
+/** „1-0-1" → „morgens 1 · abends 1" (lesbare Kurzform für die Liste) */
+function rhythmWords(schedule?: string): string | null {
+  const plan = parseSchedule(schedule);
+  if (!plan) return null;
+  return (['morning', 'noon', 'evening'] as const)
+    .filter((k) => plan[k] > 0)
+    .map((k) => `${SLOT_WORDS[k]} ${String(plan[k]).replace('.', ',')}`)
+    .join(' · ');
+}
 
 export function Medications({ profile }: { profile: Profile }) {
   const medications = useLiveQuery(
@@ -25,8 +39,9 @@ export function Medications({ profile }: { profile: Profile }) {
   const [substance, setSubstance] = useState('');
   const [dose, setDose] = useState('');
   const [unit, setUnit] = useState('mg');
-  const [schedule, setSchedule] = useState('');
+  const [schedule, setSchedule] = useState<string | undefined>(undefined);
   const [isEmergency, setIsEmergency] = useState(false);
+  const [rhythmFor, setRhythmFor] = useState<string | null>(null);
 
   const [planFor, setPlanFor] = useState<string | null>(null);
   const [stepDate, setStepDate] = useState(localDayKey(new Date().toISOString()));
@@ -44,12 +59,12 @@ export function Medications({ profile }: { profile: Profile }) {
       substance: substance.trim() || undefined,
       dose: Number(dose),
       unit,
-      schedule: schedule.trim() || undefined,
+      schedule,
       isEmergency,
       startDate: nowIso().slice(0, 10),
       createdAt: nowIso(),
     });
-    setName(''); setSubstance(''); setDose(''); setSchedule(''); setIsEmergency(false);
+    setName(''); setSubstance(''); setDose(''); setSchedule(undefined); setIsEmergency(false);
     setShowForm(false);
   }
 
@@ -115,11 +130,23 @@ export function Medications({ profile }: { profile: Profile }) {
                   </div>
                   <div className="meta">
                     {steps.length > 0 ? `aktuell ${current} ${m.unit} (Basis ${m.dose})` : `${m.dose} ${m.unit}`}
-                    {m.schedule ? ` · Schema ${m.schedule}` : ''}
                     {m.substance ? ` · ${m.substance}` : ''}
                     {m.startDate ? ` · seit ${m.startDate}` : ''}
                   </div>
+                  <div className={m.isEmergency ? 'meta' : rhythmWords(m.schedule) ? 'meta rhythm' : 'meta rhythm none'}>
+                    {m.isEmergency
+                      ? '🚨 bei Bedarf / im Notfall'
+                      : rhythmWords(m.schedule)
+                        ? `⏱ ${rhythmWords(m.schedule)} (${m.schedule})`
+                        : '⏱ kein fester Rhythmus — über „Rhythmus" einstellen'}
+                  </div>
                 </div>
+                {!m.isEmergency && (
+                  <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
+                    onClick={() => setRhythmFor(rhythmFor === m.id ? null : m.id)}>
+                    ⏱
+                  </button>
+                )}
                 <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
                   onClick={() => setPlanFor(planFor === m.id ? null : m.id)}>
                   Plan
@@ -168,6 +195,20 @@ export function Medications({ profile }: { profile: Profile }) {
                     disabled={effectText.trim() === ''}>
                     ＋ Beobachtung notieren
                   </button>
+                </div>
+              )}
+
+              {rhythmFor === m.id && (
+                <div className="card" style={{ marginTop: 6 }}>
+                  <h2>Einnahme-Rhythmus</h2>
+                  <p className="hint" style={{ marginTop: 0 }}>
+                    Wie oft wird {m.name} am Tag genommen? Der Rhythmus steuert den
+                    Tagesstatus auf „Heute" („⏰ jetzt fällig" / „✓ heute erledigt").
+                  </p>
+                  <ScheduleEditor
+                    value={m.schedule}
+                    onChange={(schedule) => db.medications.update(m.id, { schedule })}
+                  />
                 </div>
               )}
 
@@ -245,10 +286,8 @@ export function Medications({ profile }: { profile: Profile }) {
               </select>
             </label>
           </div>
-          <label className="field">
-            <span>Einnahmeschema (optional, z. B. „1-0-1")</span>
-            <input type="text" value={schedule} onChange={(e) => setSchedule(e.target.value)} />
-          </label>
+          <label className="field"><span>Einnahme-Rhythmus (optional)</span></label>
+          <ScheduleEditor value={schedule} onChange={setSchedule} />
           <label className="check-row">
             <input type="checkbox" checked={isEmergency} onChange={(e) => setIsEmergency(e.target.checked)} />
             Bedarfs-/Notfallmedikation

@@ -78,40 +78,58 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
         </button>
       )}
 
-      {orderedMeds.length > 0 && (
-        <div className="med-quick">
-          {orderedMeds.map(({ med: m, open, due, done }) => {
-            const classes = [
-              'med-quick-btn',
-              m.isEmergency ? 'emergency' : '',
-              due ? 'due' : '',
-              done ? 'muted' : '',
-            ]
-              .filter(Boolean)
-              .join(' ');
-            return (
-              <button key={m.id} className={classes} onClick={() => logNow(m)}>
-                <span className="med-quick-name">
-                  💊 {m.name}
-                  {m.isEmergency ? ' · Notfall' : ''}
-                </span>
-                <span className="med-quick-dose">
-                  {effectiveDose(m, nowIso())} {m.unit} — jetzt genommen
-                </span>
-                {(open.length > 0 || done) && (
-                  <span className={done ? 'med-quick-status done' : 'med-quick-status open'}>
-                    {done
-                      ? '✓ heute erledigt'
-                      : due
-                        ? `⏰ jetzt fällig: ${open.join(', ')}`
-                        : `heute noch offen: ${open.join(', ')}`}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      {orderedMeds.length > 0 && (() => {
+        // Volle Buttons nur für Medikamente mit Handlungsbedarf (offen/fällig,
+        // Notfall im Akutfall); alles andere kompakt als Chips — erreichbar
+        // und erkennbar, ohne die Startseite zu fluten.
+        const needsAction = ({ med: m, open, due }: (typeof orderedMeds)[number]) =>
+          open.length > 0 || due || (acuteStartedAt != null && m.isEmergency);
+        const primary = orderedMeds.filter(needsAction);
+        const secondary = orderedMeds.filter((s) => !needsAction(s));
+        return (
+          <>
+            {primary.length > 0 && (
+              <div className="med-quick">
+                {primary.map(({ med: m, open, due }) => {
+                  const classes = ['med-quick-btn', m.isEmergency ? 'emergency' : '', due ? 'due' : '']
+                    .filter(Boolean)
+                    .join(' ');
+                  return (
+                    <button key={m.id} className={classes} onClick={() => logNow(m)}>
+                      <span className="med-quick-name">
+                        💊 {m.name}
+                        {m.isEmergency ? ' · Notfall' : ''}
+                      </span>
+                      <span className="med-quick-dose">
+                        {effectiveDose(m, nowIso())} {m.unit} — jetzt genommen
+                      </span>
+                      {open.length > 0 && (
+                        <span className="med-quick-status open">
+                          {due ? `⏰ jetzt fällig: ${open.join(', ')}` : `heute noch offen: ${open.join(', ')}`}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {secondary.length > 0 && (
+              <div className="med-chips">
+                {secondary.map(({ med: m, done }) => (
+                  <button
+                    key={m.id}
+                    className={m.isEmergency ? 'med-chip emergency' : 'med-chip'}
+                    onClick={() => logNow(m)}
+                    aria-label={`${m.name} jetzt genommen erfassen`}
+                  >
+                    {m.isEmergency ? '🚨' : done ? '✓' : '💊'} {m.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        );
+      })()}
 
       <div className="quick-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
         {/* Reihenfolge nach Nutzungshäufigkeit: täglich → selten */}

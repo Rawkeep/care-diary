@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Intake } from '../src/db/models';
 import { localDayKey } from '../src/utils/date';
-import { openSlotLabels, parseSchedule, takenToday } from '../src/utils/schedule';
+import { formatSchedule, openSlotLabels, parseSchedule, takenToday } from '../src/utils/schedule';
 
 function iso(y: number, m: number, d: number, h = 12): string {
   return new Date(y, m - 1, d, h).toISOString();
@@ -23,6 +23,13 @@ describe('parseSchedule', () => {
     expect(parseSchedule(undefined)).toBeNull();
     expect(parseSchedule('bei Bedarf')).toBeNull();
     expect(parseSchedule('0-0-0')).toBeNull();
+  });
+
+  it('formatSchedule ⇄ parseSchedule ist ein Roundtrip (inkl. halber Dosen)', () => {
+    expect(formatSchedule({ morning: 1, noon: 0, evening: 1 })).toBe('1-0-1');
+    expect(formatSchedule({ morning: 0.5, noon: 0, evening: 1.5 })).toBe('0,5-0-1,5');
+    const plan = parseSchedule(formatSchedule({ morning: 0.5, noon: 0, evening: 1.5 }))!;
+    expect(plan).toMatchObject({ morning: 0.5, noon: 0, evening: 1.5, slots: 2 });
   });
 });
 
