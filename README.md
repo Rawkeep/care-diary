@@ -75,6 +75,16 @@ npm test             # Vitest (Aggregations-Kern)
   bzw. „✓ heute erledigt" — sanfte Erinnerung ohne Push und ohne Mahnen.
 - **Migräne-Modul** als zweites Erkrankungs-Preset (Migräne-Arten, Trigger,
   Schmerz-/Konzentrations-Skala) — wählbar beim Profil-Setup.
+- **Mehrprofil:** mehrere Personen in einer App (z. B. zwei Kinder) —
+  Wechsel und Neuanlage über das Profil im Kopfbereich; Daten strikt
+  getrennt, Backup enthält alle Profile.
+- **Parameter-Überlagerung** im Zustands-Verlauf: zwei Kurven (z. B.
+  Schlaf und Verhalten) auf derselben Skala übereinander — reine
+  Darstellung, keine Korrelationsaussage.
+- **Erinnerungen:** Tagesstatus auf den Medikamenten-Buttons, App-Badge
+  mit offenen Einnahmen und optionale Benachrichtigungen zu festen
+  Zeitfenstern (8/13/19 Uhr), solange die App geöffnet ist. Push bei
+  geschlossener App folgt mit den nativen Builds.
 - **Verschlüsseltes Backup** (.cdbak): AES-256-GCM mit Passphrase
   (PBKDF2), sicher ablegbar auch in Cloud/Mail; **Wiederherstellen** von
   Backup- und JSON-Dateien direkt in der App (idempotenter Import).

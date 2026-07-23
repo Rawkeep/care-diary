@@ -80,10 +80,12 @@ button { touch-action: manipulation; }
 }
 .app-header .app-logo { width: 27px; height: 27px; border-radius: 7px; display: block; box-shadow: var(--shadow-1); }
 .app-header .profile-badge {
-  font-size: 0.84rem; font-weight: 600; color: var(--text-dim);
+  font: inherit; font-size: 0.84rem; font-weight: 600; color: var(--text-dim);
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 999px; padding: 5px 13px; box-shadow: var(--shadow-1);
+  cursor: pointer; transition: transform 0.1s ease;
 }
+.app-header .profile-badge:active { transform: scale(0.96); }
 
 main { flex: 1; padding: 8px 16px 90px; }
 
@@ -295,6 +297,12 @@ textarea { resize: vertical; min-height: 64px; }
 .trend-last { font-size: 10px; font-weight: 700; fill: var(--accent); }
 .trend-cross { stroke: var(--text-dim); stroke-dasharray: 3 3; }
 .trend-event { stroke: var(--danger); stroke-width: 3; stroke-linecap: round; }
+.trend-line2 { fill: none; stroke: var(--danger); stroke-width: 2; stroke-dasharray: 5 4; stroke-linejoin: round; stroke-linecap: round; }
+.trend-dot2 { fill: var(--danger); opacity: 0.45; }
+.trend-legend { display: flex; gap: 16px; font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
+.trend-legend .swatch { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
+.trend-legend .swatch.a { background: var(--accent); }
+.trend-legend .swatch.b { background: var(--danger); }
 .trend-empty { font-size: 10px; fill: var(--text-dim); }
 .trend-xaxis { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
 .trend-ranges button { padding: 8px; font-size: 0.8rem; }

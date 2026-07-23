@@ -18,6 +18,12 @@ function fmtValue(v: number): string {
   return v.toFixed(1).replace('.', ',');
 }
 
+export interface SecondarySeries {
+  label: string;
+  points: TrendPoint[];
+  smoothed: TrendPoint[];
+}
+
 export function TrendChart({
   title,
   days,
@@ -25,6 +31,7 @@ export function TrendChart({
   smoothed,
   domain = [1, 5],
   ticks = [1, 3, 5],
+  secondary,
 }: {
   title: string;
   days: string[];
@@ -33,6 +40,8 @@ export function TrendChart({
   /** Werteskala [min, max] — Standard: Zustands-Skala 1–5 */
   domain?: [number, number];
   ticks?: number[];
+  /** Überlagerte zweite Kurve (gleiche Skala) — reine Darstellung */
+  secondary?: SecondarySeries;
 }) {
   const [hover, setHover] = useState<TrendPoint | null>(null);
   const n = Math.max(days.length - 1, 1);
@@ -41,9 +50,12 @@ export function TrendChart({
   const x = (i: number) => L + (i / n) * (W - L - R);
   const y = (v: number) => T + ((dMax - v) / span) * (H - T - B);
 
-  const path = smoothed
-    .map((p, i) => `${i === 0 ? 'M' : 'L'}${x(p.dayIndex).toFixed(1)},${y(p.value).toFixed(1)}`)
-    .join(' ');
+  const toPath = (pts: TrendPoint[]) =>
+    pts
+      .map((p, i) => `${i === 0 ? 'M' : 'L'}${x(p.dayIndex).toFixed(1)},${y(p.value).toFixed(1)}`)
+      .join(' ');
+  const path = toPath(smoothed);
+  const path2 = secondary ? toPath(secondary.smoothed) : '';
   const lastSmoothed = smoothed[smoothed.length - 1];
 
   function onMove(e: PointerEvent<SVGSVGElement>) {
@@ -94,6 +106,10 @@ export function TrendChart({
         {points.map((p) => (
           <circle key={p.day} cx={x(p.dayIndex)} cy={y(p.value)} r={2.5} className="trend-dot" />
         ))}
+        {secondary && secondary.smoothed.length > 1 && <path d={path2} className="trend-line2" />}
+        {secondary?.points.map((p) => (
+          <circle key={`s-${p.day}`} cx={x(p.dayIndex)} cy={y(p.value)} r={2.5} className="trend-dot2" />
+        ))}
         {lastSmoothed && (
           <text
             x={x(lastSmoothed.dayIndex) + 6}
@@ -103,12 +119,18 @@ export function TrendChart({
             {fmtValue(lastSmoothed.value)}
           </text>
         )}
-        {points.length === 0 && (
+        {points.length === 0 && !secondary && (
           <text x={(L + W - R) / 2} y={H / 2} className="trend-empty" textAnchor="middle">
             keine Daten in diesem Zeitraum
           </text>
         )}
       </svg>
+      {secondary && (
+        <div className="trend-legend">
+          <span><i className="swatch a" /> {title}</span>
+          <span><i className="swatch b" /> {secondary.label}</span>
+        </div>
+      )}
     </div>
   );
 }

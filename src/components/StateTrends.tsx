@@ -33,6 +33,8 @@ export function StateTrends({
   fixedRange?: { from: string; to: string };
 }) {
   const [rangeDays, setRangeDays] = useState(84);
+  const [overlayA, setOverlayA] = useState('');
+  const [overlayB, setOverlayB] = useState('');
   const observations = useLiveQuery(
     () => db.observations.where('profileId').equals(profile.id).toArray(),
     [profile.id]
@@ -76,6 +78,18 @@ export function StateTrends({
   const wVals = weightPoints.map((p) => p.value);
   const wMin = Math.floor(Math.min(...wVals, Infinity) - 1);
   const wMax = Math.ceil(Math.max(...wVals, -Infinity) + 1);
+
+  // Überlagerung zweier Parameter (gleiche 1–5-Skala) — reine Darstellung
+  const paramsWithData = preset.observationParams.filter(
+    (p) => seriesForParam(obsR, p.key, days).length > 0
+  );
+  const keyA = paramsWithData.some((p) => p.key === overlayA) ? overlayA : paramsWithData[0]?.key;
+  const keyB =
+    paramsWithData.some((p) => p.key === overlayB) && overlayB !== keyA
+      ? overlayB
+      : paramsWithData.find((p) => p.key !== keyA)?.key;
+  const paramA = paramsWithData.find((p) => p.key === keyA);
+  const paramB = paramsWithData.find((p) => p.key === keyB);
 
   // Zustand im Vergleich: Ereignistag+Folgetag vs. ereignisfreie Tage —
   // nur Parameter mit Daten in beiden Gruppen (sonst kein Vergleich möglich)
@@ -142,6 +156,42 @@ export function StateTrends({
             Linie = geglätteter Verlauf (±3 Tage), Punkte = Tages-Ø. Nur Darstellung — keine
             Bewertung.
           </p>
+          {!fixedRange && paramA && paramB && (
+            <>
+              <h2 style={{ marginTop: 14 }}>Überlagerung</h2>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                <select value={paramA.key} onChange={(e) => setOverlayA(e.target.value)} aria-label="Parameter A">
+                  {paramsWithData.map((p) => (
+                    <option key={p.key} value={p.key}>{p.label}</option>
+                  ))}
+                </select>
+                <select value={paramB.key} onChange={(e) => setOverlayB(e.target.value)} aria-label="Parameter B">
+                  {paramsWithData
+                    .filter((p) => p.key !== paramA.key)
+                    .map((p) => (
+                      <option key={p.key} value={p.key}>{p.label}</option>
+                    ))}
+                </select>
+              </div>
+              {(() => {
+                const ptsA = seriesForParam(obsR, paramA.key, days);
+                const ptsB = seriesForParam(obsR, paramB.key, days);
+                return (
+                  <TrendChart
+                    title={paramA.label}
+                    days={days}
+                    points={ptsA}
+                    smoothed={smoothSeries(ptsA)}
+                    secondary={{ label: paramB.label, points: ptsB, smoothed: smoothSeries(ptsB) }}
+                  />
+                );
+              })()}
+              <p className="hint">
+                Zwei Kurven auf derselben 1–5-Skala übereinander — nur Darstellung, um Phasen
+                gemeinsam zu betrachten. Keine Korrelations- oder Kausalaussage.
+              </p>
+            </>
+          )}
           {comparison.length > 0 && (
             <>
               <h2 style={{ marginTop: 14 }}>Zustand im Vergleich</h2>

@@ -5,6 +5,7 @@ import { buildExportBundle, db, importBundle } from '../db/db';
 import type { Profile } from '../db/models';
 import { newId, nowIso } from '../db/models';
 import { useAppStore } from '../store/appStore';
+import { REMINDER_PREF_KEY, remindersEnabled } from '../components/ReminderManager';
 import { decryptBackup, encryptBackup, isBackupEnvelope } from '../utils/backup';
 import { dayKeyDaysAgo, localDayKey } from '../utils/date';
 import { clearPin, hasPin, setPin, verifyPin } from '../utils/pin';
@@ -78,6 +79,22 @@ export function More({ profile }: { profile: Profile }) {
     } else {
       setPinError('Falsche PIN.');
     }
+  }
+
+  // --- Erinnerungen ---
+  const [remindersOn, setRemindersOn] = useState(remindersEnabled());
+  const [notifPermission, setNotifPermission] = useState(
+    typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
+  );
+
+  function toggleReminders(on: boolean) {
+    localStorage.setItem(REMINDER_PREF_KEY, on ? 'on' : 'off');
+    setRemindersOn(on);
+  }
+
+  async function requestNotifications() {
+    if (typeof Notification === 'undefined') return;
+    setNotifPermission(await Notification.requestPermission());
   }
 
   // --- Sicherung & Wiederherstellung ---
@@ -254,6 +271,42 @@ export function More({ profile }: { profile: Profile }) {
         </p>
         <p className="hint">
           Aktivierte Module: {profile.conditions.length > 0 ? profile.conditions.join(', ') : 'Allgemein'}
+        </p>
+      </div>
+
+      <div className="card">
+        <h2>Erinnerungen</h2>
+        <p className="hint" style={{ marginTop: 0 }}>
+          Sanfte Einnahme-Erinnerung aus dem Schema („1-0-1"): Tagesstatus auf den
+          Medikamenten-Buttons, App-Badge mit offenen Einnahmen (installierte App) und —
+          wenn erlaubt — eine Benachrichtigung je fälligem Zeitpunkt (morgens 8 Uhr,
+          mittags 13 Uhr, abends 19 Uhr), solange die App geöffnet ist.
+        </p>
+        <label className="check-row">
+          <input
+            type="checkbox"
+            checked={remindersOn}
+            onChange={(e) => toggleReminders(e.target.checked)}
+          />
+          Erinnerungen aktiv
+        </label>
+        {notifPermission === 'default' && (
+          <button className="btn secondary" onClick={requestNotifications}>
+            🔔 Benachrichtigungen erlauben
+          </button>
+        )}
+        {notifPermission === 'granted' && (
+          <p className="hint">🔔 Benachrichtigungen sind erlaubt.</p>
+        )}
+        {notifPermission === 'denied' && (
+          <p className="hint">
+            Benachrichtigungen sind im Browser blockiert — in den Website-Einstellungen
+            freigeben, falls gewünscht.
+          </p>
+        )}
+        <p className="hint">
+          Ehrlich gesagt: Push bei komplett geschlossener App kann eine reine Web-App ohne
+          Server nicht — das kommt mit den geplanten nativen Builds (iOS/Android).
         </p>
       </div>
 

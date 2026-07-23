@@ -2,8 +2,11 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db/db';
 import { presetFor } from './presets/epilepsy';
 import { useAppStore } from './store/appStore';
+import { useState } from 'react';
 import { LockScreen } from './components/LockScreen';
 import { Modal } from './components/Modal';
+import { ProfileSwitcher } from './components/ProfileSwitcher';
+import { ReminderManager } from './components/ReminderManager';
 import { Toast } from './components/Toast';
 import { EventForm } from './components/forms/EventForm';
 import { IntakeForm } from './components/forms/IntakeForm';
@@ -35,6 +38,7 @@ export function App() {
   const { view, setView, activeProfileId, openForm, setOpenForm, locked, reportRange } =
     useAppStore();
   const profiles = useLiveQuery(() => db.profiles.toArray(), []);
+  const [showProfiles, setShowProfiles] = useState(false);
 
   if (locked) return <LockScreen />;
   if (!profiles) return null; // DB lädt (Millisekunden)
@@ -53,8 +57,17 @@ export function App() {
           <img className="app-logo" src="./icon.svg" alt="" aria-hidden="true" />
           care-diary
         </h1>
-        <span className="profile-badge">👤 {profile.name}</span>
+        <button
+          className="profile-badge"
+          onClick={() => setShowProfiles(true)}
+          aria-label="Profil wechseln"
+        >
+          👤 {profile.name}
+          {profiles.length > 1 ? ' ▾' : ''}
+        </button>
       </header>
+
+      <ReminderManager profile={profile} />
 
       <main>
         {view === 'home' && <Home profile={profile} preset={preset} />}
@@ -72,6 +85,10 @@ export function App() {
           )}
           {openForm === 'weight' && <WeightForm profile={profile} onDone={() => setOpenForm(null)} />}
         </Modal>
+      )}
+
+      {showProfiles && (
+        <ProfileSwitcher profiles={profiles} active={profile} onClose={() => setShowProfiles(false)} />
       )}
 
       <Toast />
