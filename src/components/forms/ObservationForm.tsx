@@ -7,6 +7,7 @@ import type { Observation, Profile } from '../../db/models';
 import { newId, nowIso } from '../../db/models';
 import type { ConditionPreset } from '../../presets/epilepsy';
 import { fromLocalInputValue, toLocalInputValue } from '../../utils/date';
+import { AudioRecorder } from '../AudioRecorder';
 import { PhotoPicker } from '../PhotoPicker';
 
 type ScaleValue = 1 | 2 | 3 | 4 | 5;
@@ -24,6 +25,7 @@ export function ObservationForm({
   const [at, setAt] = useState(toLocalInputValue(new Date()));
   const [note, setNote] = useState('');
   const [photos, setPhotos] = useState<File[]>([]);
+  const [audioClips, setAudioClips] = useState<Blob[]>([]);
   const [saving, setSaving] = useState(false);
 
   function toggle(param: string, v: ScaleValue) {
@@ -52,8 +54,8 @@ export function ObservationForm({
       createdAt,
     }));
     await db.observations.bulkAdd(rows);
-    // Fotos hängen am ersten Eintrag (wie die Notiz)
-    await saveAttachments(profile.id, 'observation', rows[0].id, photos);
+    // Anhänge (Fotos/Sprachnotizen) hängen am ersten Eintrag (wie die Notiz)
+    await saveAttachments(profile.id, 'observation', rows[0].id, [...photos, ...audioClips]);
     onDone();
   }
 
@@ -85,6 +87,7 @@ export function ObservationForm({
       </label>
 
       <PhotoPicker files={photos} onChange={setPhotos} />
+      <AudioRecorder clips={audioClips} onChange={setAudioClips} />
 
       <button className="btn" onClick={save} disabled={touched.length === 0 || saving}>
         {touched.length === 0

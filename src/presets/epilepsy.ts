@@ -85,6 +85,57 @@ export const EPILEPSY_PRESET: ConditionPreset = {
   ],
 };
 
+/** Migräne-Preset — zweiter Anwendungsfall nach demselben Muster */
+export const MIGRAINE_PRESET: ConditionPreset = {
+  key: 'migraine',
+  label: 'Migräne / Kopfschmerz',
+  eventTypes: [
+    {
+      key: 'migraine_aura',
+      label: 'Migräne mit Aura',
+      description: 'Vorboten wie Flimmern, Lichtblitze, Kribbeln oder Sprachstörung, dann Kopfschmerz.',
+    },
+    {
+      key: 'migraine_no_aura',
+      label: 'Migräne ohne Aura',
+      description: 'Meist einseitig pochender Kopfschmerz, oft mit Übelkeit, Licht-/Lärmempfindlichkeit.',
+    },
+    {
+      key: 'tension',
+      label: 'Spannungskopfschmerz',
+      description: 'Dumpf-drückend, beidseitig („wie ein Band um den Kopf"), meist ohne Übelkeit.',
+    },
+    {
+      key: 'cluster',
+      label: 'Cluster-artig',
+      description: 'Sehr starker, einseitiger Schmerz um Auge/Schläfe, oft mit tränendem Auge.',
+    },
+    {
+      key: 'unclassified',
+      label: 'Unklar / nicht zuordenbar',
+      description: 'Auffällige Kopfschmerz-Episode, die zu keiner Beschreibung passt — trotzdem dokumentieren!',
+    },
+  ],
+  circumstances: [
+    'Schlafmangel',
+    'Stress / Aufregung',
+    'Wetterwechsel',
+    'Menstruation / Zyklus',
+    'Mahlzeit ausgelassen',
+    'Bildschirm / Flackerlicht',
+    'Lärm / Gerüche',
+    'Bestimmte Lebensmittel (z. B. Rotwein, Käse)',
+    'Unbekannt',
+  ],
+  observationParams: [
+    { key: 'pain', label: 'Schmerzen', scaleHint: ['sehr stark', 'keine'] },
+    { key: 'energy', label: 'Energie', scaleHint: ['sehr erschöpft', 'voller Energie'] },
+    { key: 'mood', label: 'Stimmung', scaleHint: ['sehr schlecht', 'sehr gut'] },
+    { key: 'sleep', label: 'Schlaf (letzte Nacht)', scaleHint: ['sehr schlecht', 'sehr gut'] },
+    { key: 'concentration', label: 'Konzentration', scaleHint: ['sehr schwer', 'wie sonst'] },
+  ],
+};
+
 /** Generisches Fallback-Preset für Profile ohne aktivierte Erkrankung */
 export const GENERIC_PRESET: ConditionPreset = {
   key: 'generic',
@@ -104,8 +155,16 @@ export const GENERIC_PRESET: ConditionPreset = {
 
 const PRESETS: Record<string, ConditionPreset> = {
   [EPILEPSY_PRESET.key]: EPILEPSY_PRESET,
+  [MIGRAINE_PRESET.key]: MIGRAINE_PRESET,
   [GENERIC_PRESET.key]: GENERIC_PRESET,
 };
+
+/** Auswählbare Erkrankungs-Module fürs Profil-Setup */
+export const SELECTABLE_PRESETS: ConditionPreset[] = [
+  EPILEPSY_PRESET,
+  MIGRAINE_PRESET,
+  GENERIC_PRESET,
+];
 
 /** Liefert das Preset zum ersten aktivierten Condition-Key, sonst das generische. */
 export function presetFor(conditions: string[]): ConditionPreset {

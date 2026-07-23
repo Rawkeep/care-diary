@@ -1,14 +1,22 @@
-// Erster Start: Profil anlegen (für sich selbst oder eine betreute Person).
+// Erster Start: Profil anlegen (für sich selbst oder eine betreute Person)
+// und passendes Erkrankungs-Modul wählen.
 import { useState } from 'react';
 import { db } from '../db/db';
 import { newId, nowIso } from '../db/models';
+import { GENERIC_PRESET, SELECTABLE_PRESETS } from '../presets/epilepsy';
 import { useAppStore } from '../store/appStore';
+
+const MODULE_DESC: Record<string, string> = {
+  epilepsy: 'Anfallstagebuch mit Anfallsarten, Aura, Nachphase und Notfallmedikation.',
+  migraine: 'Kopfschmerz-Tagebuch mit Migräne-Arten, Triggern und Schmerz-Skala.',
+  generic: 'Neutrales Tagebuch für Episoden, Auffälligkeiten und Allgemeinzustand.',
+};
 
 export function ProfileSetup() {
   const setActiveProfile = useAppStore((s) => s.setActiveProfile);
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState('');
-  const [epilepsy, setEpilepsy] = useState(true);
+  const [condition, setCondition] = useState('epilepsy');
 
   async function create() {
     const id = newId();
@@ -16,7 +24,7 @@ export function ProfileSetup() {
       id,
       name: name.trim(),
       birthDate: birthDate || undefined,
-      conditions: epilepsy ? ['epilepsy'] : [],
+      conditions: condition === GENERIC_PRESET.key ? [] : [condition],
       createdAt: nowIso(),
     });
     setActiveProfile(id);
@@ -39,10 +47,23 @@ export function ProfileSetup() {
           <span>Geburtsdatum (optional — für die Historie „von Beginn an")</span>
           <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
         </label>
-        <label className="check-row">
-          <input type="checkbox" checked={epilepsy} onChange={(e) => setEpilepsy(e.target.checked)} />
-          Epilepsie-Modul aktivieren (Anfallstagebuch)
-        </label>
+
+        <label className="field"><span>Erkrankungs-Modul</span></label>
+        <div className="choice-list">
+          {SELECTABLE_PRESETS.map((p) => (
+            <div
+              key={p.key}
+              className={`choice ${condition === p.key ? 'selected' : ''}`}
+              onClick={() => setCondition(p.key)}
+              role="radio"
+              aria-checked={condition === p.key}
+            >
+              <div className="label">{p.label}</div>
+              <div className="desc">{MODULE_DESC[p.key]}</div>
+            </div>
+          ))}
+        </div>
+
         <button className="btn" onClick={create} disabled={name.trim() === ''}>
           Profil anlegen
         </button>

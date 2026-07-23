@@ -63,9 +63,18 @@ npm test             # Vitest (Aggregations-Kern)
   Die App zählt und gruppiert nur — die Einordnung gehört ins ärztliche
   Gespräch.
 - **Verlauf:** chronologisch nach Tagen gruppiert + Ereignis-Zähler je Art.
-- **Foto-Anhänge** an Ereignissen und Zustandseinträgen (Kamera oder Galerie,
-  automatisch verkleinert, Vollbild-Ansicht) — z. B. Hautbilder, Befunde,
-  Medikamentenpackungen. Fotos bleiben wie alles andere lokal.
+- **Foto- & Video-Anhänge** an Ereignissen und Zustandseinträgen (Kamera oder
+  Galerie; Fotos automatisch verkleinert, Videos bis 100 MB) — z. B.
+  Hautbilder, Befunde oder ein kurzes Video des Ereignisses fürs Arztgespräch.
+  Alles bleibt lokal.
+- **Sprachnotizen** (🎙, sprechen statt tippen): direkt im Ereignis-/
+  Zustandsformular aufnehmen, Wiedergabe im Verlauf — ideal für stressige
+  Momente.
+- **Einnahme-Tagesstatus:** aus dem Schema („1-0-1") zeigt jeder
+  Medikamenten-Button, was heute noch offen ist („⏰ noch offen: abends")
+  bzw. „✓ heute erledigt" — sanfte Erinnerung ohne Push und ohne Mahnen.
+- **Migräne-Modul** als zweites Erkrankungs-Preset (Migräne-Arten, Trigger,
+  Schmerz-/Konzentrations-Skala) — wählbar beim Profil-Setup.
 - **Verschlüsseltes Backup** (.cdbak): AES-256-GCM mit Passphrase
   (PBKDF2), sicher ablegbar auch in Cloud/Mail; **Wiederherstellen** von
   Backup- und JSON-Dateien direkt in der App (idempotenter Import).

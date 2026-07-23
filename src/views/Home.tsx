@@ -12,6 +12,7 @@ import { daysSinceLastEvent } from '../utils/correlation';
 import { fmtDuration, localDayKey } from '../utils/date';
 import { effectiveDose } from '../utils/dose';
 import { quickIntake } from '../utils/quickIntake';
+import { openSlotLabels, parseSchedule, takenToday } from '../utils/schedule';
 
 export function Home({ profile, preset }: { profile: Profile; preset: ConditionPreset }) {
   const { setOpenForm, acuteStartedAt, startAcute, showToast } = useAppStore();
@@ -69,21 +70,31 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
 
       {activeMeds.length > 0 && (
         <div className="med-quick">
-          {activeMeds.map((m) => (
-            <button
-              key={m.id}
-              className={m.isEmergency ? 'med-quick-btn emergency' : 'med-quick-btn'}
-              onClick={() => logNow(m)}
-            >
-              <span className="med-quick-name">
-                💊 {m.name}
-                {m.isEmergency ? ' · Notfall' : ''}
-              </span>
-              <span className="med-quick-dose">
-                {effectiveDose(m, nowIso())} {m.unit} — jetzt genommen
-              </span>
-            </button>
-          ))}
+          {activeMeds.map((m) => {
+            // Sanfte Erinnerung: was ist laut Schema („1-0-1") heute noch offen?
+            const plan = m.isEmergency ? null : parseSchedule(m.schedule);
+            const open = plan ? openSlotLabels(plan, takenToday(intakes ?? [], m.id, todayKey)) : [];
+            return (
+              <button
+                key={m.id}
+                className={m.isEmergency ? 'med-quick-btn emergency' : 'med-quick-btn'}
+                onClick={() => logNow(m)}
+              >
+                <span className="med-quick-name">
+                  💊 {m.name}
+                  {m.isEmergency ? ' · Notfall' : ''}
+                </span>
+                <span className="med-quick-dose">
+                  {effectiveDose(m, nowIso())} {m.unit} — jetzt genommen
+                </span>
+                {plan && (
+                  <span className={open.length > 0 ? 'med-quick-status open' : 'med-quick-status done'}>
+                    {open.length > 0 ? `⏰ heute noch offen: ${open.join(', ')}` : '✓ heute erledigt'}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 

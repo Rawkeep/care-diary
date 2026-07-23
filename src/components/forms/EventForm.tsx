@@ -8,6 +8,7 @@ import { newId, nowIso } from '../../db/models';
 import type { ConditionPreset } from '../../presets/epilepsy';
 import { useAppStore } from '../../store/appStore';
 import { fromLocalInputValue, toLocalInputValue } from '../../utils/date';
+import { AudioRecorder } from '../AudioRecorder';
 import { PhotoPicker } from '../PhotoPicker';
 
 export function EventForm({
@@ -37,6 +38,7 @@ export function EventForm({
   const [postPhase, setPostPhase] = useState('');
   const [note, setNote] = useState('');
   const [photos, setPhotos] = useState<File[]>([]);
+  const [audioClips, setAudioClips] = useState<Blob[]>([]);
   const [saving, setSaving] = useState(false);
 
   function toggleCircumstance(c: string) {
@@ -61,7 +63,7 @@ export function EventForm({
       note: note.trim() || undefined,
       createdAt: nowIso(),
     });
-    await saveAttachments(profile.id, 'event', id, photos);
+    await saveAttachments(profile.id, 'event', id, [...photos, ...audioClips]);
     clearAcute();
     onDone();
   }
@@ -140,6 +142,7 @@ export function EventForm({
       </label>
 
       <PhotoPicker files={photos} onChange={setPhotos} />
+      <AudioRecorder clips={audioClips} onChange={setAudioClips} />
 
       <button className="btn" onClick={save} disabled={saving}>
         {saving ? 'Speichert …' : 'Speichern'}
