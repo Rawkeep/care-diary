@@ -38,8 +38,10 @@ React 18 · Vite · TypeScript (strict) · Zustand · Dexie (IndexedDB) · PWA
 npm install
 npm run dev          # http://localhost:5180
 npm run build        # Typecheck + Production-Build (dist/)
+npm run preview      # Production-Build lokal ansehen
 npm run typecheck
 npm test             # Vitest (Aggregations-Kern)
+npm run test:watch
 ```
 
 ## Was die App schon kann (Phase 1 + 2, Auszug)
@@ -164,16 +166,21 @@ npm test             # Vitest (Aggregations-Kern)
 
 ```
 src/db/         Datenmodell (models.ts = Vertrag) + Dexie-Schema
-src/presets/    Erkrankungs-Presets (Epilepsie, generisch)
+src/presets/    Erkrankungs-Presets (Epilepsie, Migräne, generisch)
 src/store/      UI-Zustand (Zustand) — Fachdaten nur in Dexie
-src/utils/      Datums- und Aggregations-Helfer (getestet)
-src/views/      Heute, Verlauf, Medikamente, Mehr, Profil-Setup
+src/utils/      Datums-, Aggregations-, Taper- und Backup-Helfer (getestet)
+src/i18n/       Sprachpakete für Umfeld-Bericht/Notfallkarte (de/en/fr/tr/ar/uk/es)
+src/demo/       Demo-Profil mit 12 Wochen Beispieldaten
+src/views/      Heute, Verlauf, Medikamente, Mehr, Profil-Setup, Berichte
 src/components/ Modal, EntryList, Erfassungsformulare
-tests/          Vitest (Aggregations-Kern)
+tests/          Vitest (Aggregation, Taper, Backup, Erinnerungen, Report, i18n, …)
 ```
 
 ## Nächste Schritte (siehe Konzept §10)
 
-Phase 2 (Rest): Audio-Anhänge, Parameter-Überlagerung (nur Darstellung).
-Phase 3: Mehrprofil-Ausbau, Capacitor-Builds (iOS/Android, Biometrie),
-optionaler E2E-verschlüsselter Sync, weitere Erkrankungs-Presets.
+Phase 1 und 2 sind vollständig umgesetzt (siehe „Was die App schon kann" oben).
+Offen aus Phase 3: native Capacitor-Builds für iOS/Android inkl. Biometrie-
+Sperre und echten Erinnerungen bei geschlossener App (Fahrplan in
+[`NATIVE.md`](./NATIVE.md); Konfiguration liegt bereits im Repo), optionaler
+E2E-verschlüsselter Sync zwischen Geräten sowie weitere Erkrankungs-Presets
+über Epilepsie und Migräne hinaus (z. B. CED, Rheuma).
