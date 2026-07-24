@@ -4,6 +4,7 @@
 // selbst keine Pläne aus.
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { IconEmergency, IconGauge, IconPill, IconStop, IconStopwatch } from '../components/icons';
 import { ScheduleEditor } from '../components/ScheduleEditor';
 import { db } from '../db/db';
 import type { Medication, Profile } from '../db/models';
@@ -129,64 +130,84 @@ export function Medications({ profile }: { profile: Profile }) {
           const todayKey = localDayKey(new Date().toISOString());
           const taper = taperInfo(m, todayKey);
           return (
-            <div key={m.id} style={{ marginBottom: 6 }}>
-              <div className="entry kind-intake" style={{ marginBottom: 0 }}>
-                <div className="body">
-                  <div className="title">
-                    {m.isEmergency ? '🚨 ' : '💊 '}{m.name}
-                  </div>
-                  <div className="meta">
-                    {steps.length > 0 ? `aktuell ${current} ${m.unit} (Basis ${m.dose})` : `${m.dose} ${m.unit}`}
-                    {m.substance ? ` · ${m.substance}` : ''}
-                    {m.startDate ? ` · seit ${m.startDate}` : ''}
-                  </div>
-                  <div className={m.isEmergency ? 'meta' : rhythmWords(m.schedule) ? 'meta rhythm' : 'meta rhythm none'}>
-                    {m.isEmergency
-                      ? '🚨 bei Bedarf / im Notfall'
-                      : rhythmWords(m.schedule)
-                        ? `⏱ ${rhythmWords(m.schedule)} (${m.schedule})`
-                        : '⏱ kein fester Rhythmus — über „Rhythmus" einstellen'}
-                  </div>
-                  {taper && (
-                    <div className="meta taper">
-                      {taper.direction === 'down' ? '⤵' : taper.direction === 'up' ? '⤴' : '↔'}{' '}
-                      {DIRECTION_LABEL[taper.direction]}
-                      {taper.reached
-                        ? ` — Ziel ${taper.targetDose} ${m.unit} erreicht (seit ${fmtDayKey(taper.endDate)})`
-                        : ` — Stufe ${Math.max(taper.currentIndex + 1, 0)} von ${taper.steps.length}, aktuell ${taper.currentDose} ${m.unit}` +
-                          (taper.daysUntilNext != null
-                            ? ` · nächste Stufe (${taper.nextDose} ${m.unit}) in ${taper.daysUntilNext} Tag${taper.daysUntilNext === 1 ? '' : 'en'}`
-                            : '') +
-                          ` · Ziel ${taper.targetDose} ${m.unit} in ${taper.daysUntilEnd} Tag${taper.daysUntilEnd === 1 ? '' : 'en'} (${fmtDayKey(taper.endDate)})`}
-                    </div>
-                  )}
+            <div key={m.id} className={m.isEmergency ? 'med-card emergency' : 'med-card'}>
+              <div className="med-card-head">
+                {m.isEmergency ? (
+                  <IconEmergency size={20} className="inline-icon" />
+                ) : (
+                  <IconPill size={20} className="inline-icon" />
+                )}
+                <span className="med-name">{m.name}</span>
+                <span className="med-dose-badge">
+                  {steps.length > 0 ? `${current} ${m.unit}` : `${m.dose} ${m.unit}`}
+                </span>
+              </div>
+              <div className="meta">
+                {steps.length > 0 ? `Basis ${m.dose} ${m.unit}` : ''}
+                {steps.length > 0 && m.substance ? ' · ' : ''}
+                {m.substance ?? ''}
+                {(steps.length > 0 || m.substance) && m.startDate ? ' · ' : ''}
+                {m.startDate ? `seit ${fmtDayKey(m.startDate)}` : ''}
+              </div>
+              <div className={m.isEmergency ? 'meta' : rhythmWords(m.schedule) ? 'meta rhythm' : 'meta rhythm none'}>
+                {m.isEmergency
+                  ? 'bei Bedarf / im Notfall'
+                  : rhythmWords(m.schedule)
+                    ? `⏱ ${rhythmWords(m.schedule)} (${m.schedule})`
+                    : '⏱ kein fester Rhythmus — über „Rhythmus" einstellen'}
+              </div>
+              {taper && (
+                <div className="meta taper">
+                  {taper.direction === 'down' ? '⤵' : taper.direction === 'up' ? '⤴' : '↔'}{' '}
+                  {DIRECTION_LABEL[taper.direction]}
+                  {taper.reached
+                    ? ` — Ziel ${taper.targetDose} ${m.unit} erreicht (seit ${fmtDayKey(taper.endDate)})`
+                    : ` — Stufe ${Math.max(taper.currentIndex + 1, 0)} von ${taper.steps.length}, aktuell ${taper.currentDose} ${m.unit}` +
+                      (taper.daysUntilNext != null
+                        ? ` · nächste Stufe (${taper.nextDose} ${m.unit}) in ${taper.daysUntilNext} Tag${taper.daysUntilNext === 1 ? '' : 'en'}`
+                        : '') +
+                      ` · Ziel ${taper.targetDose} ${m.unit} in ${taper.daysUntilEnd} Tag${taper.daysUntilEnd === 1 ? '' : 'en'} (${fmtDayKey(taper.endDate)})`}
                 </div>
+              )}
+
+              <div className="med-actions">
                 {!m.isEmergency && (
-                  <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
+                  <button
+                    className={rhythmFor === m.id ? 'active' : ''}
                     onClick={() => setRhythmFor(rhythmFor === m.id ? null : m.id)}
                     aria-label={`Einnahme-Rhythmus von ${m.name} einstellen`}
                     aria-expanded={rhythmFor === m.id}
-                    title="Einnahme-Rhythmus">
-                    ⏱
+                  >
+                    <IconStopwatch size={18} />
+                    Rhythmus
                   </button>
                 )}
-                <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
+                <button
+                  className={planFor === m.id ? 'active' : ''}
                   onClick={() => setPlanFor(planFor === m.id ? null : m.id)}
                   aria-label={`Dosisänderungs-Plan von ${m.name}`}
                   aria-expanded={planFor === m.id}
-                  title="Dosisänderungs-Plan">
+                >
+                  <IconGauge size={18} />
                   Plan
                 </button>
-                <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
+                <button
+                  className={effectsFor === m.id ? 'active' : ''}
                   onClick={() => setEffectsFor(effectsFor === m.id ? null : m.id)}
                   aria-label={`Beobachtete Auffälligkeiten unter ${m.name}`}
                   aria-expanded={effectsFor === m.id}
-                  title="Beobachtete Auffälligkeiten">
-                  {effectsOf(m.id).length > 0 ? `⚠ ${effectsOf(m.id).length}` : '⚠'}
+                >
+                  <IconEmergency size={18} />
+                  {effectsOf(m.id).length > 0 ? `Auffällig (${effectsOf(m.id).length})` : 'Auffällig'}
                 </button>
-                <button className="btn secondary" style={{ width: 'auto', padding: '8px 12px', marginTop: 0 }}
-                  onClick={() => endMedication(m.id)}
-                  aria-label={`${m.name} absetzen (Historie bleibt erhalten)`}>
+                <button
+                  onClick={() => {
+                    if (window.confirm(`${m.name} wirklich absetzen? Die Historie bleibt erhalten.`))
+                      endMedication(m.id);
+                  }}
+                  aria-label={`${m.name} absetzen (Historie bleibt erhalten)`}
+                >
+                  <IconStop size={18} />
                   Absetzen
                 </button>
               </div>

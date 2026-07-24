@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db/db';
 import { presetFor } from './presets/epilepsy';
 import { useAppStore } from './store/appStore';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { LockScreen } from './components/LockScreen';
 import { Modal } from './components/Modal';
 import { IconHistory, IconMore, IconPill, IconToday } from './components/icons';
@@ -30,6 +30,8 @@ const NAV: { view: View; icon: JSX.Element; label: string }[] = [
   { view: 'more', icon: <IconMore />, label: 'Mehr' },
 ];
 
+const VIEW_ORDER: View[] = ['home', 'history', 'meds', 'more'];
+
 const FORM_TITLES = {
   intake: 'Einnahme erfassen',
   event: 'Ereignis erfassen',
@@ -43,6 +45,32 @@ export function App() {
   const profiles = useLiveQuery(() => db.profiles.toArray(), []);
   const [showProfiles, setShowProfiles] = useState(false);
   const { introOpen, closeIntro } = useAppStore();
+
+  // Wisch-Navigation: horizontal über den Inhalt wischen wechselt den Tab.
+  // Ausgenommen sind Elemente mit eigener Horizontal-Geste (Charts, Medien,
+  // Eingaben, Stepper), damit Bedienen nicht versehentlich navigiert.
+  const touchStart = useRef<{ x: number; y: number; target: EventTarget | null } | null>(null);
+  function onTouchStart(e: React.TouchEvent) {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY, target: e.target };
+  }
+  function onTouchEnd(e: React.TouchEvent) {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start || openForm) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
+    if (
+      start.target instanceof Element &&
+      start.target.closest('audio, video, input, textarea, select, .trend-svg, .photo-strip, .sched-stepper')
+    )
+      return;
+    const idx = VIEW_ORDER.indexOf(view);
+    const next = dx < 0 ? idx + 1 : idx - 1;
+    if (next >= 0 && next < VIEW_ORDER.length) setView(VIEW_ORDER[next]);
+  }
 
   if (locked) return <LockScreen />;
   if (!profiles) return null; // DB lädt (Millisekunden)
@@ -77,7 +105,7 @@ export function App() {
 
       <ReminderManager profile={profile} />
 
-      <main>
+      <main onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         {view === 'home' && <Home profile={profile} preset={preset} />}
         {view === 'history' && <History profile={profile} preset={preset} />}
         {view === 'meds' && <Medications profile={profile} />}

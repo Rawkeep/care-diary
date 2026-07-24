@@ -188,6 +188,15 @@ export function IconMic(p: IconProps) {
   );
 }
 
+/** Absetzen: Stopp-Quadrat */
+export function IconStop(p: IconProps) {
+  return (
+    <Base {...p}>
+      <rect x="6" y="6" width="12" height="12" rx="2.5" />
+    </Base>
+  );
+}
+
 /** Bearbeiten: Stift */
 export function IconEdit(p: IconProps) {
   return (
