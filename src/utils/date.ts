@@ -58,3 +58,57 @@ export function toLocalInputValue(date: Date): string {
 export function fromLocalInputValue(value: string): string {
   return new Date(value).toISOString();
 }
+
+// --- Rechnen mit Day-Keys (YYYY-MM-DD) ---------------------------------
+// Bewusst über UTC-Mittag gerechnet: so verschiebt keine Sommerzeit-Umstellung
+// einen Tag und dieselbe Eingabe liefert überall dasselbe Ergebnis.
+
+function dayKeyToUtc(dayKey: string): Date {
+  const [y, m, d] = dayKey.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d, 12));
+}
+
+function utcToDayKey(d: Date): string {
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  return `${d.getUTCFullYear()}-${m}-${day}`;
+}
+
+/** Day-Key + N Tage (N darf negativ sein) */
+export function addDaysToDayKey(dayKey: string, days: number): string {
+  const d = dayKeyToUtc(dayKey);
+  d.setUTCDate(d.getUTCDate() + days);
+  return utcToDayKey(d);
+}
+
+/**
+ * Day-Key + N Monate. Zu kurze Monate werden auf den letzten Tag begrenzt
+ * (31.01. + 1 Monat = 28./29.02.) — so wandert eine Quartalskontrolle nicht
+ * versehentlich in den Folgemonat.
+ */
+export function addMonthsToDayKey(dayKey: string, months: number): string {
+  const [y, m, d] = dayKey.split('-').map(Number);
+  const target = new Date(Date.UTC(y, m - 1 + months, 1, 12));
+  const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0, 12)).getUTCDate();
+  target.setUTCDate(Math.min(d, lastDay));
+  return utcToDayKey(target);
+}
+
+/** Ganze Tage von `from` bis `to` (negativ = `to` liegt in der Vergangenheit) */
+export function daysBetweenDayKeys(from: string, to: string): number {
+  const ms = dayKeyToUtc(to).getTime() - dayKeyToUtc(from).getTime();
+  return Math.round(ms / 86_400_000);
+}
+
+/** „in 3 Tagen" / „heute" / „vor 2 Tagen" — für Fristen und Termine */
+export function fmtRelativeDays(days: number): string {
+  if (days === 0) return 'heute';
+  if (days === 1) return 'morgen';
+  if (days === -1) return 'gestern';
+  return days > 0 ? `in ${days} Tagen` : `vor ${-days} Tagen`;
+}
+
+/** „1 Tag" / „5 Tage" (korrekter Singular) */
+export function fmtDays(days: number): string {
+  return `${days} ${Math.abs(days) === 1 ? 'Tag' : 'Tage'}`;
+}

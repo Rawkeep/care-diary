@@ -33,6 +33,8 @@ export interface ReportStrings {
   emergencyMeds: string;
   emergencyMedsNote: string;
   allergies: string;
+  nutrition: string;
+  nutritionNote: string;
   everyday: string;
   helps: string;
   avoid: string;
@@ -65,6 +67,9 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
     emergencyMedsNote:
       'Nur nach Absprache mit den Angehörigen bzw. laut vereinbartem Vorgehen geben.',
     allergies: 'Allergien & Unverträglichkeiten',
+    nutrition: 'Ernährung: bitte beachten',
+    nutritionNote:
+      'Von den Angehörigen zusammengestellt — bei Fragen bitte dort nachfragen.',
     everyday: 'Im Alltag',
     helps: 'Das hilft',
     avoid: 'Bitte vermeiden',
@@ -95,6 +100,9 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
     emergencyMeds: 'Emergency medication',
     emergencyMedsNote: 'Give only as agreed with the family or according to the agreed plan.',
     allergies: 'Allergies & intolerances',
+    nutrition: 'Food: please note',
+    nutritionNote:
+      'Compiled by the family — please ask them if anything is unclear.',
     everyday: 'In everyday life',
     helps: 'This helps',
     avoid: 'Please avoid',
@@ -125,6 +133,9 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
     emergencyMeds: 'Médicament d’urgence',
     emergencyMedsNote: 'À donner uniquement en accord avec la famille ou selon le plan convenu.',
     allergies: 'Allergies et intolérances',
+    nutrition: 'Alimentation : à savoir',
+    nutritionNote:
+      'Établi par les proches — en cas de doute, demandez-leur.',
     everyday: 'Au quotidien',
     helps: 'Ce qui aide',
     avoid: 'À éviter',
@@ -155,6 +166,9 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
     emergencyMeds: 'Acil durum ilacı',
     emergencyMedsNote: 'Yalnızca aile ile mutabık kalınarak veya kararlaştırılan plana göre verin.',
     allergies: 'Alerjiler ve intoleranslar',
+    nutrition: 'Beslenme: lütfen dikkat',
+    nutritionNote:
+      'Aile tarafından hazırlandı — sorularınız için onlara danışın.',
     everyday: 'Günlük yaşamda',
     helps: 'Bunlar yardımcı olur',
     avoid: 'Lütfen kaçının',
@@ -185,6 +199,9 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
     emergencyMeds: 'دواء الطوارئ',
     emergencyMedsNote: 'يُعطى فقط بالاتفاق مع العائلة أو وفق الخطة المتفق عليها.',
     allergies: 'الحساسية وعدم التحمل',
+    nutrition: 'الطعام: يُرجى الانتباه',
+    nutritionNote:
+      'أعدّه الأهل — يُرجى سؤالهم عند وجود أي استفسار.',
     everyday: 'في الحياة اليومية',
     helps: 'هذا يساعد',
     avoid: 'يُرجى تجنّب',
@@ -215,6 +232,9 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
     emergencyMeds: 'Невідкладні ліки',
     emergencyMedsNote: 'Давати лише за домовленістю з родиною або згідно з узгодженим планом.',
     allergies: 'Алергії та непереносимості',
+    nutrition: 'Харчування: зверніть увагу',
+    nutritionNote:
+      'Складено близькими — з питаннями звертайтеся до них.',
     everyday: 'У повсякденні',
     helps: 'Це допомагає',
     avoid: 'Будь ласка, уникайте',
@@ -245,6 +265,9 @@ export const REPORT_STRINGS: Record<CareReportLanguage, ReportStrings> = {
     emergencyMeds: 'Medicación de emergencia',
     emergencyMedsNote: 'Administrar solo según lo acordado con la familia o conforme al plan establecido.',
     allergies: 'Alergias e intolerancias',
+    nutrition: 'Alimentación: a tener en cuenta',
+    nutritionNote:
+      'Elaborado por la familia — ante cualquier duda, pregúntenles.',
     everyday: 'En el día a día',
     helps: 'Esto ayuda',
     avoid: 'Evitad, por favor',

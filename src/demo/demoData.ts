@@ -5,12 +5,16 @@
 // Lebens-Historie, Fragen und ausgefüllter Umfeld-Bericht.
 // Alles hängt an EINER Profil-ID — die Löschung entfernt rückstandslos.
 import type {
+  Appointment,
   CareReportVariant,
   HealthEvent,
   Intake,
   Measurement,
+  MedStock,
   Medication,
+  NutritionRule,
   Observation,
+  Prescription,
   Profile,
   Question,
   SideEffectNote,
@@ -41,6 +45,11 @@ export interface DemoData {
   timeline: TimelineEntry[];
   questions: Question[];
   careReports: CareReportVariant[];
+  /** Begleit-Module (alle vier im Demo-Profil aktiviert) */
+  prescriptions: Prescription[];
+  stocks: MedStock[];
+  appointments: Appointment[];
+  nutrition: NutritionRule[];
 }
 
 export function buildDemoData(now: Date): DemoData {
@@ -60,6 +69,8 @@ export function buildDemoData(now: Date): DemoData {
     name: 'Mia (Demo)',
     birthDate: `${now.getFullYear() - 9}-03-14`,
     conditions: ['epilepsy'],
+    // Alle Begleit-Module an, damit die Demo zeigt, was sie leisten
+    modules: ['prescriptions', 'stock', 'appointments', 'nutrition'],
     allergies: ['Erdnüsse (schwer)', 'Laktose'],
     isDemo: true,
     createdAt: nowIsoStr,
@@ -297,6 +308,189 @@ export function buildDemoData(now: Date): DemoData {
     },
   ];
 
+  // --- Begleit-Module: eine typische Woche im Leben einer Familie ----------
+  // Ein Rezept muss angefordert werden, das Notfallset läuft bald ab, der
+  // Vorrat wird knapp, das Blutbild ist überfällig und der Kontrolltermin
+  // steht an — genau die Punkte, die sonst zwischen allem verloren gehen.
+  const prescriptions: Prescription[] = [
+    {
+      id: newId(),
+      profileId,
+      medicationId: keppra.id,
+      title: 'Levetiracetam 500 mg, N3',
+      kind: 'kasse',
+      status: 'needed',
+      prescriber: 'Dr. Weber',
+      note: 'Beim nächsten Termin gleich mitnehmen.',
+      createdAt: at(4, 9, 0),
+      updatedAt: at(4, 9, 0),
+    },
+    {
+      id: newId(),
+      profileId,
+      medicationId: buccolam.id,
+      title: 'Buccolam 10 mg (Notfallset für die Schule)',
+      kind: 'kasse',
+      status: 'issued',
+      prescriber: 'Dr. Weber',
+      requestedDate: day(28),
+      issuedDate: day(24),
+      createdAt: at(28, 9, 0),
+      updatedAt: at(24, 11, 0),
+    },
+    {
+      id: newId(),
+      profileId,
+      medicationId: keppra.id,
+      title: 'Levetiracetam 500 mg, N3',
+      kind: 'kasse',
+      status: 'redeemed',
+      prescriber: 'Dr. Weber',
+      requestedDate: day(70),
+      issuedDate: day(66),
+      redeemedDate: day(65),
+      createdAt: at(70, 9, 0),
+      updatedAt: at(65, 16, 0),
+    },
+  ];
+
+  const stocks: MedStock[] = [
+    {
+      medicationId: keppra.id,
+      profileId,
+      units: 56,
+      unitLabel: 'Tabletten',
+      unitsPerDose: 1,
+      leadDays: 10,
+      countedAt: at(20, 8, 0),
+      updatedAt: at(20, 8, 0),
+    },
+    {
+      medicationId: buccolam.id,
+      profileId,
+      units: 4,
+      unitLabel: 'Applikatoren',
+      unitsPerDose: 1,
+      leadDays: 14,
+      expiryDate: day(-21),
+      countedAt: at(30, 8, 0),
+      updatedAt: at(30, 8, 0),
+    },
+  ];
+
+  const appointments: Appointment[] = [
+    {
+      id: newId(),
+      profileId,
+      kind: 'checkup',
+      title: 'Dr. Weber, Kontrolle nach Reduktion',
+      at: at(-5, 10, 30),
+      place: 'Praxis Dr. Weber',
+      intervalMonths: 3,
+      lastDoneDate: day(95),
+      prep: [
+        'Fragenliste aus „Mehr" mitnehmen',
+        'Verlaufsbericht ausdrucken oder auf dem Handy bereithalten',
+        'Aktuelle Medikamentenliste mitnehmen',
+      ],
+      prepDone: ['Aktuelle Medikamentenliste mitnehmen'],
+      createdAt: at(30, 12, 0),
+      updatedAt: at(30, 12, 0),
+    },
+    {
+      id: newId(),
+      profileId,
+      kind: 'bloodwork',
+      title: 'Kontrolle unter Levetiracetam',
+      intervalMonths: 3,
+      lastDoneDate: day(100),
+      prep: ['Nüchtern? — vorher in der Praxis nachfragen', 'Termin möglichst morgens legen'],
+      createdAt: at(100, 12, 0),
+      updatedAt: at(100, 12, 0),
+    },
+    {
+      id: newId(),
+      profileId,
+      kind: 'eeg',
+      title: 'Ambulanz',
+      place: 'Uniklinik, Ambulanz 2',
+      intervalMonths: 6,
+      lastDoneDate: day(240),
+      doneDate: day(240),
+      resultNote: 'Unauffälliger Befund lt. Dr. Weber.',
+      createdAt: at(250, 12, 0),
+      updatedAt: at(240, 16, 0),
+    },
+    {
+      id: newId(),
+      profileId,
+      kind: 'eeg',
+      title: 'Ambulanz',
+      place: 'Uniklinik, Ambulanz 2',
+      intervalMonths: 6,
+      lastDoneDate: day(240),
+      prep: [
+        'Haare gewaschen, ohne Gel/Öl/Spray',
+        'Schlafentzug nur, wenn die Praxis es angeordnet hat',
+        'Beschäftigung für die Wartezeit einpacken (Buch, Kuscheltier)',
+      ],
+      createdAt: at(240, 16, 0),
+      updatedAt: at(240, 16, 0),
+    },
+  ];
+
+  const nutrition: NutritionRule[] = [
+    {
+      id: newId(),
+      profileId,
+      stance: 'avoid',
+      item: 'Erdnüsse',
+      reason: 'Schwere Allergie — steht auch auf der Notfallkarte.',
+      confirmed: true,
+      createdAt: at(200, 12, 0),
+      updatedAt: at(200, 12, 0),
+    },
+    {
+      id: newId(),
+      profileId,
+      stance: 'careful',
+      item: 'Laktose',
+      reason: 'Unverträglichkeit — laktosefreie Produkte sind okay.',
+      confirmed: true,
+      createdAt: at(200, 12, 0),
+      updatedAt: at(200, 12, 0),
+    },
+    {
+      id: newId(),
+      profileId,
+      stance: 'careful',
+      item: 'Grapefruit / Pampelmuse',
+      reason: 'Von Dr. Weber angesprochen — lassen wir vorsichtshalber weg.',
+      confirmed: true,
+      createdAt: at(95, 12, 0),
+      updatedAt: at(95, 12, 0),
+    },
+    {
+      id: newId(),
+      profileId,
+      stance: 'careful',
+      item: 'Energydrinks / Cola am Abend',
+      reason: 'Schlafmangel steht oft als Begleitumstand dabei — noch offen im Termin.',
+      createdAt: at(20, 12, 0),
+      updatedAt: at(20, 12, 0),
+    },
+    {
+      id: newId(),
+      profileId,
+      stance: 'good',
+      item: 'Regelmäßige Mahlzeiten',
+      reason: 'Tablette morgens zum Frühstück, abends zum Abendessen — klappt so am besten.',
+      confirmed: true,
+      createdAt: at(95, 12, 0),
+      updatedAt: at(95, 12, 0),
+    },
+  ];
+
   return {
     profile,
     medications: [keppra, buccolam],
@@ -308,6 +502,10 @@ export function buildDemoData(now: Date): DemoData {
     timeline,
     questions,
     careReports,
+    prescriptions,
+    stocks,
+    appointments,
+    nutrition,
   };
 }
 
@@ -316,7 +514,7 @@ export async function createDemoProfile(): Promise<string> {
   const data = buildDemoData(new Date());
   await db.transaction(
     'rw',
-    [db.profiles, db.medications, db.intakes, db.events, db.observations, db.measurements, db.sideEffects, db.timeline, db.questions, db.careReports],
+    [db.profiles, db.medications, db.intakes, db.events, db.observations, db.measurements, db.sideEffects, db.timeline, db.questions, db.careReports, db.prescriptions, db.stocks, db.appointments, db.nutrition],
     async () => {
       await db.profiles.add(data.profile);
       await db.medications.bulkAdd(data.medications);
@@ -328,16 +526,20 @@ export async function createDemoProfile(): Promise<string> {
       await db.timeline.bulkAdd(data.timeline);
       await db.questions.bulkAdd(data.questions);
       await db.careReports.bulkAdd(data.careReports);
+      await db.prescriptions.bulkAdd(data.prescriptions);
+      await db.stocks.bulkAdd(data.stocks);
+      await db.appointments.bulkAdd(data.appointments);
+      await db.nutrition.bulkAdd(data.nutrition);
     }
   );
   return data.profile.id;
 }
 
-/** Löscht ALLE Daten eines Profils rückstandslos (inkl. Anhänge) */
+/** Löscht ALLE Daten eines Profils rückstandslos (inkl. Anhänge und Modul-Daten) */
 export async function deleteProfileData(profileId: string): Promise<void> {
   await db.transaction(
     'rw',
-    [db.profiles, db.medications, db.intakes, db.events, db.observations, db.measurements, db.sideEffects, db.timeline, db.questions, db.careReports, db.attachments],
+    [db.profiles, db.medications, db.intakes, db.events, db.observations, db.measurements, db.sideEffects, db.timeline, db.questions, db.careReports, db.attachments, db.prescriptions, db.stocks, db.appointments, db.nutrition],
     async () => {
       for (const table of [
         db.medications,
@@ -350,6 +552,10 @@ export async function deleteProfileData(profileId: string): Promise<void> {
         db.questions,
         db.careReports,
         db.attachments,
+        db.prescriptions,
+        db.stocks,
+        db.appointments,
+        db.nutrition,
       ]) {
         await table.where('profileId').equals(profileId).delete();
       }

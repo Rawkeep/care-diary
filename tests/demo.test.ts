@@ -1,6 +1,8 @@
 // Tests für den Demo-Daten-Builder: Konsistenz und erzählerische Invarianten.
 import { describe, expect, it } from 'vitest';
 import { buildDemoData } from '../src/demo/demoData';
+import { MODULES } from '../src/modules/registry';
+import { buildAgenda } from '../src/utils/agenda';
 import { localDayKey } from '../src/utils/date';
 
 const NOW = new Date(2026, 6, 23, 12, 0, 0);
@@ -20,6 +22,10 @@ describe('buildDemoData', () => {
       ...data.timeline,
       ...data.questions,
       ...data.careReports,
+      ...data.prescriptions,
+      ...data.stocks,
+      ...data.appointments,
+      ...data.nutrition,
     ];
     expect(rows.length).toBeGreaterThan(100);
     expect(rows.every((r) => r.profileId === pid)).toBe(true);
@@ -74,6 +80,38 @@ describe('buildDemoData', () => {
     expect(sorted.length).toBe(12);
     expect(sorted[sorted.length - 1].value).toBeGreaterThan(sorted[0].value + 1.5);
     expect(data.sideEffects.length).toBeGreaterThan(0);
+  });
+
+  it('alle Begleit-Module sind aktiviert und mit Beispieldaten gefüllt', () => {
+    expect(data.profile.modules).toEqual(MODULES.map((m) => m.key));
+    expect(data.prescriptions.map((p) => p.status)).toEqual(['needed', 'issued', 'redeemed']);
+    expect(data.stocks).toHaveLength(2);
+    expect(data.stocks.some((s) => s.expiryDate)).toBe(true); // Notfallset mit Verfall
+    expect(data.appointments.some((a) => a.doneDate && a.resultNote)).toBe(true); // Historie
+    expect(data.appointments.some((a) => a.at)).toBe(true); // geplanter Termin
+    expect(data.appointments.some((a) => !a.doneDate && a.intervalMonths)).toBe(true); // Intervall
+    expect(data.nutrition.map((n) => n.stance)).toContain('avoid');
+    expect(data.nutrition.some((n) => n.confirmed)).toBe(true);
+  });
+
+  it('die Demo erzählt eine Agenda: Rezept, Nachschub, überfällige Kontrolle, Termin', () => {
+    const items = buildAgenda({
+      profile: data.profile,
+      medications: data.medications,
+      intakes: data.intakes,
+      prescriptions: data.prescriptions,
+      stocks: data.stocks,
+      appointments: data.appointments,
+      todayKey: localDayKey(NOW.toISOString()),
+      nowIso: NOW.toISOString(),
+    });
+    const modules = items.map((i) => i.module);
+    expect(modules).toContain('prescriptions');
+    expect(modules).toContain('stock');
+    expect(modules).toContain('appointments');
+    // mindestens ein überfälliger Punkt (Blutbild-Intervall) und nichts Doppeltes
+    expect(items.some((i) => i.severity === 'overdue')).toBe(true);
+    expect(new Set(items.map((i) => i.key)).size).toBe(items.length);
   });
 
   it('Umfeld-Bericht ist ausgefüllt und deterministisch gleich', () => {

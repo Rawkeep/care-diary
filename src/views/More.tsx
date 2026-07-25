@@ -6,6 +6,7 @@ import type { Profile } from '../db/models';
 import { newId, nowIso } from '../db/models';
 import { useAppStore } from '../store/appStore';
 import { REMINDER_PREF_KEY, remindersEnabled } from '../components/ReminderManager';
+import { MODULES, moduleEnabled, toggleModule } from '../modules/registry';
 import { deleteProfileData } from '../demo/demoData';
 import { decryptBackup, encryptBackup, isBackupEnvelope } from '../utils/backup';
 import { dayKeyDaysAgo, localDayKey } from '../utils/date';
@@ -272,6 +273,37 @@ export function More({ profile }: { profile: Profile }) {
             ＋
           </button>
         </div>
+      </div>
+
+      <div className="card">
+        <h2>Module</h2>
+        <p className="hint" style={{ marginTop: 0 }}>
+          Die Begleit-Aktivitäten rund um die Therapie — einzeln zuschaltbar, damit die App nur
+          zeigt, was ihr gerade braucht. Aktivierte Module erscheinen im Tab „Plan", melden sich
+          bei Fristen und Fälligkeiten und kommen in den Arztbericht. Ausschalten verbirgt nur:
+          eingetragene Daten bleiben erhalten.
+        </p>
+        {MODULES.map((m) => {
+          const on = moduleEnabled(profile.modules, m.key);
+          return (
+            <div key={m.key} className={`choice ${on ? 'selected' : ''}`} style={{ marginBottom: 8 }}>
+              <label className="check-row" style={{ padding: 0 }}>
+                <input
+                  type="checkbox"
+                  checked={on}
+                  onChange={(e) =>
+                    db.profiles.update(profile.id, {
+                      modules: toggleModule(profile.modules, m.key, e.target.checked),
+                    })
+                  }
+                />
+                <span className="label">{m.label}</span>
+              </label>
+              <div className="desc">{m.description}</div>
+              <div className="desc">🔔 {m.reminds}</div>
+            </div>
+          );
+        })}
       </div>
 
       <details className="group" open>

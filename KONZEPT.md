@@ -105,6 +105,39 @@ aber generisch für alle chronischen Erkrankungen.
   Mensch und Arzt überlassen). Das hält die App aus der
   Medizinprodukt-Zone (→ §8) und aus der Pseudo-Diagnostik heraus.
 
+### 3.7 Begleitende Aktivitäten (zuschaltbare Module)
+
+Die Doku ist nur die Hälfte der Arbeit. Die andere Hälfte ist Organisation —
+und sie ist der häufigste Grund, warum im Alltag etwas schiefgeht: das Rezept
+war zu spät angefordert, die Frist abgelaufen, die Dose leer, das Blutbild
+seit acht Monaten fällig, das Notfallset abgelaufen. Diese Aktivitäten sind
+deshalb **eigene Module, einzeln aktivierbar** (Profil → `modules`):
+
+- **Verordnungen & Fristen** — Rezept-Weg (gebraucht → angefragt →
+  ausgestellt → eingelöst) mit Einlösefrist je Rezeptart als Richtwert
+  (Kassenrezept 28 Tage, BtM 7, Privat ~3 Monate, Mehrfachverordnung 365)
+  oder eigener Frist vom Beleg.
+- **Medikamenten-Bestand** — gezählter Bestand als Anker, Verbrauch aus den
+  dokumentierten Einnahmen, Reichweite aus dem Einnahme-Rhythmus, Vorlaufzeit
+  für Rezept + Apotheke, Verfallsdatum der Packung.
+- **Termine & Untersuchungen** — geplante Termine *und* Kontrollen im
+  Intervall (EEG, Blutbild, Medikamentenspiegel, MRT …), je Art mit
+  Vorbereitungs-Checkliste; nach dem Abschließen entsteht der nächste offene
+  Punkt automatisch, die Historie bleibt stehen.
+- **Ernährung: Gutes & Meiden** — die „Gos and No-Gos" mit Begründung und
+  Kennzeichen „ärztlich bestätigt"; erscheint im Arztbericht und optional im
+  Umfeld-Bericht (Schule!).
+
+**Proaktiv, aber in den Grenzen von §5 und §8.** Eine deterministische
+Funktion (`utils/agenda.ts`) leitet aus dem Datenbestand eine sortierte Liste
+von Hinweisen ab: auf „Heute" als Karten, im Tab „Plan" vollständig, als
+App-Badge und — bei geöffneter App — als Benachrichtigung (je Sachverhalt
+höchstens einmal am Tag). Jeder Hinweis ist **organisatorisch** und nennt Zahl
+und Datum („reicht noch 6 Tage, Vorlauf 10 Tage"). Was es bewusst *nicht*
+gibt: Risiko-Scores, Verlaufsprognosen, Dosisrechnung, Ernährungsempfehlungen.
+Die Module kennen sich gegenseitig: ist für einen knappen Vorrat schon eine
+Verordnung unterwegs, wird informiert statt gedrängt.
+
 ---
 
 ## 4. Spezialmodul Epilepsie (Anfallstagebuch)

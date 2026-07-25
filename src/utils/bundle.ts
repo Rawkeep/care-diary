@@ -24,7 +24,7 @@ export function parseExportBundle(text: string): ExportBundle {
     throw new Error('Keine care-diary-Export-Datei (format fehlt oder falsch).');
   }
   const version = b.version;
-  if (version !== 2 && version !== 3 && version !== 4 && version !== 5 && version !== 6) {
+  if (version !== 2 && version !== 3 && version !== 4 && version !== 5 && version !== 6 && version !== 7) {
     throw new Error(`Unbekannte Export-Version: ${String(version)}.`);
   }
   for (const table of TABLES) {
@@ -43,6 +43,17 @@ export function parseExportBundle(text: string): ExportBundle {
   }
   if (version >= 6 && !Array.isArray(b.careReports)) {
     throw new Error('Export unvollständig: „careReports" fehlt (ab v6).');
+  }
+  if (
+    version >= 7 &&
+    (!Array.isArray(b.prescriptions) ||
+      !Array.isArray(b.stocks) ||
+      !Array.isArray(b.appointments) ||
+      !Array.isArray(b.nutrition))
+  ) {
+    throw new Error(
+      'Export unvollständig: „prescriptions"/„stocks"/„appointments"/„nutrition" fehlt (ab v7).'
+    );
   }
   return b as ExportBundle;
 }

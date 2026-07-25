@@ -12,6 +12,13 @@ export interface Profile {
   /** Aktivierte Erkrankungs-Presets, z. B. ['epilepsy'] */
   conditions: string[];
   /**
+   * Aktivierte Begleit-Module (Keys aus `modules/registry.ts`), z. B.
+   * ['prescriptions', 'stock']. Undefiniert/leer = keines aktiv: die App
+   * bleibt schlank, bis ein Bedarf da ist. Deaktivieren verbirgt nur,
+   * es löscht nichts.
+   */
+  modules?: string[];
+  /**
    * Allergien & Unverträglichkeiten als Freitext-Einträge (z. B.
    * „Erdnüsse (schwer)", „Laktose"). Stammdaten — erscheinen auf der
    * Notfallkarte, im Umfeld-Bericht und im Arztbericht, nicht im Tagebuch.
@@ -199,6 +206,11 @@ export interface CareReportVariant {
   includeEmergencyMeds: boolean;
   /** Allergien zeigen (Standard: an — sicherheitsrelevant); optional für Altbestand */
   includeAllergies?: boolean;
+  /**
+   * Ernährungs-Vereinbarungen zeigen (Standard: an, sobald das Modul
+   * „Ernährung" aktiv ist — Schule und Betreuung brauchen genau das).
+   */
+  includeNutrition?: boolean;
   updatedAt: string;
 }
 
@@ -233,13 +245,153 @@ export interface Question {
   resolvedAt?: string;
 }
 
+// ---------------------------------------------------------------------------
+// Begleit-Module (bei Bedarf aktivierbar, siehe modules/registry.ts).
+// Alles hier ist Organisation rund um die Therapie — Fristen, Nachschub,
+// Termine, Vereinbarungen. Bewusst keine medizinische Bewertung.
+// ---------------------------------------------------------------------------
+
+/** Rezept-/Verordnungsart — bestimmt die Regel-Einlösefrist */
+export type PrescriptionKind = 'kasse' | 'privat' | 'btm' | 'dauer' | 'hilfsmittel' | 'other';
+
+/** Status-Kette einer Verordnung: gebraucht → angefragt → ausgestellt → eingelöst */
+export type PrescriptionStatus = 'needed' | 'requested' | 'issued' | 'redeemed';
+
+/**
+ * Ärztliche Verordnung (Rezept) mit Fristenblick. Die App dokumentiert den
+ * Beschaffungsweg und rechnet die Einlösefrist aus dem Ausstellungsdatum —
+ * die Fristen sind Richtwerte, verbindlich ist der Beleg selbst.
+ */
+export interface Prescription {
+  id: ID;
+  profileId: ID;
+  /** optionaler Bezug auf ein Medikament der Liste */
+  medicationId?: ID;
+  /** was verordnet wird, z. B. „Levetiracetam 500 mg, N3" */
+  title: string;
+  kind: PrescriptionKind;
+  status: PrescriptionStatus;
+  /** Praxis/Ärzt:in, bei der angefragt wird */
+  prescriber?: string;
+  /** Tag der Anfrage (ISO-Datum) */
+  requestedDate?: string;
+  /** Ausstellungsdatum (ISO-Datum) — Beginn der Einlösefrist */
+  issuedDate?: string;
+  /** Tag der Einlösung in der Apotheke (ISO-Datum) */
+  redeemedDate?: string;
+  /** abweichende Einlösefrist in Tagen, wenn auf dem Beleg anders angegeben */
+  validDays?: number;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Medikamenten-Bestand je Medikament (ein Datensatz je Medikament).
+ * `units` ist eine **gezählte** Momentaufnahme; der aktuelle Stand wird aus
+ * den dokumentierten Einnahmen seit `countedAt` hochgerechnet (siehe
+ * `utils/stock.ts`) — die App zählt mit, statt heimlich zu buchen.
+ */
+export interface MedStock {
+  /** Primärschlüssel: ein Bestand je Medikament */
+  medicationId: ID;
+  profileId: ID;
+  /** gezählter Bestand in Bestands-Einheiten */
+  units: number;
+  /** Bezeichnung der Bestands-Einheit, z. B. „Tabletten", „ml" */
+  unitLabel: string;
+  /** Bestands-Einheiten je Einzeldosis (z. B. 0,5 Tablette) */
+  unitsPerDose: number;
+  /** Vorlauf in Tagen für Rezept + Apotheke — ab hier wird erinnert */
+  leadDays: number;
+  /**
+   * Verfallsdatum der aktuellen Packung (ISO-Datum), optional. Besonders
+   * relevant bei Notfallmedikation, die jahrelang unbenutzt bereitliegt.
+   */
+  expiryDate?: string;
+  /** Zeitpunkt der Zählung (ISO) — ab hier werden Einnahmen abgezogen */
+  countedAt: string;
+  updatedAt: string;
+}
+
+/** Termin-/Untersuchungsart (EEG, Blutbild, Kontrolle …) */
+export type AppointmentKind =
+  | 'checkup'
+  | 'eeg'
+  | 'bloodwork'
+  | 'druglevel'
+  | 'mri'
+  | 'ecg'
+  | 'therapy'
+  | 'dentist'
+  | 'vaccination'
+  | 'other';
+
+/**
+ * Arzttermin oder wiederkehrende Untersuchung. Zwei Spielarten in einem
+ * Datensatz: ein **geplanter** Termin (`at` gesetzt) und/oder eine
+ * **Kontrolle im Intervall** (`intervalMonths` + `lastDoneDate`). Beim
+ * Abschließen entsteht — wenn ein Intervall gepflegt ist — automatisch der
+ * nächste offene Datensatz, die Historie bleibt erhalten.
+ */
+export interface Appointment {
+  id: ID;
+  profileId: ID;
+  kind: AppointmentKind;
+  /** Ergänzung zum Typ, z. B. „Dr. Weber, Kontrolle nach Reduktion" */
+  title?: string;
+  /** geplanter Zeitpunkt (ISO); fehlt = nur über das Intervall geführt */
+  at?: string;
+  place?: string;
+  /** Kontrollintervall in Monaten (z. B. Blutbild alle 3 Monate) */
+  intervalMonths?: number;
+  /** letzte Durchführung (ISO-Datum) — Basis der Intervall-Fälligkeit */
+  lastDoneDate?: string;
+  /** Vorbereitungs-Checkliste (aus Vorschlägen übernommen oder frei) */
+  prep?: string[];
+  /** abgehakte Punkte der Vorbereitung */
+  prepDone?: string[];
+  /** erledigt am (ISO-Datum) — schließt den Datensatz ab */
+  doneDate?: string;
+  /** Ergebnis in Kurzform, z. B. „EEG unauffällig lt. Dr. Weber" */
+  resultNote?: string;
+  /** Vorlauf der Erinnerung in Tagen (Standard: siehe utils/appointments.ts) */
+  reminderDaysBefore?: number;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Ernährungs-Haltung: was guttut, was mit Bedacht, was gemieden wird */
+export type NutritionStance = 'good' | 'careful' | 'avoid';
+
+/**
+ * Ernährungs-Vereinbarung („Gos and No-Gos"). Inhalt kommt von den
+ * Nutzer:innen bzw. aus dem Arztgespräch — die App empfiehlt nichts und
+ * bewertet nichts, sie hält fest, was vereinbart wurde.
+ */
+export interface NutritionRule {
+  id: ID;
+  profileId: ID;
+  stance: NutritionStance;
+  /** Lebensmittel/Thema, z. B. „Grapefruit" */
+  item: string;
+  /** Begründung in eigenen Worten, z. B. „lt. Dr. Weber wegen Wirkstoffspiegel" */
+  reason?: string;
+  /** ärztlich bestätigt — reines Doku-Kennzeichen, kein Urteil der App */
+  confirmed?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /** Versioniertes Export-Format (Daten gehören den Nutzer:innen).
  *  v2 = Basis, v3 = + Foto-Anhänge (Base64), v4 = + Messwerte und
  *  Nebenwirkungs-Notizen, v5 = + Umfeld-Bericht (eine Variante),
- *  v6 = Umfeld-Bericht-Varianten je Empfänger. Import versteht alle. */
+ *  v6 = Umfeld-Bericht-Varianten je Empfänger, v7 = + Begleit-Module
+ *  (Verordnungen, Bestand, Termine, Ernährung). Import versteht alle. */
 export interface ExportBundle {
   format: 'care-diary-export';
-  version: 2 | 3 | 4 | 5 | 6;
+  version: 2 | 3 | 4 | 5 | 6 | 7;
   exportedAt: string;
   profiles: Profile[];
   medications: Medication[];
@@ -257,6 +409,11 @@ export interface ExportBundle {
   careInfo?: CareInfo[];
   /** ab v6 */
   careReports?: CareReportVariant[];
+  /** ab v7 — Begleit-Module */
+  prescriptions?: Prescription[];
+  stocks?: MedStock[];
+  appointments?: Appointment[];
+  nutrition?: NutritionRule[];
 }
 
 /** v5-Datensatz → Standard-Variante (deterministische ID ⇒ Import idempotent) */

@@ -2,6 +2,7 @@
 // Indizes auf [profileId+Zeit] tragen Verlaufslisten und Report-Zeiträume.
 import Dexie, { type Table } from 'dexie';
 import type {
+  Appointment,
   Attachment,
   CareInfo,
   CareReportVariant,
@@ -9,8 +10,11 @@ import type {
   HealthEvent,
   Intake,
   Measurement,
+  MedStock,
   Medication,
+  NutritionRule,
   Observation,
+  Prescription,
   Profile,
   Question,
   SideEffectNote,
@@ -31,6 +35,11 @@ export class CareDiaryDB extends Dexie {
   measurements!: Table<Measurement, string>;
   sideEffects!: Table<SideEffectNote, string>;
   careReports!: Table<CareReportVariant, string>;
+  prescriptions!: Table<Prescription, string>;
+  /** Primärschlüssel ist die medicationId (ein Bestand je Medikament) */
+  stocks!: Table<MedStock, string>;
+  appointments!: Table<Appointment, string>;
+  nutrition!: Table<NutritionRule, string>;
 
   constructor() {
     super('care-diary');
@@ -75,6 +84,15 @@ export class CareDiaryDB extends Dexie {
     this.version(7).stores({
       careInfo: null,
     });
+    // v8: Begleit-Module — Verordnungen, Bestand, Termine, Ernährung.
+    // Nur neue Tabellen; bestehende Profile bleiben ohne aktivierte Module
+    // (Profile.modules undefiniert) und sehen davon zunächst nichts.
+    this.version(8).stores({
+      prescriptions: 'id, profileId, [profileId+status]',
+      stocks: 'medicationId, profileId',
+      appointments: 'id, profileId, at, [profileId+at]',
+      nutrition: 'id, profileId, [profileId+stance]',
+    });
   }
 }
 
@@ -83,7 +101,7 @@ export const db = new CareDiaryDB();
 /** Vollständiger Export aller Daten (JSON) — jederzeit, versioniert.
  *  Foto-Anhänge werden als Base64 eingebettet (v3). */
 export async function buildExportBundle(): Promise<ExportBundle> {
-  const [profiles, medications, intakes, events, observations, timeline, questions, attachments, measurements, sideEffects, careReports] =
+  const [profiles, medications, intakes, events, observations, timeline, questions, attachments, measurements, sideEffects, careReports, prescriptions, stocks, appointments, nutrition] =
     await Promise.all([
       db.profiles.toArray(),
       db.medications.toArray(),
@@ -96,10 +114,14 @@ export async function buildExportBundle(): Promise<ExportBundle> {
       db.measurements.toArray(),
       db.sideEffects.toArray(),
       db.careReports.toArray(),
+      db.prescriptions.toArray(),
+      db.stocks.toArray(),
+      db.appointments.toArray(),
+      db.nutrition.toArray(),
     ]);
   return {
     format: 'care-diary-export',
-    version: 6,
+    version: 7,
     exportedAt: nowIso(),
     profiles,
     medications,
@@ -117,6 +139,10 @@ export async function buildExportBundle(): Promise<ExportBundle> {
     measurements,
     sideEffects,
     careReports,
+    prescriptions,
+    stocks,
+    appointments,
+    nutrition,
   };
 }
 
@@ -126,7 +152,7 @@ export async function buildExportBundle(): Promise<ExportBundle> {
 export async function importBundle(bundle: ExportBundle): Promise<void> {
   await db.transaction(
     'rw',
-    [db.profiles, db.medications, db.intakes, db.events, db.observations, db.timeline, db.questions, db.attachments, db.measurements, db.sideEffects, db.careReports],
+    [db.profiles, db.medications, db.intakes, db.events, db.observations, db.timeline, db.questions, db.attachments, db.measurements, db.sideEffects, db.careReports, db.prescriptions, db.stocks, db.appointments, db.nutrition],
     async () => {
       await db.profiles.bulkPut(bundle.profiles);
       await db.medications.bulkPut(bundle.medications);
@@ -148,6 +174,11 @@ export async function importBundle(bundle: ExportBundle): Promise<void> {
       // v5-Altformat: eine Variante je Profil → „Standard" (deterministische ID)
       if (bundle.careInfo) await db.careReports.bulkPut(bundle.careInfo.map(careInfoToVariant));
       if (bundle.careReports) await db.careReports.bulkPut(bundle.careReports);
+      // ab v7: Begleit-Module
+      if (bundle.prescriptions) await db.prescriptions.bulkPut(bundle.prescriptions);
+      if (bundle.stocks) await db.stocks.bulkPut(bundle.stocks);
+      if (bundle.appointments) await db.appointments.bulkPut(bundle.appointments);
+      if (bundle.nutrition) await db.nutrition.bulkPut(bundle.nutrition);
     }
   );
 }

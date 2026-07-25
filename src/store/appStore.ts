@@ -5,7 +5,8 @@ import { create } from 'zustand';
 import { needsOnboarding } from '../components/Onboarding';
 import { hasPin } from '../utils/pin';
 
-export type View = 'home' | 'history' | 'meds' | 'more';
+/** `plan` erscheint nur, wenn mindestens ein Begleit-Modul aktiviert ist */
+export type View = 'home' | 'history' | 'meds' | 'plan' | 'more';
 export type FormKind = 'intake' | 'event' | 'observation' | 'weight' | null;
 
 /** Berichtszeitraum als lokale Day-Keys (YYYY-MM-DD, inklusiv) */

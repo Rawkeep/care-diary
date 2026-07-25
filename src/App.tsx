@@ -5,7 +5,7 @@ import { useAppStore } from './store/appStore';
 import { useRef, useState } from 'react';
 import { LockScreen } from './components/LockScreen';
 import { Modal } from './components/Modal';
-import { IconHistory, IconMore, IconPill, IconToday } from './components/icons';
+import { IconHistory, IconMore, IconPill, IconPlan, IconToday } from './components/icons';
 import { Onboarding } from './components/Onboarding';
 import { ProfileSwitcher } from './components/ProfileSwitcher';
 import { ReminderManager } from './components/ReminderManager';
@@ -19,18 +19,21 @@ import { Home } from './views/Home';
 import { History } from './views/History';
 import { Medications } from './views/Medications';
 import { More } from './views/More';
+import { Plan } from './views/Plan';
 import { ProfileSetup } from './views/ProfileSetup';
 import { Report } from './views/Report';
+import { enabledModules } from './modules/registry';
 import type { View } from './store/appStore';
 
-const NAV: { view: View; icon: JSX.Element; label: string }[] = [
+// `short` greift, wenn „Plan" dazukommt: fünf Beschriftungen müssen auch auf
+// schmalen Displays ganz lesbar bleiben (statt abgeschnitten „Medikam…").
+const NAV: { view: View; icon: JSX.Element; label: string; short?: string }[] = [
   { view: 'home', icon: <IconToday />, label: 'Heute' },
   { view: 'history', icon: <IconHistory />, label: 'Verlauf' },
-  { view: 'meds', icon: <IconPill />, label: 'Medikamente' },
+  { view: 'meds', icon: <IconPill />, label: 'Medikamente', short: 'Medis' },
+  { view: 'plan', icon: <IconPlan />, label: 'Plan' },
   { view: 'more', icon: <IconMore />, label: 'Mehr' },
 ];
-
-const VIEW_ORDER: View[] = ['home', 'history', 'meds', 'more'];
 
 const FORM_TITLES = {
   intake: 'Einnahme erfassen',
@@ -50,6 +53,22 @@ export function App() {
   // Ausgenommen sind Elemente mit eigener Horizontal-Geste (Charts, Medien,
   // Eingaben, Stepper), damit Bedienen nicht versehentlich navigiert.
   const touchStart = useRef<{ x: number; y: number; target: EventTarget | null } | null>(null);
+
+  if (locked) return <LockScreen />;
+  if (!profiles) return null; // DB lädt (Millisekunden)
+  if (profiles.length === 0) return <ProfileSetup />;
+
+  const profile = profiles.find((p) => p.id === activeProfileId) ?? profiles[0];
+  const preset = presetFor(profile.conditions);
+
+  // „Plan" nur zeigen, wenn Begleit-Module aktiviert sind — die App bleibt
+  // sonst genau so schlank wie vorher. Die Wisch-Reihenfolge folgt der Leiste.
+  const hasModules = enabledModules(profile.modules).length > 0;
+  const navItems = NAV.filter((item) => item.view !== 'plan' || hasModules);
+  const compactNav = navItems.length > 4;
+  const viewOrder = navItems.map((item) => item.view);
+  const currentView: View = view === 'plan' && !hasModules ? 'more' : view;
+
   function onTouchStart(e: React.TouchEvent) {
     const t = e.touches[0];
     touchStart.current = { x: t.clientX, y: t.clientY, target: e.target };
@@ -67,17 +86,10 @@ export function App() {
       start.target.closest('audio, video, input, textarea, select, .trend-svg, .photo-strip, .sched-stepper')
     )
       return;
-    const idx = VIEW_ORDER.indexOf(view);
+    const idx = viewOrder.indexOf(currentView);
     const next = dx < 0 ? idx + 1 : idx - 1;
-    if (next >= 0 && next < VIEW_ORDER.length) setView(VIEW_ORDER[next]);
+    if (next >= 0 && next < viewOrder.length) setView(viewOrder[next]);
   }
-
-  if (locked) return <LockScreen />;
-  if (!profiles) return null; // DB lädt (Millisekunden)
-  if (profiles.length === 0) return <ProfileSetup />;
-
-  const profile = profiles.find((p) => p.id === activeProfileId) ?? profiles[0];
-  const preset = presetFor(profile.conditions);
 
   // Berichte ersetzen die komplette Shell (druckfreundlich, keine Navigation)
   if (reportRange) return <Report profile={profile} preset={preset} />;
@@ -106,10 +118,11 @@ export function App() {
       <ReminderManager profile={profile} />
 
       <main onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-        {view === 'home' && <Home profile={profile} preset={preset} />}
-        {view === 'history' && <History profile={profile} preset={preset} />}
-        {view === 'meds' && <Medications profile={profile} />}
-        {view === 'more' && <More profile={profile} />}
+        {currentView === 'home' && <Home profile={profile} preset={preset} />}
+        {currentView === 'history' && <History profile={profile} preset={preset} />}
+        {currentView === 'meds' && <Medications profile={profile} />}
+        {currentView === 'plan' && <Plan profile={profile} />}
+        {currentView === 'more' && <More profile={profile} />}
       </main>
 
       {openForm && (
@@ -129,15 +142,16 @@ export function App() {
 
       <Toast />
 
-      <nav className="bottom-nav">
-        {NAV.map((item) => (
+      <nav className={compactNav ? 'bottom-nav tabs-5' : 'bottom-nav'}>
+        {navItems.map((item) => (
           <button
             key={item.view}
-            className={view === item.view ? 'active' : ''}
+            className={currentView === item.view ? 'active' : ''}
             onClick={() => setView(item.view)}
+            aria-label={item.label}
           >
             <span className="icon" aria-hidden="true">{item.icon}</span>
-            {item.label}
+            <span className="label">{compactNav ? (item.short ?? item.label) : item.label}</span>
           </button>
         ))}
       </nav>

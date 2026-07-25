@@ -21,6 +21,10 @@ import {
 import { SLOT_LABEL, SLOT_ORDER, timeOfDayHistogram } from '../utils/correlation';
 import { effectiveDose } from '../utils/dose';
 import { fmtDate, fmtDayKey, fmtDuration, fmtTime, localDayKey } from '../utils/date';
+import { moduleEnabled } from '../modules/registry';
+import { appointmentInfo, appointmentTitle, sortAppointments } from '../utils/appointments';
+import { prescriptionInfo, prescriptionKindDef, sortPrescriptions } from '../utils/prescription';
+import { STANCES, groupByStance } from '../utils/nutrition';
 
 const fmtKg = (v: number) => v.toFixed(1).replace('.', ',');
 
@@ -53,6 +57,19 @@ export function Report({ profile, preset }: { profile: Profile; preset: Conditio
   );
   const sideEffects = useLiveQuery(
     () => db.sideEffects.where('profileId').equals(profile.id).toArray(),
+    [profile.id]
+  );
+  // Begleit-Module: nur relevant, wenn aktiviert (siehe Abschnitte unten)
+  const prescriptions = useLiveQuery(
+    () => db.prescriptions.where('profileId').equals(profile.id).toArray(),
+    [profile.id]
+  );
+  const appointments = useLiveQuery(
+    () => db.appointments.where('profileId').equals(profile.id).toArray(),
+    [profile.id]
+  );
+  const nutrition = useLiveQuery(
+    () => db.nutrition.where('profileId').equals(profile.id).toArray(),
     [profile.id]
   );
 
@@ -108,6 +125,19 @@ export function Report({ profile, preset }: { profile: Profile; preset: Conditio
   const medsSorted = [...medications].sort(
     (a, b) => Number(Boolean(a.endDate)) - Number(Boolean(b.endDate))
   );
+
+  // Begleit-Module: im Bericht steht, was im Zeitraum durchgeführt wurde, plus
+  // was gerade offen ist — genau die zwei Fragen, die im Termin gestellt werden.
+  const today = localDayKey(new Date().toISOString());
+  const shownAppointments = sortAppointments(
+    (appointments ?? []).filter((a) => !a.doneDate || (a.doneDate >= from && a.doneDate <= to)),
+    today
+  );
+  const openPrescriptions = sortPrescriptions(
+    (prescriptions ?? []).filter((p) => p.status !== 'redeemed'),
+    today
+  );
+  const nutritionGroups = groupByStance(nutrition ?? []);
 
   return (
     <div className="report">
@@ -305,6 +335,92 @@ export function Report({ profile, preset }: { profile: Profile; preset: Conditio
               — {r.text}
             </p>
           ))}
+        </div>
+      )}
+
+      {/* Begleit-Module — je aktiviertem Modul ein kurzer Abschnitt. Was die
+          Praxis in 10 Minuten wirklich braucht: welche Untersuchungen wann
+          waren, was verordnet wurde, was bei der Ernährung vereinbart ist. */}
+      {moduleEnabled(profile.modules, 'appointments') && shownAppointments.length > 0 && (
+        <div className="card">
+          <h2>Termine &amp; Untersuchungen</h2>
+          <table>
+            <thead>
+              <tr><th>Art</th><th>Datum</th><th>Stand</th><th>Ergebnis (lt. Angehörigen)</th></tr>
+            </thead>
+            <tbody>
+              {shownAppointments.map((a) => {
+                const info = appointmentInfo(a, today);
+                return (
+                  <tr key={a.id}>
+                    <td>{appointmentTitle(a)}</td>
+                    <td>
+                      {a.doneDate
+                        ? fmtDayKey(a.doneDate)
+                        : a.at
+                          ? fmtDayKey(localDayKey(a.at))
+                          : info.dueDayKey
+                            ? `fällig ${fmtDayKey(info.dueDayKey)}`
+                            : '—'}
+                    </td>
+                    <td>
+                      {a.doneDate
+                        ? 'durchgeführt'
+                        : info.state === 'overdue' || info.state === 'due'
+                          ? 'offen (Intervall)'
+                          : a.at
+                            ? 'geplant'
+                            : 'notiert'}
+                      {a.intervalMonths ? ` · alle ${a.intervalMonths} Mon.` : ''}
+                    </td>
+                    <td>{a.resultNote ?? ''}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {moduleEnabled(profile.modules, 'prescriptions') && openPrescriptions.length > 0 && (
+        <div className="card">
+          <h2>Offene Verordnungen</h2>
+          {openPrescriptions.map((p) => {
+            const info = prescriptionInfo(p, today);
+            return (
+              <p key={p.id} style={{ margin: '4px 0', fontSize: '0.9rem' }}>
+                • {p.title} — {prescriptionKindDef(p.kind).label}
+                {p.prescriber ? ` · ${p.prescriber}` : ''}
+                {p.status === 'needed'
+                  ? ' · noch anzufragen'
+                  : p.status === 'requested'
+                    ? ` · angefragt${p.requestedDate ? ` am ${fmtDayKey(p.requestedDate)}` : ''}`
+                    : info.expiry
+                      ? ` · ausgestellt ${fmtDayKey(p.issuedDate!)}, einlösbar bis ${fmtDayKey(info.expiry)}`
+                      : ''}
+              </p>
+            );
+          })}
+        </div>
+      )}
+
+      {moduleEnabled(profile.modules, 'nutrition') && (nutrition ?? []).length > 0 && (
+        <div className="card">
+          <h2>Ernährung — Vereinbarungen im Alltag</h2>
+          {STANCES.map((s) =>
+            nutritionGroups[s.key].length > 0 ? (
+              <p key={s.key} style={{ margin: '4px 0', fontSize: '0.9rem' }}>
+                <strong>{s.label}:</strong>{' '}
+                {nutritionGroups[s.key]
+                  .map((r) => `${r.item}${r.confirmed ? ' (ärztlich bestätigt)' : ''}${r.reason ? ` — ${r.reason}` : ''}`)
+                  .join(' · ')}
+              </p>
+            ) : null
+          )}
+          <p className="hint">
+            Von den Angehörigen geführte Liste. Nicht ärztlich bestätigte Punkte sind
+            Beobachtungen bzw. offene Fragen.
+          </p>
         </div>
       )}
 

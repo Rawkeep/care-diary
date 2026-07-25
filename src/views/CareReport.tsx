@@ -14,6 +14,8 @@ import { useAppStore } from '../store/appStore';
 import { inDayRange } from '../utils/aggregate';
 import { daysSinceLastEvent } from '../utils/correlation';
 import { dayKeyDaysAgo, fmtDayKey, localDayKey } from '../utils/date';
+import { moduleEnabled } from '../modules/registry';
+import { STANCES, groupByStance } from '../utils/nutrition';
 import {
   CARD_STEPS,
   fill,
@@ -56,6 +58,11 @@ export function CareReport({ profile, preset }: { profile: Profile; preset: Cond
   );
   const medications = useLiveQuery(
     () => db.medications.where('profileId').equals(profile.id).toArray(),
+    [profile.id]
+  );
+  // Ernährungs-Vereinbarungen — nur relevant, wenn das Modul aktiv ist
+  const nutrition = useLiveQuery(
+    () => db.nutrition.where('profileId').equals(profile.id).toArray(),
     [profile.id]
   );
 
@@ -107,6 +114,13 @@ export function CareReport({ profile, preset }: { profile: Profile; preset: Cond
   const topTriggers = [...triggerCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   const emergencyMeds = medications.filter((m) => m.isEmergency && !m.endDate);
+
+  // Fürs Umfeld zählt „was meiden / worauf achten" — die Begründungen der
+  // Angehörigen kommen mit, damit niemand rätseln muss.
+  const nutritionOn =
+    moduleEnabled(profile.modules, 'nutrition') && (info.includeNutrition ?? true);
+  const nutritionGroups = groupByStance(nutrition ?? []);
+  const showNutrition = nutritionOn && (nutrition ?? []).length > 0;
 
   const field = (
     label: string,
@@ -243,6 +257,16 @@ export function CareReport({ profile, preset }: { profile: Profile; preset: Cond
                 />
                 Allergien &amp; Unverträglichkeiten zeigen (im Profil gepflegt)
               </label>
+              {moduleEnabled(profile.modules, 'nutrition') && (
+                <label className="check-row">
+                  <input
+                    type="checkbox"
+                    checked={info.includeNutrition ?? true}
+                    onChange={(e) => update({ includeNutrition: e.target.checked })}
+                  />
+                  Ernährung: Gutes &amp; Meiden zeigen (im Plan gepflegt)
+                </label>
+              )}
               {toggle('Notfallmedikation nennen', 'includeEmergencyMeds')}
               {toggle('Häufige Begleitumstände zeigen', 'includeTriggers')}
               {toggle('Aktuelle Häufigkeit zeigen (letzte 4 Wochen)', 'includeFrequency')}
@@ -296,6 +320,25 @@ export function CareReport({ profile, preset }: { profile: Profile; preset: Cond
               <p style={{ margin: '4px 0', fontWeight: 600 }}>
                 ⚠ {(profile.allergies ?? []).join(' · ')}
               </p>
+            </div>
+          )}
+
+          {showNutrition && (
+            <div className="card">
+              <h2>{t.nutrition}</h2>
+              {STANCES.map((st) =>
+                nutritionGroups[st.key].length > 0 ? (
+                  <p key={st.key} style={{ margin: '4px 0' }}>
+                    <strong>
+                      {st.icon} {st.label}:
+                    </strong>{' '}
+                    {nutritionGroups[st.key]
+                      .map((r) => (r.reason ? `${r.item} (${r.reason})` : r.item))
+                      .join(' · ')}
+                  </p>
+                ) : null
+              )}
+              <p className="hint">{t.nutritionNote}</p>
             </div>
           )}
 

@@ -14,6 +14,34 @@ mit 12 Wochen Beispieldaten (inkl. laufender Absetzung) — ladbar beim
 Setup oder über den Profil-Wechsler, rückstandslos löschbar mit einem
 Tipp unter „Mehr".
 
+## Begleit-Module — bei Bedarf zuschalten
+
+Rund um die eigentliche Doku hängt ein Rattenschwanz an Organisation:
+Rezepte besorgen, Fristen einhalten, Vorräte im Auge behalten,
+Untersuchungstermine führen, Ernährungsregeln nicht vergessen. Genau das
+sind die **Begleit-Module** — einzeln aktivierbar unter **„Mehr → Module"**,
+damit die App bei niemandem Ballast mitschleppt. Ist mindestens eines aktiv,
+erscheint der Tab **„Plan"**; auf „Heute" tauchen die dringenden Punkte als
+Karten auf („Im Blick behalten").
+
+| Modul | Was es übernimmt | Woran es erinnert |
+|-------|------------------|-------------------|
+| **Verordnungen & Fristen** | Rezept-Weg festhalten: gebraucht → angefragt → ausgestellt → eingelöst; Rezeptart mit Regel-Frist (Kasse 28 Tage, BtM 7, Privat ~3 Monate, Dauerverordnung 365) oder eigener Frist | offene Anfragen, Nachfragen nach 5 Tagen ohne Antwort, ablaufende und abgelaufene Einlösefristen |
+| **Medikamenten-Bestand** | Bestand zählen, Reichweite aus dem Einnahme-Rhythmus hochrechnen, Packung nachlegen, Verfallsdatum führen | Vorrat geht mit Vorlaufzeit zur Neige, Bestand aufgebraucht, Packung (z. B. Notfallset) läuft ab |
+| **Termine & Untersuchungen** | Arzttermine und wiederkehrende Kontrollen (EEG, Blutbild, Medikamentenspiegel, MRT, Impfung …) mit **Vorbereitungs-Checkliste** je Art; Intervall („alle 3 Monate") mit automatischem Folgetermin nach dem Abschließen | Termin steht an (mit offener Vorbereitung), Termin nachtragen, Kontrolle laut Intervall fällig |
+| **Ernährung: Gutes & Meiden** | „Gos and No-Gos" mit Begründung und Häkchen „ärztlich bestätigt"; Vorschläge als Gesprächsanstöße für den Termin | bewusst nichts — die Liste steht bereit: im Alltag, im Arztbericht und (abschaltbar, alle Sprachen) im Umfeld-Bericht |
+
+Zwei Dinge gelten dabei durchgehend:
+
+- **Die Hinweise sind organisatorisch, nicht medizinisch.** Fristen,
+  Nachschub, Termine, Vorbereitung — jeder Hinweis nennt Zahl und Datum. Es
+  gibt keine Risiko-Scores, keine Prognosen und keine Dosisrechnung
+  (KONZEPT.md §8), und die App empfiehlt auch keine Ernährung: sie hält
+  fest, was mit der Praxis vereinbart wurde.
+- **Die Module reden miteinander.** Wird ein Vorrat knapp und ist für dieses
+  Medikament schon eine Verordnung unterwegs, drängt die App nicht — sie
+  informiert nur („Verordnung ist angefragt").
+
 ## Sofort nutzen
 
 **➡️ https://rawkeep.github.io/care-diary/** — im Browser öffnen, fertig.
@@ -99,6 +127,9 @@ npm test             # Vitest (Aggregations-Kern)
   mit offenen Einnahmen und optionale Benachrichtigungen zu festen
   Zeitfenstern (8/13/19 Uhr), solange die App geöffnet ist. Push bei
   geschlossener App folgt mit den nativen Builds (siehe `NATIVE.md`).
+- **Begleit-Module** (Verordnungen & Fristen, Bestand, Termine &
+  Untersuchungen, Ernährung) — einzeln zuschaltbar, mit proaktiven Hinweisen
+  auf „Heute" und eigenem Tab „Plan": siehe Abschnitt oben.
 - **Kontextabhängige Knopf-Ordnung** auf „Heute": stabile Zonen
   (Akut-Button immer ganz oben, Schnell-Raster wandert nie), nur die
   Medikamenten-Liste sortiert sich — jetzt Fälliges zuerst (markiert),
@@ -128,7 +159,9 @@ npm test             # Vitest (Aggregations-Kern)
   **Varianten je Empfängerkreis** (z. B. Schule vs. Großeltern) mit
   eigener Sprache — Struktur, Ereignisarten und Erste Hilfe sind auf
   **Deutsch, Englisch, Französisch, Türkisch, Arabisch (RTL),
-  Ukrainisch und Spanisch** verfügbar.
+  Ukrainisch und Spanisch** verfügbar. Bei aktivem Ernährungs-Modul kommt
+  „Ernährung: bitte beachten" dazu (abschaltbar) — genau das, was Schule
+  und Betreuung wissen müssen.
 - **QR-Notfallkarte** im Scheckkartenformat (drucken, ausschneiden,
   Portemonnaie/Schulranzen): Kurzanweisungen, Notfallmedikation, Kontakt —
   der QR-Code enthält dieselben Infos als Klartext, offline lesbar mit
@@ -164,13 +197,23 @@ npm test             # Vitest (Aggregations-Kern)
 
 ```
 src/db/         Datenmodell (models.ts = Vertrag) + Dexie-Schema
-src/presets/    Erkrankungs-Presets (Epilepsie, generisch)
+src/presets/    Erkrankungs-Presets (Epilepsie, Migräne, generisch)
+src/modules/    Begleit-Module: registry.ts (Katalog) + useAgenda (Datenquelle)
 src/store/      UI-Zustand (Zustand) — Fachdaten nur in Dexie
-src/utils/      Datums- und Aggregations-Helfer (getestet)
-src/views/      Heute, Verlauf, Medikamente, Mehr, Profil-Setup
-src/components/ Modal, EntryList, Erfassungsformulare
-tests/          Vitest (Aggregations-Kern)
+src/utils/      Datums-/Aggregations-Helfer und die Modul-Logik (getestet):
+                prescription · stock · appointments · nutrition · agenda
+src/views/      Heute, Verlauf, Medikamente, Plan, Mehr, Profil-Setup, Berichte
+src/components/ Modal, EntryList, Erfassungsformulare, AgendaCards,
+                plan/ (ein Panel je Modul)
+tests/          Vitest (Aggregations-Kern + Modul-Logik + Agenda)
 ```
+
+**Ein Modul hinzufügen** (dem Muster folgen, nichts erfinden):
+Eintrag in `src/modules/registry.ts` → Entität in `src/db/models.ts` +
+Tabelle in `src/db/db.ts` (neue Dexie-Version, Export-Version hochziehen) →
+deterministische Logik in `src/utils/<modul>.ts` mit Tests → Regeln in
+`buildAgenda` (`src/utils/agenda.ts`) → Panel unter
+`src/components/plan/` → Eintrag in `PANELS` in `src/views/Plan.tsx`.
 
 ## Nächste Schritte (siehe Konzept §10)
 

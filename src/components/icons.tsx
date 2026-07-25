@@ -206,6 +206,48 @@ export function IconEdit(p: IconProps) {
   );
 }
 
+/** Plan (Begleit-Module): Kalenderblatt mit Haken */
+export function IconPlan(p: IconProps) {
+  return (
+    <Base {...p}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M8 3v4M16 3v4M3 10h18" />
+      <path d="m8.5 14.5 2 2 4.5-4.5" />
+    </Base>
+  );
+}
+
+/** Verordnung: Rezeptblatt */
+export function IconPrescription(p: IconProps) {
+  return (
+    <Base {...p}>
+      <path d="M5.5 3.5h13v17l-3-2-3 2-3-2-4 2Z" />
+      <path d="M9 8h4a2 2 0 0 1 0 4H9V8Zm0 4 5 4.5" />
+    </Base>
+  );
+}
+
+/** Bestand: Vorratsdose */
+export function IconStock(p: IconProps) {
+  return (
+    <Base {...p}>
+      <path d="M5 8h14v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8Z" />
+      <path d="M4 4.5h16V8H4z" />
+      <path d="M10 13h4" />
+    </Base>
+  );
+}
+
+/** Ernährung: Apfel */
+export function IconNutrition(p: IconProps) {
+  return (
+    <Base {...p}>
+      <path d="M12 8c-1.2-1.3-3-1.8-4.6-1C5.4 8 4.5 10.3 5 12.7c.6 3 3 6.6 5.4 7.5 1 .4 2.2.4 3.2 0 2.4-.9 4.8-4.5 5.4-7.5.5-2.4-.4-4.7-2.4-5.7-1.6-.8-3.4-.3-4.6 1Z" />
+      <path d="M12 8c0-1.7.8-3.3 2.5-4" />
+    </Base>
+  );
+}
+
 /** Löschen: Papierkorb */
 export function IconTrash(p: IconProps) {
   return (

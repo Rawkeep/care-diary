@@ -1,6 +1,7 @@
 // Heute-Ansicht: Akut-Button, Schnellerfassung in ≤ 3 Taps, Tagesüberblick.
 import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { AgendaCards } from '../components/AgendaCards';
 import { CaptureButtons } from '../components/CaptureButtons';
 import { EntryList } from '../components/EntryList';
 import {
@@ -15,6 +16,7 @@ import { db } from '../db/db';
 import type { Medication, Profile } from '../db/models';
 import { nowIso } from '../db/models';
 import type { ConditionPreset } from '../presets/epilepsy';
+import { useAgenda } from '../modules/useAgenda';
 import { useAppStore } from '../store/appStore';
 import { itemsOfDay, mergeChronological } from '../utils/aggregate';
 import { daysSinceLastEvent } from '../utils/correlation';
@@ -23,9 +25,13 @@ import { effectiveDose } from '../utils/dose';
 import { orderMedsForHome } from '../utils/medOrder';
 import { quickIntake } from '../utils/quickIntake';
 
+/** Wie viele proaktive Hinweise passen auf „Heute", ohne sie zu überfrachten? */
+const AGENDA_ON_HOME = 3;
+
 export function Home({ profile, preset }: { profile: Profile; preset: ConditionPreset }) {
-  const { setOpenForm, acuteStartedAt, startAcute, showToast, acuteMedia, addAcuteMedia } =
+  const { setOpenForm, acuteStartedAt, startAcute, showToast, acuteMedia, addAcuteMedia, setView } =
     useAppStore();
+  const agenda = useAgenda(profile);
 
   const intakes = useLiveQuery(() => db.intakes.where('profileId').equals(profile.id).toArray(), [profile.id]);
   const events = useLiveQuery(() => db.events.where('profileId').equals(profile.id).toArray(), [profile.id]);
@@ -168,6 +174,12 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
           </>
         );
       })()}
+
+      {/* Proaktive Hinweise der Begleit-Module — im Akutfall bewusst weg:
+          dann zählt nur das Ereignis. */}
+      {!acuteStartedAt && (
+        <AgendaCards items={agenda} max={AGENDA_ON_HOME} onOpen={() => setView('plan')} />
+      )}
 
       <div className="quick-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
         {/* Reihenfolge nach Nutzungshäufigkeit: täglich → selten */}
