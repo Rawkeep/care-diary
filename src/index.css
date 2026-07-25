@@ -358,6 +358,53 @@ details.group > .card { margin-left: 0; }
 /* Verlaufsliste */
 .day-group { margin-bottom: 16px; }
 .day-group .day-title { font-size: 0.85rem; color: var(--text-dim); margin: 0 0 6px 4px; }
+
+/* Zeitraum-Chips (Verlauf): vier gleich breite Felder in einer Zeile */
+.chip-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+.chip-row button {
+  font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; min-width: 0;
+  color: var(--text-dim); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 999px; padding: 9px 2px;
+  letter-spacing: -0.01em; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chip-row button.active { background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent); }
+.chip-row button:active { transform: scale(0.97); }
+
+/* Filter-Chips (Verlauf): festes 2×2-Raster — bricht auf keiner Breite krumm */
+.chip-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+.chip-grid button {
+  font: inherit; font-size: 0.86rem; font-weight: 600; cursor: pointer;
+  color: var(--text-dim); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 999px; padding: 9px 10px;
+}
+.chip-grid button.active { background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent); }
+.chip-grid button:active { transform: scale(0.97); }
+
+/* Einordnungszeile über der Tagesliste („34 Einträge an 14 Tagen") */
+.list-info { margin: 2px 4px 10px; }
+
+/* Verlauf: Tageskopf mit Zusammenfassung und Monats-Trenner — Orientierung
+   beim Scrollen durch Monate voller gleichförmiger Einnahme-Zeilen. */
+.day-head { margin: 0 0 6px 4px; }
+.day-head .day-title {
+  margin: 0; font-weight: 700; color: var(--text); font-size: 0.9rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.day-head .day-flag {
+  font-size: 0.74rem; font-weight: 700; color: var(--danger);
+  background: var(--danger-soft); border-radius: 999px; padding: 1px 8px;
+}
+.day-head .day-summary { margin: 1px 0 0; font-size: 0.78rem; color: var(--text-dim); }
+.month-divider {
+  position: sticky; top: calc(52px + env(safe-area-inset-top)); z-index: 20;
+  margin: 18px 0 8px; padding: 4px 0;
+  font-size: 0.76rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-dim);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
 .entry {
   display: flex; gap: 10px; align-items: baseline;
   background: var(--surface); border: 1px solid var(--border);
@@ -377,7 +424,7 @@ details.group > .card { margin-left: 0; }
 label.field { display: block; margin-bottom: 12px; font-size: 0.85rem; color: var(--text-dim); }
 label.field > span { display: block; margin-bottom: 4px; }
 input[type='text'], input[type='number'], input[type='date'], input[type='datetime-local'],
-input[type='password'], select, textarea {
+input[type='password'], input[type='search'], select, textarea {
   width: 100%; padding: 11px 12px; font: inherit; color: var(--text);
   background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;

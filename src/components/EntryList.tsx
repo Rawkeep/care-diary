@@ -29,11 +29,18 @@ export function EntryList({
   medications,
   preset,
   profile,
+  attachments: providedAttachments,
 }: {
   items: DiaryItem[];
   medications: Medication[];
   preset: ConditionPreset;
   profile: Profile;
+  /**
+   * Bereits geladene Anhänge (Verlauf lädt sie für alle Tage in einer
+   * Abfrage). Ohne Angabe holt die Liste sie selbst — sonst hätte jede
+   * Tagesgruppe ihre eigene Live-Abfrage.
+   */
+  attachments?: Attachment[];
 }) {
   const [selected, setSelected] = useState<DiaryItem | null>(null);
   const [editing, setEditing] = useState(false);
@@ -63,12 +70,17 @@ export function EntryList({
     }
     close();
   }
-  // Anhänge aller sichtbaren Einträge in einem Rutsch laden, nach Eintrag gruppiert
-  const entryIds = items.map((i) => i.ref.id);
-  const attachments = useLiveQuery(
-    () => db.attachments.where('entryId').anyOf(entryIds).toArray(),
-    [entryIds.join(',')]
+  // Anhänge aller sichtbaren Einträge in einem Rutsch laden, nach Eintrag
+  // gruppiert — es sei denn, die Ansicht hat sie schon geladen.
+  const entryIds = providedAttachments ? [] : items.map((i) => i.ref.id);
+  const ownAttachments = useLiveQuery<Attachment[]>(
+    () =>
+      providedAttachments
+        ? Promise.resolve<Attachment[]>([])
+        : db.attachments.where('entryId').anyOf(entryIds).toArray(),
+    [entryIds.join(','), providedAttachments != null]
   );
+  const attachments = providedAttachments ?? ownAttachments;
   const byEntry = new Map<string, Attachment[]>();
   for (const a of attachments ?? []) {
     byEntry.set(a.entryId, [...(byEntry.get(a.entryId) ?? []), a]);

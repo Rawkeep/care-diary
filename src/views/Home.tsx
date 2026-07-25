@@ -19,6 +19,7 @@ import type { ConditionPreset } from '../presets/epilepsy';
 import { useAgenda } from '../modules/useAgenda';
 import { useAppStore } from '../store/appStore';
 import { itemsOfDay, mergeChronological } from '../utils/aggregate';
+import { sortWithinDay } from '../utils/history';
 import { daysSinceLastEvent } from '../utils/correlation';
 import { fmtDuration, localDayKey } from '../utils/date';
 import { effectiveDose } from '../utils/dose';
@@ -54,9 +55,9 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
 
   const todayKey = localDayKey(new Date().toISOString());
   const eventFreeDays = daysSinceLastEvent(events ?? [], todayKey);
-  const todayItems = itemsOfDay(
-    mergeChronological(intakes ?? [], events ?? [], observations ?? []),
-    todayKey
+  // Der Tag liest sich von morgens nach abends — dieselbe Regel wie im Verlauf
+  const todayItems = sortWithinDay(
+    itemsOfDay(mergeChronological(intakes ?? [], events ?? [], observations ?? []), todayKey)
   );
 
   const elapsed = acuteStartedAt

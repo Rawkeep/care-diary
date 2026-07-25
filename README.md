@@ -104,7 +104,15 @@ npm test             # Vitest (Aggregations-Kern)
   ereignisfreien Tagen vs. Ereignistag + Folgetag** je Parameter.
   Die App zählt und gruppiert nur — die Einordnung gehört ins ärztliche
   Gespräch.
-- **Verlauf:** chronologisch nach Tagen gruppiert + Ereignis-Zähler je Art.
+- **Verlauf, der auch nach Jahren benutzbar bleibt:** Zeitraum wählbar
+  (4 Wochen … gesamt, steuert gleich die Kurven und Zähler mit), Filter nach
+  Art (⚡ Ereignisse / 💊 Einnahmen / 📝 Zustand) und **Suche** in Notizen,
+  Namen und Begleitumständen („Fieber", „Oma"). Jeder Tag hat einen Kopf mit
+  Zusammenfassung („1 Ereignis · 2 Einnahmen · 5× Zustand — Absence"),
+  Monats-Trenner geben beim Scrollen Orientierung, und die Liste lädt in
+  14-Tage-Schritten nach. **Sortierung:** neuester Tag oben, innerhalb des
+  Tages von morgens nach abends; bei gleicher Uhrzeit zählt die Wichtigkeit
+  (Ereignis → Einnahme → Zustand). Ereignis-Zähler je Art gehören dazu.
 - **Foto- & Video-Anhänge** an Ereignissen und Zustandseinträgen (Kamera oder
   Galerie; Fotos automatisch verkleinert, Videos bis 100 MB) — z. B.
   Hautbilder, Befunde oder ein kurzes Video des Ereignisses fürs Arztgespräch.
