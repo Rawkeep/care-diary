@@ -1,21 +1,64 @@
-/* care-diary — mobile-first, große Touchziele, Dark/Light via System.
-   Gestaltungsprinzip: klar & scharf — Vektor statt Pixel, feine 1px-Linien,
-   ruhige Flächen mit dezenter Tiefe, knackige Systemtypografie. */
+/* care-diary — Design-System
+   ===========================
+   Mobile-first, große Touchziele, Dark/Light via System.
+
+   Gestaltungsprinzip: **ruhig und geordnet**. Die App begleitet Menschen an
+   schlechten Tagen — sie darf nicht laut sein. Konkret heißt das:
+
+   1. EINE Rahmen-Ebene. Eine Karte trägt den Rahmen; alles darin ist eine
+      Fläche (`.panel`), kein zweiter Kasten. Verschachtelte Rahmen waren die
+      größte Unruhe im alten Layout.
+   2. Schatten sind Bedeutung, keine Dekoration — nur was schwebt oder
+      gedrückt wird (Navigation, Modal, Toast, Primärknopf, Akut-Knopf).
+   3. Eine Typo-Skala (5 Stufen). Vorher: 25 Größen, oft 0,02rem auseinander.
+   4. Eine Sprache je Bedienelement: Segment-Umschalter (entweder-oder),
+      Chip (Filter/Kurzaktion), Knopf (Hauptaktion), Icon-Knopf (Nebenaktion).
+   5. Farbe trägt Dringlichkeit — Akzent für „dran", Danger für „überfällig"
+      —, niemals Ausrufezeichen oder Blinken.
+
+   Alte Klassennamen bleiben als Aliasse gültig (`.med-card` = `.panel` …),
+   damit Ansicht und Stil unabhängig voneinander umgebaut werden können. */
+
 :root {
+  /* --- Farbe: hell ---------------------------------------------------- */
   --bg: #f4f5f2;
   --surface: #ffffff;
-  --surface-2: #ecedea;
+  --surface-2: #eceeea;
   --text: #191921;
-  --text-dim: #656470;
-  --border: #d8d8d1;
+  --text-dim: #62616d;
+  --border: #dcdcd5;
   --accent: #147a63;
   --accent-strong: #0f6350;
-  --accent-soft: #d9efe8;
-  --danger: #bb4a33;
-  --danger-soft: #f8e3dd;
-  --radius: 16px;
-  --shadow-1: 0 1px 2px rgba(20, 20, 30, 0.05), 0 2px 8px rgba(20, 20, 30, 0.05);
+  --accent-soft: #dcefe9;
+  --danger: #b8482f;
+  --danger-soft: #f8e4de;
+
+  /* --- Abstände: eine Skala, überall dieselbe ------------------------- */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+
+  /* --- Typo: fünf Stufen --------------------------------------------- */
+  --t-xs: 0.75rem;  /* Tags, Zeitspalte, Legenden */
+  --t-sm: 0.82rem;  /* Sekundärtext, Metazeilen, Kartentitel */
+  --t-md: 0.94rem;  /* Fließtext, Listenzeilen, Knöpfe */
+  --t-lg: 1.05rem;  /* Namen, Modaltitel */
+  --t-xl: 1.6rem;   /* große Zahlen (Akut-Timer, Akut-Label) */
+
+  /* --- Radien -------------------------------------------------------- */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-pill: 999px;
+  --radius: var(--r-lg); /* Alt-Alias */
+
+  /* --- Elevation: zwei Stufen, sparsam ------------------------------- */
+  --shadow-1: 0 1px 2px rgba(20, 20, 30, 0.06), 0 2px 6px rgba(20, 20, 30, 0.04);
   --shadow-2: 0 8px 28px rgba(20, 20, 30, 0.16);
+
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -25,32 +68,32 @@
   :root:not(.theme-light) {
     --bg: #14141b;
     --surface: #1e1e28;
-    --surface-2: #2a2a36;
+    --surface-2: #282833;
     --text: #f1f1f5;
-    --text-dim: #a09fac;
+    --text-dim: #a3a2af;
     --border: #34343f;
     --accent: #7fd1b9;
     --accent-strong: #98e0cb;
-    --accent-soft: #22443b;
+    --accent-soft: #21433a;
     --danger: #e8927c;
     --danger-soft: #472b23;
-    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 10px rgba(0, 0, 0, 0.25);
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.22);
     --shadow-2: 0 10px 32px rgba(0, 0, 0, 0.55);
   }
 }
 :root.theme-dark {
   --bg: #14141b;
   --surface: #1e1e28;
-  --surface-2: #2a2a36;
+  --surface-2: #282833;
   --text: #f1f1f5;
-  --text-dim: #a09fac;
+  --text-dim: #a3a2af;
   --border: #34343f;
   --accent: #7fd1b9;
   --accent-strong: #98e0cb;
-  --accent-soft: #22443b;
+  --accent-soft: #21433a;
   --danger: #e8927c;
   --danger-soft: #472b23;
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 10px rgba(0, 0, 0, 0.25);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.22);
   --shadow-2: 0 10px 32px rgba(0, 0, 0, 0.55);
 }
 
@@ -84,38 +127,43 @@ button { touch-action: manipulation; }
   * { transition: none !important; animation: none !important; }
 }
 
+/* ====================================================================
+   Gerüst: Kopf, Inhalt, Navigation
+   ==================================================================== */
+
 #root { max-width: 560px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; }
 
 .app-header {
   position: sticky; top: 0; z-index: 40;
   display: flex; align-items: center; justify-content: space-between;
-  padding: calc(12px + env(safe-area-inset-top)) 16px 10px;
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  padding: calc(var(--s3) + env(safe-area-inset-top)) var(--s4) var(--s2);
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
   backdrop-filter: blur(14px) saturate(1.4);
   -webkit-backdrop-filter: blur(14px) saturate(1.4);
   border-bottom: 1px solid var(--border);
 }
 .app-header h1 {
-  font-size: 1.12rem; margin: 0; display: flex; align-items: center; gap: 9px;
+  font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: var(--s2);
   font-weight: 800; letter-spacing: -0.015em;
 }
-.app-header .app-logo { width: 27px; height: 27px; border-radius: 7px; display: block; box-shadow: var(--shadow-1); }
+.app-header .app-logo { width: 26px; height: 26px; border-radius: 7px; display: block; }
 .app-header .profile-badge {
-  font: inherit; font-size: 0.84rem; font-weight: 600; color: var(--text-dim);
+  font: inherit; font-size: var(--t-sm); font-weight: 600; color: var(--text-dim);
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 999px; padding: 5px 13px; box-shadow: var(--shadow-1);
+  border-radius: var(--r-pill); padding: 5px 13px;
   cursor: pointer; transition: transform 0.1s ease;
+  display: inline-flex; align-items: center; gap: 6px;
 }
 .app-header .profile-badge:active { transform: scale(0.96); }
 
-main { flex: 1; padding: 8px 16px 90px; }
+main { flex: 1; padding: var(--s2) var(--s4) 92px; }
 
 .bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 560px;
   /* Spaltenzahl folgt der Anzahl der Tabs (4 ohne, 5 mit „Plan") */
   display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
   backdrop-filter: blur(14px) saturate(1.4);
   -webkit-backdrop-filter: blur(14px) saturate(1.4);
   border-top: 1px solid var(--border);
@@ -123,7 +171,7 @@ main { flex: 1; padding: 8px 16px 90px; }
 }
 .bottom-nav button {
   background: none; border: none; color: var(--text-dim);
-  font: inherit; font-size: 0.74rem; font-weight: 600;
+  font: inherit; font-size: var(--t-xs); font-weight: 600;
   padding: 9px 4px 11px; cursor: pointer; min-width: 0;
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   transition: color 0.15s ease, transform 0.1s ease;
@@ -134,207 +182,317 @@ main { flex: 1; padding: 8px 16px 90px; }
 .bottom-nav.tabs-5 button { font-size: 0.68rem; letter-spacing: -0.01em; }
 .bottom-nav.tabs-5 button .icon { padding: 3px 9px; }
 .bottom-nav button .icon {
-  font-size: 1.32rem; line-height: 1;
-  padding: 3px 14px; border-radius: 999px; transition: background 0.15s ease;
+  line-height: 1; padding: 3px 14px; border-radius: var(--r-pill);
+  transition: background 0.15s ease;
 }
 .bottom-nav button.active { color: var(--accent-strong); }
 .bottom-nav button.active .icon { background: var(--accent-soft); }
+.bottom-nav button .icon svg { display: block; }
+
+/* ====================================================================
+   Flächen: Karte (eine Rahmen-Ebene) und Panel (Fläche darin)
+   ==================================================================== */
 
 .card {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 15px 16px; margin-bottom: 12px;
-  box-shadow: var(--shadow-1);
+  border-radius: var(--r-lg); padding: var(--s4); margin-bottom: var(--s3);
 }
+/* Kartentitel: ruhig und klein, keine Versalien-Schreierei */
 .card h2 {
-  font-size: 0.82rem; margin: 0 0 10px; color: var(--text-dim);
-  font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  font-size: var(--t-sm); margin: 0 0 var(--s3); color: var(--text-dim);
+  font-weight: 700; letter-spacing: 0;
+  display: flex; align-items: center; gap: var(--s2);
+}
+.card h2 + .hint { margin-top: calc(-1 * var(--s2)); }
+
+/* Fläche INNERHALB einer Karte — kein zweiter Rahmen, kein Schatten.
+   `.med-card` ist der Alt-Name derselben Sache. */
+.panel, .med-card {
+  background: var(--surface-2); border: none;
+  border-radius: var(--r-md); padding: var(--s3);
+  margin-bottom: var(--s2);
+}
+.panel:last-child, .med-card:last-child { margin-bottom: 0; }
+/* Dringlich: farbige Kante links, sonst nichts Laut(er)es */
+.panel.is-urgent, .med-card.emergency, .panel.emergency {
+  border-left: 3px solid var(--danger);
+  background: color-mix(in srgb, var(--danger-soft) 45%, var(--surface-2));
+}
+/* Editor/Detail INNERHALB einer Fläche — hebt sich durch Helligkeit ab,
+   nicht durch einen weiteren Rahmen. */
+.subpanel {
+  background: var(--surface); border-radius: var(--r-md);
+  padding: var(--s3); margin-top: var(--s2);
+}
+.subpanel > h3 {
+  margin: 0 0 var(--s2); font-size: var(--t-sm); font-weight: 700; color: var(--text-dim);
 }
 
-/* Schnellerfassung: große Aktionsflächen */
-.quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
-.quick-btn {
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 16px 6px; font: inherit; font-weight: 600; cursor: pointer; color: var(--text);
-  display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 84px;
-  box-shadow: var(--shadow-1);
-  transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+/* Verschachtelte Karten gibt es nicht mehr: eine Karte in einer Karte wird
+   automatisch zur Fläche (Sicherheitsnetz für Altbestand). */
+.card .card, .panel .card, .med-card .card {
+  background: var(--surface); border: none; box-shadow: none;
+  border-radius: var(--r-md); padding: var(--s3);
 }
-.quick-btn .icon { font-size: 1.75rem; }
-.quick-btn:active { background: var(--surface-2); transform: scale(0.97); }
 
-/* Ein-Tipp-Einnahme: ein Button je aktivem Medikament */
-.med-quick { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-.med-quick-btn {
-  width: 100%; text-align: left; font: inherit; cursor: pointer;
-  background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius);
-  padding: 13px 16px; color: var(--text);
-  display: flex; flex-direction: column; gap: 2px;
-  box-shadow: var(--shadow-1); transition: transform 0.1s ease, filter 0.15s ease;
+.panel-head, .med-card-head { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
+.panel-head .panel-name, .med-card-head .med-name {
+  font-weight: 700; font-size: var(--t-md); flex: 1 1 65%; min-width: 0; overflow-wrap: anywhere;
 }
-.med-quick-btn:active { filter: brightness(0.94); transform: scale(0.985); }
-.med-quick-btn .med-quick-name { font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; }
-.med-quick-btn .med-quick-dose { font-size: 0.82rem; color: var(--text-dim); }
-.med-quick-btn .med-quick-status { font-size: 0.8rem; font-weight: 700; margin-top: 2px; }
-.med-quick-btn .med-quick-status.open { color: var(--danger); }
-.med-quick-btn .med-quick-status.done { color: var(--accent-strong); }
-.med-quick-btn.emergency { background: var(--danger-soft); border-color: var(--danger); }
-/* Jetzt fällig: deutlich, aber ruhig — kräftiger Rand statt Blinken */
-.med-quick-btn.due {
-  border-width: 2px; border-color: var(--accent-strong);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent), var(--shadow-1);
+.panel .meta, .med-card .meta {
+  color: var(--text-dim); font-size: var(--t-sm); margin-top: 2px; overflow-wrap: break-word;
 }
-/* Heute erledigt: bleibt tippbar (Bedarfs-Extradosis), tritt aber zurück */
-.med-quick-btn.muted { opacity: 0.62; box-shadow: none; }
 
-/* Sofort-Aufnahme im Akutfall */
-.capture-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
-.capture-btn {
-  flex: 1; min-width: 120px; font: inherit; font-weight: 700; cursor: pointer;
-  padding: 14px; border-radius: var(--radius);
-  background: var(--surface); color: var(--danger);
-  border: 2px solid var(--danger); box-shadow: var(--shadow-1);
-  transition: transform 0.1s ease, background 0.15s ease;
-}
-.capture-btn:active { transform: scale(0.97); background: var(--danger-soft); }
-.capture-btn.recording {
-  background: linear-gradient(135deg, var(--danger), color-mix(in srgb, var(--danger) 78%, #000));
-  color: #fff; border-color: transparent;
-}
-.capture-count { flex-basis: 100%; font-size: 0.85rem; font-weight: 600; color: var(--accent-strong); }
-
-/* Demo-Banner */
-.card.demo-banner { border-color: var(--danger); background: color-mix(in srgb, var(--danger-soft) 35%, var(--surface)); }
-.card.demo-banner h2 { color: var(--danger); }
-
-/* Agenda — proaktive Hinweise der Begleit-Module („Im Blick behalten").
-   Farbe trägt die Dringlichkeit, nie ein Ausrufezeichen: überfällig = Danger-
-   Kante, fällig = Akzent, bald/Info = ruhig. */
-.card.agenda-card h2 { display: flex; align-items: center; gap: 8px; }
-.agenda-count {
-  font-size: 0.78rem; font-weight: 700; color: var(--accent-strong);
-  background: var(--accent-soft); border-radius: 999px; padding: 2px 9px;
-}
-.agenda { display: flex; flex-direction: column; gap: 8px; }
-.agenda-item {
-  display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%;
-  font: inherit; color: var(--text); cursor: pointer;
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-left: 4px solid var(--text-dim);
-  border-radius: 12px; padding: 10px 12px;
-}
-button.agenda-item:active { transform: scale(0.99); filter: brightness(0.97); }
-.agenda-item.sev-overdue { border-left-color: var(--danger); background: var(--danger-soft); }
-.agenda-item.sev-due { border-left-color: var(--accent); background: var(--accent-soft); }
-.agenda-item.sev-soon { border-left-color: var(--accent); }
-.agenda-item .agenda-icon { font-size: 1.05rem; line-height: 1.3; flex-shrink: 0; }
-.agenda-item .agenda-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.agenda-item .agenda-title { font-weight: 700; font-size: 0.94rem; overflow-wrap: break-word; }
-.agenda-item .agenda-detail { font-size: 0.84rem; color: var(--text); overflow-wrap: break-word; }
-.agenda-item .agenda-tag { font-size: 0.75rem; color: var(--text-dim); font-weight: 600; }
-
-/* Aufklappbare Gruppen auf „Mehr" */
-details.group { margin-bottom: 12px; }
+/* Aufklappbare Gruppe (Mehr, Plan) — flach, dieselbe Kartensprache */
+details.group { margin-bottom: var(--s3); }
 details.group > summary {
-  cursor: pointer; list-style: none; user-select: none;
-  font-size: 0.95rem; font-weight: 700; color: var(--text);
+  cursor: pointer; list-style: none; user-select: none; -webkit-user-select: none;
+  font-size: var(--t-md); font-weight: 700; color: var(--text);
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 13px 16px; margin-bottom: 10px;
-  box-shadow: var(--shadow-1); position: relative;
+  border-radius: var(--r-lg); padding: var(--s3) var(--s4); margin-bottom: var(--s2);
+  position: relative;
 }
 details.group > summary::-webkit-details-marker { display: none; }
 details.group > summary::after {
-  content: '›'; position: absolute; right: 16px; top: 50%;
+  content: '›'; position: absolute; right: var(--s4); top: 50%;
   transform: translateY(-50%) rotate(90deg); transition: transform 0.15s ease;
   color: var(--text-dim); font-size: 1.1rem;
 }
 details.group[open] > summary::after { transform: translateY(-50%) rotate(-90deg); }
-details.group > .card { margin-left: 0; }
+details.group[open] > summary { border-color: var(--accent); color: var(--accent-strong); }
 
-/* Tappbare Verlaufszeilen (Bearbeiten/Löschen) */
-.entry.tappable { cursor: pointer; }
-.entry.tappable:active { background: var(--surface-2); }
-
-/* Inline-SVG-Icons in Textzeilen */
-.inline-icon { vertical-align: -3px; }
-.bottom-nav button .icon svg { display: block; }
-.quick-btn .icon svg { display: block; }
-
-/* Kompakte Med-Chips (erledigt / Bedarf) — ein Tipp erfasst weiterhin */
-.med-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.med-chip {
-  font: inherit; font-size: 0.86rem; font-weight: 600; cursor: pointer;
-  color: var(--text-dim); background: var(--surface);
-  border: 1px solid var(--border); border-radius: 999px; padding: 8px 14px;
-  transition: transform 0.1s ease, background 0.15s ease;
+/* Kleine aufklappbare Erklärung („Wie funktioniert das?") — Text auf Abruf
+   statt Textwand auf Vorrat. */
+details.explain { margin: 0 0 var(--s2); }
+details.explain > summary {
+  cursor: pointer; list-style: none; font-size: var(--t-sm); font-weight: 600;
+  color: var(--accent-strong); padding: 2px 0;
 }
-.med-chip:active { transform: scale(0.95); background: var(--surface-2); }
-.med-chip.emergency { color: var(--danger); border-color: var(--danger); background: var(--danger-soft); }
+details.explain > summary::-webkit-details-marker { display: none; }
+details.explain > summary::after { content: ' ›'; display: inline-block; transition: transform 0.15s ease; }
+details.explain[open] > summary::after { transform: rotate(90deg); }
+details.explain > p { margin: var(--s1) 0 0; font-size: var(--t-sm); color: var(--text-dim); }
 
-/* Rhythmus-Stepper (Einnahmeschema) */
-.sched-editor { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.sched-slot { text-align: center; }
-.sched-label { display: block; font-size: 0.78rem; color: var(--text-dim); font-weight: 600; margin-bottom: 4px; }
-.sched-stepper {
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 2px;
-}
-.sched-stepper button {
-  width: 38px; height: 38px; border: none; border-radius: 10px; cursor: pointer;
-  font-size: 1.05rem; font-weight: 700; color: var(--accent-strong);
-  background: var(--surface); box-shadow: var(--shadow-1);
-}
-.sched-stepper button:disabled { opacity: 0.35; box-shadow: none; }
-.sched-stepper button:active { transform: scale(0.94); }
-.sched-value { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 28px; }
+/* ====================================================================
+   Text
+   ==================================================================== */
+
+.hint { font-size: var(--t-sm); color: var(--text-dim); line-height: 1.45; }
+.meta { color: var(--text-dim); font-size: var(--t-sm); }
 .meta.rhythm { color: var(--accent-strong); font-weight: 600; }
 .meta.rhythm.none { color: var(--text-dim); font-weight: 400; }
 .meta.taper { color: var(--text); font-weight: 600; }
+.empty { color: var(--text-dim); text-align: center; padding: var(--s5) var(--s2); font-size: var(--t-md); }
+.med-ended { opacity: 0.55; }
+.list-info { margin: 2px var(--s1) var(--s2); }
 
-/* Medikamenten-Karten mit Aktionsleiste (kein Überlauf mehr) */
-.med-card {
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 12px 13px; margin-bottom: 10px;
-}
-.med-card.emergency { border-left: 4px solid var(--danger); }
-.med-card .meta { color: var(--text-dim); font-size: 0.84rem; margin-top: 2px; overflow-wrap: break-word; }
-.med-card-head { display: flex; align-items: center; gap: 8px; }
-.med-card-head .med-name { font-weight: 700; font-size: 1rem; flex: 1; min-width: 0; overflow-wrap: break-word; }
-.med-dose-badge {
+/* Tag/Badge — eine Form für alle Statuszeichen */
+.tag, .med-dose-badge, .agenda-count, .day-head .day-flag {
+  font-size: var(--t-xs); font-weight: 700; white-space: nowrap;
   background: var(--accent-soft); color: var(--accent-strong);
-  border-radius: 999px; padding: 3px 11px; font-size: 0.8rem; font-weight: 700; white-space: nowrap;
+  border-radius: var(--r-pill); padding: 3px 10px;
+  display: inline-flex; align-items: center; gap: 4px;
 }
-.med-card.emergency .med-dose-badge { background: var(--danger-soft); color: var(--danger); }
-.med-actions {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
-  gap: 6px; margin-top: 10px;
+.tag.quiet { background: var(--surface-2); color: var(--text-dim); }
+.tag.danger, .day-head .day-flag, .med-card.emergency .med-dose-badge {
+  background: var(--danger-soft); color: var(--danger);
 }
+
+/* Icons in Textzeilen */
+.inline-icon { vertical-align: -3px; flex-shrink: 0; }
+
+/* ====================================================================
+   Bedienelemente
+   ==================================================================== */
+
+/* Knopf — Hauptaktion. Standard: volle Breite (Daumen), in `.btn-row` nebeneinander. */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 13px var(--s4); font: inherit; font-size: var(--t-md); font-weight: 700;
+  letter-spacing: -0.005em;
+  border: 1px solid transparent; border-radius: var(--r-md); cursor: pointer;
+  background: var(--accent); color: #fff; margin-top: var(--s2);
+  box-shadow: var(--shadow-1);
+  transition: transform 0.1s ease, filter 0.15s ease;
+}
+.btn:active { transform: scale(0.985); filter: brightness(0.95); }
+.btn.secondary {
+  background: var(--surface); color: var(--text);
+  border-color: var(--border); box-shadow: none;
+}
+.btn.quiet { background: none; color: var(--accent-strong); border-color: transparent; box-shadow: none; }
+.btn.danger { background: var(--danger-soft); color: var(--danger); border-color: transparent; box-shadow: none; }
+.btn:disabled { opacity: 0.45; cursor: default; transform: none; }
+/* Knöpfe nebeneinander statt gestapelt */
+.btn-row { display: flex; gap: var(--s2); margin-top: var(--s2); }
+.btn-row .btn { margin-top: 0; flex: 1; }
+.btn-row .btn.shrink { flex: 0 0 auto; width: auto; }
+/* Knopf direkt neben einem Eingabefeld (auf Höhe des Feldes) */
+.btn-inline { width: auto; margin-top: 22px; flex: 0 0 auto; }
+
+/* Icon-Knopf — Nebenaktion (löschen, bestätigen) an einer Zeile */
+.icon-btn {
+  flex: 0 0 auto; width: 38px; height: 38px; padding: 0; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text-dim); background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  transition: transform 0.1s ease, color 0.15s ease, background 0.15s ease;
+}
+.icon-btn:active { transform: scale(0.94); background: var(--surface-2); }
+.icon-btn.danger { color: var(--danger); }
+.icon-btn.accent { color: var(--accent-strong); }
+.icon-btn.on { background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent); }
+
+/* Segment-Umschalter — genau eine Auswahl (Tabs, Zeitraum, Theme).
+   Eine Spur, gleich breite Segmente; aktiv = angehobene Fläche. */
+.segmented, .tabs, .chip-row {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  gap: 2px; padding: 3px; margin-bottom: var(--s3);
+  background: var(--surface-2); border-radius: var(--r-md);
+}
+.segmented button, .tabs button, .chip-row button {
+  font: inherit; font-size: var(--t-sm); font-weight: 600; cursor: pointer; min-width: 0;
+  padding: 9px 6px; border: none; border-radius: var(--r-sm);
+  background: none; color: var(--text-dim);
+  text-align: center; overflow-wrap: anywhere;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.chip-row button { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.segmented button.active, .tabs button.active, .chip-row button.active {
+  background: var(--surface); color: var(--accent-strong); box-shadow: var(--shadow-1);
+}
+.segmented button:active, .tabs button:active, .chip-row button:active { transform: scale(0.97); }
+/* Enge Variante für vier kurze Segmente auf schmalen Displays */
+.segmented.tight button, .chip-row button { font-size: var(--t-xs); padding: 9px 2px; letter-spacing: -0.01em; }
+
+/* Chip — Filter oder Kurzaktion, mehrere nebeneinander */
+.chips, .med-chips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-bottom: var(--s3); }
+.chip, .med-chip, .chip-grid button {
+  font: inherit; font-size: var(--t-sm); font-weight: 600; cursor: pointer;
+  color: var(--text); background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-pill); padding: 8px 13px;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.chip:active, .med-chip:active, .chip-grid button:active { transform: scale(0.96); background: var(--surface-2); }
+.chip.active, .chip-grid button.active {
+  background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent);
+}
+.chip.danger, .med-chip.emergency { color: var(--danger); border-color: var(--danger); background: var(--danger-soft); }
+.chip.quiet, .med-chip { color: var(--text-dim); }
+.chip-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s2); margin-bottom: var(--s3); }
+.chip-grid button { justify-content: center; }
+
+/* Nebenaktionen an einer Fläche (Rhythmus/Plan/Absetzen …): kompakte
+   Chip-Reihe statt vier großer Kacheln, die umbrechen. */
+.med-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--s3); }
 .med-actions button {
-  font: inherit; font-size: 0.72rem; font-weight: 600; color: var(--text-dim);
-  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-  padding: 8px 2px; cursor: pointer; min-width: 0;
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font: inherit; font-size: var(--t-xs); font-weight: 600; color: var(--text-dim);
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-pill);
+  padding: 7px 11px; cursor: pointer; min-width: 0;
+  display: inline-flex; align-items: center; gap: 5px;
   transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 .med-actions button:active { transform: scale(0.96); }
-.med-actions button.active {
-  background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent);
+.med-actions button.active { background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent); }
+.med-actions button.danger { color: var(--danger); }
+
+/* Zeile mit Schalter (Module, Optionen): Text links, Schalter rechts */
+.toggle-row {
+  display: flex; align-items: flex-start; gap: var(--s3);
+  background: var(--surface-2); border-radius: var(--r-md);
+  padding: var(--s3); margin-bottom: var(--s2); cursor: pointer;
 }
-.entry.phase-current { border-color: var(--accent); background: color-mix(in srgb, var(--accent-soft) 40%, var(--surface)); }
+.toggle-row.on { background: var(--accent-soft); }
+.toggle-row .toggle-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.toggle-row .toggle-title { font-weight: 700; font-size: var(--t-md); }
+.toggle-row .toggle-desc { font-size: var(--t-sm); color: var(--text-dim); margin-top: 2px; }
+.toggle-row input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--accent); flex-shrink: 0; }
 
-/* Sprachnotizen */
-.audio-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.audio-row audio { flex: 1; min-width: 0; height: 40px; }
-.audio-remove { width: auto !important; padding: 8px 12px !important; margin-top: 0 !important; flex-shrink: 0; }
-.audio-clip { display: block; width: 100%; height: 36px; margin-top: 8px; }
+/* Reihen-/Stapel-Helfer (ersetzt Inline-Styles) */
+.row { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; min-width: 0; }
+.row.top { align-items: flex-start; }
+.row > .grow { flex: 1; min-width: 0; }
+.row-fields { display: flex; gap: var(--s2); }
+.row-fields > * { flex: 1; min-width: 0; }
+.tight { margin-top: 0; }
+.hint.tight { margin-top: 0; }
+.flush { margin-bottom: 0; }
+.prep { margin-top: var(--s2); }
+.stance-group { margin-bottom: var(--s3); }
+.stance-group:last-child { margin-bottom: 0; }
 
-/* Akut: großer runder Panik-Knopf — prominent, mit Zoom beim Betätigen */
-.acute-wrap { display: flex; justify-content: center; padding: 6px 0 4px; margin-bottom: 10px; }
+/* ====================================================================
+   Formulare
+   ==================================================================== */
+
+label.field { display: block; margin-bottom: var(--s3); font-size: var(--t-sm); color: var(--text-dim); }
+label.field > span { display: block; margin-bottom: var(--s1); }
+input[type='text'], input[type='number'], input[type='date'], input[type='datetime-local'],
+input[type='password'], input[type='search'], input[type='time'], select, textarea {
+  width: 100%; padding: 11px 12px; font: inherit; font-size: var(--t-md); color: var(--text);
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+textarea { resize: vertical; min-height: 64px; }
+
+.check-row {
+  display: flex; align-items: center; gap: var(--s3); padding: var(--s2) 2px;
+  font-size: var(--t-md); color: var(--text);
+}
+.check-row input { width: 21px; height: 21px; accent-color: var(--accent); flex-shrink: 0; }
+
+.choice-list { display: flex; flex-direction: column; gap: var(--s2); margin-bottom: var(--s3); }
+.choice {
+  border: 1px solid transparent; border-radius: var(--r-md); padding: var(--s3); cursor: pointer;
+  background: var(--surface-2);
+}
+.choice.selected { border-color: var(--accent); background: var(--accent-soft); }
+.choice .label { font-weight: 700; font-size: var(--t-md); }
+.choice .desc { font-size: var(--t-sm); color: var(--text-dim); margin-top: 2px; }
+
+.scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.scale button {
+  padding: 13px 0; font: inherit; font-size: var(--t-md); font-weight: 700;
+  border-radius: var(--r-sm); cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+}
+.scale button.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+.scale-hint { display: flex; justify-content: space-between; font-size: var(--t-xs); color: var(--text-dim); margin-top: 3px; }
+
+/* Rhythmus-Stepper (Einnahmeschema) */
+.sched-editor { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); }
+.sched-slot { text-align: center; }
+.sched-label { display: block; font-size: var(--t-xs); color: var(--text-dim); font-weight: 600; margin-bottom: var(--s1); }
+.sched-stepper {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 2px;
+}
+.sched-stepper button {
+  width: 36px; height: 36px; border: none; border-radius: var(--r-sm); cursor: pointer;
+  font-size: var(--t-lg); font-weight: 700; color: var(--accent-strong);
+  background: var(--surface-2);
+}
+.sched-stepper button:disabled { opacity: 0.35; }
+.sched-stepper button:active { transform: scale(0.94); }
+.sched-value { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 28px; }
+
+/* ====================================================================
+   Heute
+   ==================================================================== */
+
+/* Akut: großer runder Knopf — der einzige laute Punkt der App, mit Absicht */
+.acute-wrap { display: flex; justify-content: center; padding: var(--s1) 0; margin-bottom: var(--s3); }
 .acute-circle {
-  width: 172px; height: 172px; border-radius: 50%; border: none; cursor: pointer;
+  width: 168px; height: 168px; border-radius: 50%; border: none; cursor: pointer;
   font: inherit; color: var(--danger);
   background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--danger-soft) 62%, var(--surface)), var(--danger-soft));
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-  box-shadow: var(--shadow-1), 0 0 0 10px color-mix(in srgb, var(--danger) 9%, transparent);
+  box-shadow: var(--shadow-1), 0 0 0 10px color-mix(in srgb, var(--danger) 8%, transparent);
   transition: transform 0.12s ease, box-shadow 0.15s ease;
   -webkit-user-select: none; user-select: none;
 }
@@ -342,8 +500,8 @@ details.group > .card { margin-left: 0; }
   transform: scale(1.09); /* „auszoomen" beim Drücken — wächst der Hand entgegen */
   box-shadow: var(--shadow-2), 0 0 0 16px color-mix(in srgb, var(--danger) 14%, transparent);
 }
-.acute-circle .acute-label { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.01em; }
-.acute-circle .acute-sub { font-size: 0.78rem; font-weight: 600; opacity: 0.85; max-width: 130px; text-align: center; }
+.acute-circle .acute-label { font-size: var(--t-xl); font-weight: 800; letter-spacing: -0.01em; }
+.acute-circle .acute-sub { font-size: var(--t-xs); font-weight: 600; opacity: 0.85; max-width: 130px; text-align: center; }
 .acute-circle.running {
   background: linear-gradient(145deg, var(--danger), color-mix(in srgb, var(--danger) 72%, #000));
   color: #fff;
@@ -355,170 +513,207 @@ details.group > .card { margin-left: 0; }
 }
 .acute-timer { font-variant-numeric: tabular-nums; font-size: 2rem; font-weight: 800; display: block; }
 
-/* Verlaufsliste */
-.day-group { margin-bottom: 16px; }
-.day-group .day-title { font-size: 0.85rem; color: var(--text-dim); margin: 0 0 6px 4px; }
-
-/* Zeitraum-Chips (Verlauf): vier gleich breite Felder in einer Zeile */
-.chip-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
-.chip-row button {
-  font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; min-width: 0;
-  color: var(--text-dim); background: var(--surface-2);
-  border: 1px solid var(--border); border-radius: 999px; padding: 9px 2px;
-  letter-spacing: -0.01em; text-align: center;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+/* Schnellerfassung: vier gleich große Flächen */
+.quick-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s2); margin-bottom: var(--s3); }
+.quick-btn {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md);
+  padding: var(--s4) 6px; font: inherit; font-size: var(--t-md); font-weight: 600;
+  cursor: pointer; color: var(--text);
+  display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 78px;
+  transition: transform 0.1s ease, background 0.15s ease;
 }
-.chip-row button.active { background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent); }
-.chip-row button:active { transform: scale(0.97); }
+.quick-btn .icon { color: var(--accent-strong); }
+.quick-btn .icon svg { display: block; }
+.quick-btn:active { background: var(--surface-2); transform: scale(0.97); }
 
-/* Filter-Chips (Verlauf): festes 2×2-Raster — bricht auf keiner Breite krumm */
-.chip-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
-.chip-grid button {
-  font: inherit; font-size: 0.86rem; font-weight: 600; cursor: pointer;
-  color: var(--text-dim); background: var(--surface-2);
-  border: 1px solid var(--border); border-radius: 999px; padding: 9px 10px;
+/* Ein-Tipp-Einnahme: ein Knopf je aktivem Medikament */
+.med-quick { display: flex; flex-direction: column; gap: var(--s2); margin-bottom: var(--s3); }
+.med-quick-btn {
+  width: 100%; text-align: left; font: inherit; cursor: pointer;
+  background: var(--accent-soft); border: 1px solid transparent; border-radius: var(--r-md);
+  padding: var(--s3) var(--s4); color: var(--text);
+  display: flex; flex-direction: column; gap: 2px;
+  transition: transform 0.1s ease, filter 0.15s ease;
 }
-.chip-grid button.active { background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent); }
-.chip-grid button:active { transform: scale(0.97); }
+.med-quick-btn:active { filter: brightness(0.96); transform: scale(0.985); }
+.med-quick-btn .med-quick-name {
+  font-weight: 700; font-size: var(--t-md); letter-spacing: -0.01em;
+  display: flex; align-items: center; gap: 6px;
+}
+.med-quick-btn .med-quick-dose { font-size: var(--t-sm); color: var(--text-dim); }
+.med-quick-btn .med-quick-status { font-size: var(--t-sm); font-weight: 700; margin-top: 2px; }
+.med-quick-btn .med-quick-status.open { color: var(--danger); }
+.med-quick-btn .med-quick-status.done { color: var(--accent-strong); }
+.med-quick-btn.emergency { background: var(--danger-soft); }
+/* Jetzt fällig: deutlich, aber ruhig — kräftige Kante statt Blinken */
+.med-quick-btn.due { border-color: var(--accent-strong); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent); }
+.med-quick-btn.muted { opacity: 0.62; }
 
-/* Einordnungszeile über der Tagesliste („34 Einträge an 14 Tagen") */
-.list-info { margin: 2px 4px 10px; }
+/* Sofort-Aufnahme im Akutfall */
+.capture-row { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; margin-bottom: var(--s3); }
+.capture-btn {
+  flex: 1; min-width: 110px; font: inherit; font-size: var(--t-md); font-weight: 700; cursor: pointer;
+  padding: var(--s3); border-radius: var(--r-md);
+  background: var(--surface); color: var(--danger);
+  border: 1.5px solid var(--danger);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+.capture-btn:active { transform: scale(0.97); background: var(--danger-soft); }
+.capture-btn.recording {
+  background: var(--danger); color: #fff; border-color: transparent;
+}
+.capture-count { flex-basis: 100%; font-size: var(--t-sm); font-weight: 600; color: var(--accent-strong); }
 
-/* Verlauf: Tageskopf mit Zusammenfassung und Monats-Trenner — Orientierung
-   beim Scrollen durch Monate voller gleichförmiger Einnahme-Zeilen. */
-.day-head { margin: 0 0 6px 4px; }
+/* „Tage ohne Ereignis" — dezente Statuszeile, keine Wertung */
+.streak-badge {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: var(--t-md); font-weight: 600; color: var(--accent-strong);
+  background: var(--accent-soft); border-radius: var(--r-pill);
+  padding: var(--s2) var(--s3); margin-bottom: var(--s3);
+}
+.streak-badge.today { color: var(--danger); background: var(--danger-soft); }
+
+/* Demo-Hinweis */
+.card.demo-banner { border-color: var(--danger); background: color-mix(in srgb, var(--danger-soft) 30%, var(--surface)); }
+.card.demo-banner h2 { color: var(--danger); }
+
+/* ====================================================================
+   Agenda (proaktive Hinweise)
+   ==================================================================== */
+
+.agenda { display: flex; flex-direction: column; gap: var(--s2); }
+.agenda-item {
+  display: flex; gap: var(--s3); align-items: flex-start; text-align: left; width: 100%;
+  font: inherit; color: var(--text); cursor: pointer;
+  background: var(--surface-2); border: none; border-left: 3px solid var(--text-dim);
+  border-radius: var(--r-md); padding: var(--s3);
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+button.agenda-item:active { transform: scale(0.99); filter: brightness(0.97); }
+.agenda-item.sev-overdue { border-left-color: var(--danger); background: color-mix(in srgb, var(--danger-soft) 55%, var(--surface-2)); }
+.agenda-item.sev-due { border-left-color: var(--accent); background: color-mix(in srgb, var(--accent-soft) 55%, var(--surface-2)); }
+.agenda-item.sev-soon { border-left-color: var(--accent); }
+.agenda-item .agenda-icon { color: var(--text-dim); margin-top: 1px; }
+.agenda-item.sev-overdue .agenda-icon { color: var(--danger); }
+.agenda-item.sev-due .agenda-icon, .agenda-item.sev-soon .agenda-icon { color: var(--accent-strong); }
+.agenda-item .agenda-icon svg { display: block; }
+.agenda-item .agenda-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.agenda-item .agenda-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--s2);
+}
+.agenda-item .agenda-title { font-weight: 700; font-size: var(--t-md); overflow-wrap: anywhere; }
+.agenda-item .agenda-head .tag { flex-shrink: 0; }
+.agenda-item .agenda-detail { font-size: var(--t-sm); color: var(--text); overflow-wrap: break-word; }
+.agenda-item .agenda-tag { font-size: var(--t-xs); color: var(--text-dim); font-weight: 600; margin-top: 2px; }
+
+/* ====================================================================
+   Verlauf
+   ==================================================================== */
+
+.day-group { margin-bottom: var(--s4); }
+.day-head { margin: 0 0 var(--s2) var(--s1); }
 .day-head .day-title {
-  margin: 0; font-weight: 700; color: var(--text); font-size: 0.9rem;
-  display: flex; align-items: center; gap: 8px;
+  margin: 0; font-weight: 700; color: var(--text); font-size: var(--t-md);
+  display: flex; align-items: center; gap: var(--s2);
 }
-.day-head .day-flag {
-  font-size: 0.74rem; font-weight: 700; color: var(--danger);
-  background: var(--danger-soft); border-radius: 999px; padding: 1px 8px;
-}
-.day-head .day-summary { margin: 1px 0 0; font-size: 0.78rem; color: var(--text-dim); }
+.day-head .day-summary { margin: 1px 0 0; font-size: var(--t-sm); color: var(--text-dim); }
 .month-divider {
   position: sticky; top: calc(52px + env(safe-area-inset-top)); z-index: 20;
-  margin: 18px 0 8px; padding: 4px 0;
-  font-size: 0.76rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  margin: var(--s5) 0 var(--s2); padding: var(--s1) 0;
+  font-size: var(--t-xs); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
   color: var(--text-dim);
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
+
+/* Verlaufszeile */
 .entry {
-  display: flex; gap: 10px; align-items: baseline;
+  display: flex; gap: var(--s3); align-items: flex-start;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; padding: 10px 12px; margin-bottom: 6px;
+  border-radius: var(--r-md); padding: var(--s3); margin-bottom: 6px;
 }
-.entry .time { color: var(--text-dim); font-size: 0.8rem; min-width: 42px; font-variant-numeric: tabular-nums; }
-.entry .body { flex: 1; }
-.entry .title { font-weight: 600; font-size: 0.95rem; }
-.entry .meta { color: var(--text-dim); font-size: 0.82rem; margin-top: 2px; }
-.entry.kind-event { border-left: 4px solid var(--danger); }
-.entry.kind-intake { border-left: 4px solid var(--accent); }
-.entry.kind-observation { border-left: 4px solid var(--text-dim); }
-
-.empty { color: var(--text-dim); text-align: center; padding: 24px 8px; font-size: 0.9rem; }
-
-/* Formulare */
-label.field { display: block; margin-bottom: 12px; font-size: 0.85rem; color: var(--text-dim); }
-label.field > span { display: block; margin-bottom: 4px; }
-input[type='text'], input[type='number'], input[type='date'], input[type='datetime-local'],
-input[type='password'], input[type='search'], select, textarea {
-  width: 100%; padding: 11px 12px; font: inherit; color: var(--text);
-  background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+.entry .time {
+  color: var(--text-dim); font-size: var(--t-xs); min-width: 40px;
+  font-variant-numeric: tabular-nums; padding-top: 2px;
 }
-input:focus, select:focus, textarea:focus {
-  outline: none; border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+.entry .body { flex: 1; min-width: 0; }
+.entry .title {
+  font-weight: 600; font-size: var(--t-md);
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px; overflow-wrap: anywhere;
 }
-textarea { resize: vertical; min-height: 64px; }
-
-.check-row { display: flex; align-items: center; gap: 10px; padding: 8px 2px; font-size: 0.92rem; color: var(--text); }
-.check-row input { width: 20px; height: 20px; accent-color: var(--accent); }
-
-.choice-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-.choice {
-  border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; cursor: pointer;
-  background: var(--surface-2);
+.entry .title .inline-icon { color: var(--text-dim); }
+.entry .meta { color: var(--text-dim); font-size: var(--t-sm); margin-top: 2px; }
+.entry.kind-event { border-left: 3px solid var(--danger); }
+.entry.kind-event .title .inline-icon { color: var(--danger); }
+.entry.kind-intake { border-left: 3px solid var(--accent); }
+.entry.kind-intake .title .inline-icon { color: var(--accent-strong); }
+.entry.kind-observation { border-left: 3px solid var(--text-dim); }
+.entry.tappable { cursor: pointer; }
+.entry.tappable:active { background: var(--surface-2); }
+.entry.phase-current { border-color: var(--accent); background: color-mix(in srgb, var(--accent-soft) 40%, var(--surface)); }
+/* Zeile innerhalb einer Karte (Fragen, Ernährung …) — ohne eigenen Rahmen */
+.card .entry.flat, .panel .entry.flat {
+  background: none; border: none; border-left: 3px solid var(--border);
+  border-radius: 0; padding: var(--s2) var(--s3); margin-bottom: var(--s1);
 }
-.choice.selected { border-color: var(--accent); background: var(--accent-soft); }
-.choice .label { font-weight: 600; font-size: 0.92rem; }
-.choice .desc { font-size: 0.8rem; color: var(--text-dim); margin-top: 2px; }
 
-.scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.scale button {
-  padding: 12px 0; font: inherit; font-weight: 600; border-radius: 10px; cursor: pointer;
-  border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
-}
-.scale button.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
-.scale-hint { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-dim); margin-top: 3px; }
+/* ====================================================================
+   Sprachnotizen, Fotos, Kalender, Kurven
+   ==================================================================== */
 
-.btn {
-  display: inline-block; width: 100%; padding: 14px; font: inherit; font-weight: 700;
-  letter-spacing: -0.005em;
-  border: none; border-radius: var(--radius); cursor: pointer;
-  background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 86%, #000));
-  color: #fff; margin-top: 6px; box-shadow: var(--shadow-1);
-  transition: transform 0.1s ease, filter 0.15s ease;
-}
-.btn:active { transform: scale(0.985); filter: brightness(0.95); }
-.btn.secondary { background: var(--surface-2); color: var(--text); box-shadow: none; }
-.btn.danger { background: var(--danger-soft); color: var(--danger); box-shadow: none; }
-.btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+.audio-row { display: flex; align-items: center; gap: var(--s2); margin-bottom: var(--s2); }
+.audio-row audio { flex: 1; min-width: 0; height: 40px; }
+.audio-remove { width: auto !important; padding: 8px 12px !important; margin-top: 0 !important; flex-shrink: 0; }
+.audio-clip { display: block; width: 100%; height: 36px; margin-top: var(--s2); }
 
-/* Modal (Erfassungsformulare) */
-.modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45);
-  display: flex; align-items: flex-end; justify-content: center; z-index: 50;
+.photo-strip { display: flex; gap: 6px; flex-wrap: wrap; margin-top: var(--s2); }
+.photo-thumb {
+  position: relative; width: 62px; height: 62px; padding: 0; cursor: pointer;
+  border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; background: var(--surface-2);
 }
-.modal {
-  background: var(--bg); width: 100%; max-width: 560px; max-height: 92dvh; overflow-y: auto;
-  border-radius: 20px 20px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
-  box-shadow: var(--shadow-2);
+.photo-thumb img, .photo-thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-thumb .video-mark {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #fff; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7); pointer-events: none;
 }
-.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.modal-head h2 { margin: 0; font-size: 1.05rem; }
-.modal-head button { background: none; border: none; font-size: 1.4rem; color: var(--text-dim); cursor: pointer; padding: 4px 8px; }
-
-.hint { font-size: 0.8rem; color: var(--text-dim); }
-.med-ended { opacity: 0.55; }
-
-/* Tabs (Verlauf: Tagebuch / Lebens-Historie) */
-.tabs { display: flex; gap: 8px; margin-bottom: 12px; }
-.tabs button {
-  flex: 1; padding: 10px; border-radius: 10px; cursor: pointer; font: inherit; font-weight: 600;
-  border: 1px solid var(--border); background: var(--surface); color: var(--text-dim);
+.video-clip { display: block; width: 100%; max-height: 260px; margin-top: var(--s2); border-radius: var(--r-sm); background: #000; }
+.photo-remove {
+  position: absolute; top: 2px; right: 2px; width: 22px; height: 22px;
+  border: none; border-radius: 50%; background: rgba(0, 0, 0, 0.6); color: #fff;
+  font-size: var(--t-xs); cursor: pointer; line-height: 1;
 }
-.tabs button.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.photo-picker { margin-bottom: var(--s3); }
+.lightbox {
+  position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, 0.88);
+  display: flex; align-items: center; justify-content: center; padding: var(--s4);
+}
+.lightbox img { max-width: 100%; max-height: 100%; border-radius: var(--r-sm); }
+.lightbox-close {
+  position: absolute; top: calc(var(--s3) + env(safe-area-inset-top)); right: var(--s4);
+  width: 40px; height: 40px; border: none; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15); color: #fff; cursor: pointer;
+}
 
 /* Anfallskalender (Monatsraster) */
-.cal { margin-bottom: 14px; }
-.cal .cal-title { font-size: 0.9rem; font-weight: 600; margin: 0 0 6px; }
+.cal { margin-bottom: var(--s3); }
+.cal .cal-title { font-size: var(--t-md); font-weight: 700; margin: 0 0 6px; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
 .cal-grid .wd { font-size: 0.68rem; color: var(--text-dim); text-align: center; padding: 2px 0; }
 .cal-cell {
   aspect-ratio: 1; border: 1px solid var(--border); border-radius: 6px; background: var(--surface);
-  font-size: 0.72rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  font-size: var(--t-xs); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
 }
-.cal-cell.empty { border: none; background: none; }
+.cal-cell.empty { border: none; background: none; padding: 0; }
 .cal-cell.has-events { background: var(--danger-soft); border-color: var(--danger); font-weight: 700; }
 .cal-cell .cnt { font-size: 0.66rem; color: var(--danger); }
 
-/* Arztbericht */
-.report { padding: 16px; max-width: 700px; margin: 0 auto; }
-.report h1 { font-size: 1.2rem; margin: 0 0 4px; }
-.report table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
-.report th, .report td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
-.report .report-actions { display: flex; gap: 8px; margin-bottom: 14px; }
-.report .report-actions .btn { margin-top: 0; }
-
 /* Zustands-Verlauf (Sparklines) */
-.trend { margin-bottom: 8px; }
+.trend { margin-bottom: var(--s2); }
 .trend-head { display: flex; justify-content: space-between; align-items: baseline; min-height: 1.1em; }
-.trend-title { font-size: 0.8rem; font-weight: 600; color: var(--text-dim); }
-.trend-tip { font-size: 0.75rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.trend-title { font-size: var(--t-sm); font-weight: 600; color: var(--text-dim); }
+.trend-tip { font-size: var(--t-xs); color: var(--text); font-variant-numeric: tabular-nums; }
 .trend-svg { width: 100%; display: block; }
 .trend-grid { stroke: var(--border); stroke-width: 1; }
 .trend-ytick { font-size: 9px; fill: var(--text-dim); }
@@ -530,109 +725,91 @@ textarea { resize: vertical; min-height: 64px; }
 .trend-dosemark { fill: var(--accent-strong); }
 .trend-line2 { fill: none; stroke: var(--danger); stroke-width: 2; stroke-dasharray: 5 4; stroke-linejoin: round; stroke-linecap: round; }
 .trend-dot2 { fill: var(--danger); opacity: 0.45; }
-.trend-legend { display: flex; gap: 16px; font-size: 0.78rem; color: var(--text-dim); margin-top: 4px; }
+.trend-legend { display: flex; flex-wrap: wrap; gap: var(--s3); font-size: var(--t-xs); color: var(--text-dim); margin-top: var(--s1); }
 .trend-legend .swatch { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
 .trend-legend .swatch.a { background: var(--accent); }
 .trend-legend .swatch.b { background: var(--danger); }
 .trend-empty { font-size: 10px; fill: var(--text-dim); }
-.trend-xaxis { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
-.trend-ranges button { padding: 8px; font-size: 0.8rem; }
-.compare-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+.trend-xaxis { display: flex; justify-content: space-between; font-size: var(--t-xs); color: var(--text-dim); margin-top: 2px; }
+.trend-ranges button { padding: 8px; font-size: var(--t-sm); }
+.compare-table { width: 100%; border-collapse: collapse; font-size: var(--t-sm); }
 .compare-table th, .compare-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
-.compare-table th { color: var(--text-dim); font-weight: 600; font-size: 0.78rem; }
+.compare-table th { color: var(--text-dim); font-weight: 600; font-size: var(--t-xs); }
 
-/* „Tage ohne Ereignis" — dezente Statuszeile, keine Wertung */
-.streak-badge {
-  text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--accent);
-  background: var(--accent-soft); border-radius: 999px; padding: 8px 14px; margin-bottom: 12px;
-}
-.streak-badge.today { color: var(--danger); background: var(--danger-soft); }
+/* ====================================================================
+   Modal, Toast, Onboarding, Sperre
+   ==================================================================== */
 
-/* Foto-Anhänge: Thumbnails + Vollbild-Ansicht */
-.photo-strip { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-.photo-thumb {
-  position: relative; width: 64px; height: 64px; padding: 0; cursor: pointer;
-  border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface-2);
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45);
+  display: flex; align-items: flex-end; justify-content: center; z-index: 50;
 }
-.photo-thumb img, .photo-thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.photo-thumb .video-mark {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 1.1rem; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7); pointer-events: none;
+.modal {
+  background: var(--bg); width: 100%; max-width: 560px; max-height: 92dvh; overflow-y: auto;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  padding: var(--s4) var(--s4) calc(var(--s4) + env(safe-area-inset-bottom));
+  box-shadow: var(--shadow-2);
 }
-.video-clip {
-  display: block; width: 100%; max-height: 260px; margin-top: 8px;
-  border-radius: 10px; background: #000;
-}
-.photo-remove {
-  position: absolute; top: 2px; right: 2px; width: 22px; height: 22px;
-  border: none; border-radius: 50%; background: rgba(0, 0, 0, 0.6); color: #fff;
-  font-size: 0.75rem; cursor: pointer; line-height: 1;
-}
-.photo-picker { margin-bottom: 12px; }
-.lightbox {
-  position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, 0.88);
-  display: flex; align-items: center; justify-content: center; padding: 16px;
-}
-.lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
-.lightbox-close {
-  position: absolute; top: calc(12px + env(safe-area-inset-top)); right: 16px;
-  width: 40px; height: 40px; border: none; border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15); color: #fff; font-size: 1.1rem; cursor: pointer;
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--s3); }
+.modal-head h2 { margin: 0; font-size: var(--t-lg); }
+.modal-head button {
+  background: none; border: none; font-size: 1.35rem; color: var(--text-dim);
+  cursor: pointer; padding: var(--s1) var(--s2); line-height: 1;
 }
 
-/* Bestätigungs-Toast (über der Bottom-Nav, große Touchziele) */
 .toast {
   position: fixed; bottom: calc(72px + env(safe-area-inset-bottom)); left: 50%;
   transform: translateX(-50%); width: calc(100% - 32px); max-width: 528px;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s3);
   background: var(--text); color: var(--bg);
-  border-radius: var(--radius); padding: 12px 16px; z-index: 60;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  border-radius: var(--r-md); padding: var(--s3) var(--s4); z-index: 60;
+  box-shadow: var(--shadow-2);
 }
-.toast-msg { font-weight: 600; font-size: 0.95rem; }
+.toast-msg { font-weight: 600; font-size: var(--t-md); }
 .toast-undo {
   background: none; border: none; cursor: pointer; font: inherit;
-  font-weight: 700; color: var(--bg); text-decoration: underline; padding: 8px 4px;
+  font-weight: 700; color: var(--bg); text-decoration: underline; padding: var(--s2) var(--s1);
   flex-shrink: 0;
 }
 
-/* Mini-Anleitung (Onboarding) */
-.onboarding {
-  min-height: 100dvh; display: flex; align-items: center; justify-content: center;
-  padding: 24px 20px;
-}
+.onboarding { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: var(--s5) var(--s4); }
 .ob-card {
   width: 100%; max-width: 400px; text-align: center;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 22px; padding: 30px 24px; box-shadow: var(--shadow-2);
+  border-radius: 22px; padding: var(--s6) var(--s5); box-shadow: var(--shadow-2);
 }
-.ob-icon {
-  width: 96px; height: 96px; margin: 0 auto 14px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-}
+.ob-icon { width: 92px; height: 92px; margin: 0 auto var(--s3); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .ob-card.tone-danger .ob-icon { background: var(--danger-soft); color: var(--danger); }
 .ob-card.tone-accent .ob-icon { background: var(--accent-soft); color: var(--accent-strong); }
-.ob-title { font-size: 1.35rem; margin: 0 0 8px; letter-spacing: -0.01em; }
-.ob-text { font-size: 0.98rem; line-height: 1.55; color: var(--text-dim); margin: 0 0 16px; }
-.ob-dots { display: flex; justify-content: center; gap: 7px; margin-bottom: 14px; }
+.ob-title { font-size: 1.3rem; margin: 0 0 var(--s2); letter-spacing: -0.01em; }
+.ob-text { font-size: 0.98rem; line-height: 1.55; color: var(--text-dim); margin: 0 0 var(--s4); }
+.ob-dots { display: flex; justify-content: center; gap: 7px; margin-bottom: var(--s3); }
 .ob-dots .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
 .ob-dots .dot.active { background: var(--accent); }
 
-/* Sperrbildschirm */
 .lock-screen {
   min-height: 100dvh; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 12px; padding: 24px;
+  align-items: center; justify-content: center; gap: var(--s3); padding: var(--s5);
 }
-.lock-screen input {
-  text-align: center; font-size: 1.3rem; letter-spacing: 0.35em; max-width: 220px;
-}
+.lock-screen input { text-align: center; font-size: 1.3rem; letter-spacing: 0.35em; max-width: 220px; }
+
+/* ====================================================================
+   Berichte (Bildschirm + Druck)
+   ==================================================================== */
+
+.report { padding: var(--s4); max-width: 700px; margin: 0 auto; }
+.report h1 { font-size: 1.2rem; margin: 0 0 var(--s1); }
+.report table { width: 100%; border-collapse: collapse; font-size: var(--t-sm); }
+.report th, .report td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.report .report-actions { display: flex; gap: var(--s2); margin-bottom: var(--s3); }
+.report .report-actions .btn { margin-top: 0; }
 
 /* Notfallkarte (Scheckkartenformat 85,6 × 54 mm) — druckt immer hell */
 .wallet-card {
   display: flex; gap: 4mm; align-items: stretch;
   width: 85.6mm; min-height: 54mm; padding: 4mm;
   background: #fff; color: #111; border: 1px solid #999; border-radius: 3mm;
-  margin: 12px auto 8px; box-shadow: var(--shadow-1);
+  margin: var(--s3) auto var(--s2);
 }
 .wallet-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1mm; }
 .wallet-title { font-size: 8pt; font-weight: 800; letter-spacing: 0.08em; color: #b33; }
@@ -642,16 +819,17 @@ textarea { resize: vertical; min-height: 64px; }
 .wallet-allergy { color: #b33; }
 .wallet-qr { width: 21mm; height: 21mm; align-self: center; flex-shrink: 0; }
 
-/* Druck (Bericht → PDF über den Browser-Druckdialog) */
 @media print {
   .no-print { display: none !important; }
   :root {
-    --bg: #fff; --surface: #fff; --surface-2: #f2f2f2;
+    --bg: #fff; --surface: #fff; --surface-2: #f4f4f2;
     --text: #000; --text-dim: #444; --border: #bbb;
     --accent: #1f8a70; --accent-soft: #e8f2ee;
     --danger: #a33c28; --danger-soft: #f2e4e0;
+    --shadow-1: none; --shadow-2: none;
   }
   body { background: #fff; }
   .card { break-inside: avoid; border-color: #bbb; }
+  .panel, .med-card { break-inside: avoid; }
   .report { padding: 0; max-width: none; }
 }

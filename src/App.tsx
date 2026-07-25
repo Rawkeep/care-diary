@@ -5,7 +5,7 @@ import { useAppStore } from './store/appStore';
 import { useRef, useState } from 'react';
 import { LockScreen } from './components/LockScreen';
 import { Modal } from './components/Modal';
-import { IconHistory, IconMore, IconPill, IconPlan, IconToday } from './components/icons';
+import { IconHistory, IconMore, IconPill, IconPlan, IconToday, IconUser } from './components/icons';
 import { Onboarding } from './components/Onboarding';
 import { ProfileSwitcher } from './components/ProfileSwitcher';
 import { ReminderManager } from './components/ReminderManager';
@@ -110,7 +110,8 @@ export function App() {
           onClick={() => setShowProfiles(true)}
           aria-label="Profil wechseln"
         >
-          👤 {profile.name}
+          <IconUser size={15} />
+          {profile.name}
           {profiles.length > 1 ? ' ▾' : ''}
         </button>
       </header>

@@ -60,6 +60,15 @@ native App und funktioniert auch offline.
 React 18 · Vite · TypeScript (strict) · Zustand · Dexie (IndexedDB) · PWA
 (Manifest + Service Worker). Deutsche UI, englische Identifier.
 
+## Design
+
+Alles Visuelle steckt in `src/index.css`: Tokens (Abstände, fünf Typo-Stufen,
+Radien, zwei Schatten) und Bausteine (Karte, Fläche, Segment-Umschalter, Chip,
+Knopf, Icon-Knopf, Tag). Die Regeln — eine Rahmen-Ebene, Schatten nur mit
+Bedeutung, eine Sprache je Bedienelement, SVG-Icons für Bedienung und Emoji
+nur als Inhaltsmarker — stehen in **[`DESIGN.md`](./DESIGN.md)**. Ansichten
+komponieren nur; sie definieren keine eigenen Maße.
+
 ## Kommandos
 
 ```bash

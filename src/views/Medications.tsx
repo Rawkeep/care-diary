@@ -4,7 +4,7 @@
 // selbst keine Pläne aus.
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { IconEmergency, IconGauge, IconPill, IconStop, IconStopwatch } from '../components/icons';
+import { IconEmergency, IconGauge, IconPill, IconStop, IconStopwatch, IconTrash } from '../components/icons';
 import { ScheduleEditor } from '../components/ScheduleEditor';
 import { db } from '../db/db';
 import type { Medication, Profile } from '../db/models';
@@ -150,24 +150,34 @@ export function Medications({ profile }: { profile: Profile }) {
                 {m.startDate ? `seit ${fmtDayKey(m.startDate)}` : ''}
               </div>
               <div className={m.isEmergency ? 'meta' : rhythmWords(m.schedule) ? 'meta rhythm' : 'meta rhythm none'}>
-                {m.isEmergency
-                  ? 'bei Bedarf / im Notfall'
-                  : rhythmWords(m.schedule)
-                    ? `⏱ ${rhythmWords(m.schedule)} (${m.schedule})`
-                    : '⏱ kein fester Rhythmus — über „Rhythmus" einstellen'}
+                {m.isEmergency ? (
+                  'bei Bedarf / im Notfall'
+                ) : (
+                  <>
+                    <IconStopwatch size={15} className="inline-icon" />{' '}
+                    {rhythmWords(m.schedule)
+                      ? `${rhythmWords(m.schedule)} (${m.schedule})`
+                      : 'kein fester Rhythmus — über „Rhythmus" einstellen'}
+                  </>
+                )}
               </div>
               {taper && (
-                <div className="meta taper">
-                  {taper.direction === 'down' ? '⤵' : taper.direction === 'up' ? '⤴' : '↔'}{' '}
-                  {DIRECTION_LABEL[taper.direction]}
-                  {taper.reached
-                    ? ` — Ziel ${taper.targetDose} ${m.unit} erreicht (seit ${fmtDayKey(taper.endDate)})`
-                    : ` — Stufe ${Math.max(taper.currentIndex + 1, 0)} von ${taper.steps.length}, aktuell ${taper.currentDose} ${m.unit}` +
-                      (taper.daysUntilNext != null
-                        ? ` · nächste Stufe (${taper.nextDose} ${m.unit}) in ${taper.daysUntilNext} Tag${taper.daysUntilNext === 1 ? '' : 'en'}`
-                        : '') +
-                      ` · Ziel ${taper.targetDose} ${m.unit} in ${taper.daysUntilEnd} Tag${taper.daysUntilEnd === 1 ? '' : 'en'} (${fmtDayKey(taper.endDate)})`}
-                </div>
+                <>
+                  <div className="meta taper">
+                    {DIRECTION_LABEL[taper.direction]}
+                    {taper.reached
+                      ? ` — Ziel ${taper.targetDose} ${m.unit} erreicht`
+                      : ` — Stufe ${Math.max(taper.currentIndex + 1, 0)} von ${taper.steps.length}, aktuell ${taper.currentDose} ${m.unit}`}
+                  </div>
+                  <div className="meta">
+                    {taper.reached
+                      ? `seit ${fmtDayKey(taper.endDate)}`
+                      : (taper.daysUntilNext != null
+                          ? `nächste Stufe ${taper.nextDose} ${m.unit} in ${taper.daysUntilNext} Tag${taper.daysUntilNext === 1 ? '' : 'en'} · `
+                          : '') +
+                        `Ziel ${taper.targetDose} ${m.unit} am ${fmtDayKey(taper.endDate)}`}
+                  </div>
+                </>
               )}
 
               <div className="med-actions">
@@ -213,8 +223,8 @@ export function Medications({ profile }: { profile: Profile }) {
               </div>
 
               {effectsFor === m.id && (
-                <div className="card" style={{ marginTop: 6 }}>
-                  <h2>Beobachtete Auffälligkeiten unter {m.name}</h2>
+                <div className="subpanel">
+                  <h3>Beobachtete Auffälligkeiten unter {m.name}</h3>
                   <p className="hint" style={{ marginTop: 0 }}>
                     Mögliche Nebenwirkungen dokumentieren — z. B. Gewichtszunahme, Müdigkeit,
                     Verhaltensänderung, undeutlichere Aussprache. Das ist ein dokumentierter
@@ -223,15 +233,17 @@ export function Medications({ profile }: { profile: Profile }) {
                   </p>
                   {effectsOf(m.id).length === 0 && <p className="empty">Noch nichts notiert.</p>}
                   {effectsOf(m.id).map((s) => (
-                    <div key={s.id} className="entry kind-observation">
+                    <div key={s.id} className="entry kind-observation flat">
                       <div className="body">
-                        <div className="title" style={{ fontWeight: 400 }}>{s.text}</div>
+                        <div className="title">{s.text}</div>
                         <div className="meta">{fmtDate(s.at)}</div>
                       </div>
-                      <button className="btn secondary"
-                        style={{ width: 'auto', padding: '6px 10px', marginTop: 0 }}
-                        onClick={() => removeSideEffect(s.id)} aria-label="Notiz entfernen">
-                        🗑
+                      <button
+                        className="icon-btn danger"
+                        onClick={() => removeSideEffect(s.id)}
+                        aria-label="Notiz entfernen"
+                      >
+                        <IconTrash size={16} />
                       </button>
                     </div>
                   ))}
@@ -250,11 +262,11 @@ export function Medications({ profile }: { profile: Profile }) {
               )}
 
               {rhythmFor === m.id && (
-                <div className="card" style={{ marginTop: 6 }}>
-                  <h2>Einnahme-Rhythmus</h2>
+                <div className="subpanel">
+                  <h3>Einnahme-Rhythmus</h3>
                   <p className="hint" style={{ marginTop: 0 }}>
                     Wie oft wird {m.name} am Tag genommen? Der Rhythmus steuert den
-                    Tagesstatus auf „Heute" („⏰ jetzt fällig" / „✓ heute erledigt").
+                    Tagesstatus auf „Heute" („jetzt fällig" / „heute erledigt").
                   </p>
                   <ScheduleEditor
                     value={m.schedule}
@@ -264,8 +276,8 @@ export function Medications({ profile }: { profile: Profile }) {
               )}
 
               {planFor === m.id && (
-                <div className="card" style={{ marginTop: 6 }}>
-                  <h2>Dosisänderungs-Plan</h2>
+                <div className="subpanel">
+                  <h3>Dosisänderungs-Plan</h3>
                   <p className="hint" style={{ marginTop: 0 }}>
                     Vom Arzt verordnete Stufen dokumentieren — z. B. stufenweises Herabsetzen.
                     Die App übernimmt ab dem jeweiligen Datum automatisch die passende
@@ -289,10 +301,12 @@ export function Medications({ profile }: { profile: Profile }) {
                               : `${phase.eventCount === 0 ? 'kein Ereignis' : `${phase.eventCount} Ereignis${phase.eventCount === 1 ? '' : 'se'}`} in dieser Phase dokumentiert`}
                           </div>
                         </div>
-                        <button className="btn secondary"
-                          style={{ width: 'auto', padding: '6px 10px', marginTop: 0 }}
-                          onClick={() => removeStep(m, idx)} aria-label="Stufe entfernen">
-                          🗑
+                        <button
+                          className="icon-btn danger"
+                          onClick={() => removeStep(m, idx)}
+                          aria-label="Stufe entfernen"
+                        >
+                          <IconTrash size={16} />
                         </button>
                       </div>
                     );
@@ -304,12 +318,12 @@ export function Medications({ profile }: { profile: Profile }) {
                       gehört ins ärztliche Gespräch.
                     </p>
                   )}
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <label className="field" style={{ flex: 1 }}>
+                  <div className="row-fields">
+                    <label className="field">
                       <span>Gültig ab</span>
                       <input type="date" value={stepDate} onChange={(e) => setStepDate(e.target.value)} />
                     </label>
-                    <label className="field" style={{ flex: 1 }}>
+                    <label className="field">
                       <span>Dosis ({m.unit})</span>
                       <input type="number" inputMode="decimal" min="0" step="any" value={stepDose}
                         onChange={(e) => setStepDose(e.target.value)} />
@@ -341,13 +355,13 @@ export function Medications({ profile }: { profile: Profile }) {
             <span>Wirkstoff (optional)</span>
             <input type="text" value={substance} onChange={(e) => setSubstance(e.target.value)} />
           </label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <label className="field" style={{ flex: 1 }}>
+          <div className="row-fields">
+            <label className="field">
               <span>Einzeldosis *</span>
               <input type="number" inputMode="decimal" min="0" step="any" value={dose}
                 onChange={(e) => setDose(e.target.value)} />
             </label>
-            <label className="field" style={{ flex: 1 }}>
+            <label className="field">
               <span>Einheit</span>
               <select value={unit} onChange={(e) => setUnit(e.target.value)}>
                 {['mg', 'ml', 'Tropfen', 'Tablette(n)', 'µg', 'IE'].map((u) => (
@@ -372,12 +386,15 @@ export function Medications({ profile }: { profile: Profile }) {
       )}
 
       {ended.length > 0 && (
-        <div className="card" style={{ marginTop: 12 }}>
+        <div className="card">
           <h2>Abgesetzte Medikamente (Historie)</h2>
           {ended.map((m) => (
             <div key={m.id} className="entry kind-intake med-ended">
               <div className="body">
-                <div className="title">💊 {m.name}</div>
+                <div className="title">
+                  <IconPill size={17} className="inline-icon" />
+                  {m.name}
+                </div>
                 <div className="meta">
                   {m.dose} {m.unit}
                   {m.startDate ? ` · ${m.startDate}` : ''} bis {m.endDate}

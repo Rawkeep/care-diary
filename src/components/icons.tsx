@@ -178,6 +178,16 @@ export function IconCamera(p: IconProps) {
   );
 }
 
+/** Video: Kamera-Korpus mit Linse */
+export function IconVideo(p: IconProps) {
+  return (
+    <Base {...p}>
+      <rect x="3" y="6.5" width="13" height="11" rx="2.5" />
+      <path d="m16 11 5-3v8l-5-3Z" />
+    </Base>
+  );
+}
+
 /** Mikrofon */
 export function IconMic(p: IconProps) {
   return (
@@ -202,6 +212,107 @@ export function IconEdit(p: IconProps) {
   return (
     <Base {...p}>
       <path d="M17 3a2.4 2.4 0 0 1 3.4 3.4L8 18.8 3.5 20l1.2-4.5Z" />
+    </Base>
+  );
+}
+
+/** Überfällig: Sanduhr */
+export function IconHourglass(p: IconProps) {
+  return (
+    <Base {...p}>
+      <path d="M7 3h10M7 21h10" />
+      <path d="M8 3v3.5c0 1.4 4 3.6 4 5.5s-4 4.1-4 5.5V21" />
+      <path d="M16 3v3.5c0 1.4-4 3.6-4 5.5s4 4.1 4 5.5V21" />
+    </Base>
+  );
+}
+
+/** Jetzt dran: Stecknadel */
+export function IconPin(p: IconProps) {
+  return (
+    <Base {...p}>
+      <path d="M12 21s6.5-7.2 6.5-11a6.5 6.5 0 1 0-13 0C5.5 13.8 12 21 12 21Z" />
+      <circle cx="12" cy="10" r="2.4" />
+    </Base>
+  );
+}
+
+/** Information: „i" im Kreis */
+export function IconInfo(p: IconProps) {
+  return (
+    <Base {...p}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5.5M12 7.6v.1" />
+    </Base>
+  );
+}
+
+/** Ruhige Phase: Blatt */
+export function IconLeaf(p: IconProps) {
+  return (
+    <Base {...p}>
+      <path d="M20 4c0 9-5.4 13.5-11 13.5A5 5 0 0 1 4 12.5C4 7 8.5 4 20 4Z" />
+      <path d="M4 20c2.5-6 7-9.5 12-11" />
+    </Base>
+  );
+}
+
+/** Wiederholen / erneut brauchen */
+export function IconRefresh(p: IconProps) {
+  return (
+    <Base {...p}>
+      <path d="M20 12a8 8 0 1 1-2.6-5.9" />
+      <path d="M20 4v4h-4" />
+    </Base>
+  );
+}
+
+/** Meiden: durchgestrichener Kreis */
+export function IconBan(p: IconProps) {
+  return (
+    <Base {...p}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m6.2 6.2 11.6 11.6" />
+    </Base>
+  );
+}
+
+/** App-Sperre: Schloss */
+export function IconLock(p: IconProps) {
+  return (
+    <Base {...p}>
+      <rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5" />
+      <path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" />
+    </Base>
+  );
+}
+
+/** Erinnerung: Glocke */
+export function IconBell(p: IconProps) {
+  return (
+    <Base {...p}>
+      <path d="M18 16V11a6 6 0 1 0-12 0v5l-1.5 2.5h15L18 16Z" />
+      <path d="M9.8 21.2a2.4 2.4 0 0 0 4.4 0" />
+    </Base>
+  );
+}
+
+/** Person / Profil */
+export function IconUser(p: IconProps) {
+  return (
+    <Base {...p}>
+      <circle cx="12" cy="8.5" r="3.8" />
+      <path d="M4.8 20.5a7.4 7.4 0 0 1 14.4 0" />
+    </Base>
+  );
+}
+
+/** Bericht / Dokument */
+export function IconDocument(p: IconProps) {
+  return (
+    <Base {...p}>
+      <path d="M6 3h8l4 4v14H6Z" />
+      <path d="M14 3v4h4M9 12h6M9 16h6" />
     </Base>
   );
 }

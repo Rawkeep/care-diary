@@ -25,7 +25,7 @@ import type {
 } from '../db/models';
 import { moduleEnabled, moduleOrder, type ModuleKey } from '../modules/registry';
 import { appointmentInfo, appointmentTitle, openPrep } from './appointments';
-import { fmtDayKey, fmtDays, localDayKey } from './date';
+import { fmtDayKey, fmtDays, fmtDaysDative, localDayKey } from './date';
 import { openPrescriptionFor, prescriptionInfo, PRESCRIPTION_STATUS_LABEL } from './prescription';
 import { projectStock, stockExpiry } from './stock';
 
@@ -57,6 +57,21 @@ export interface AgendaInput {
 }
 
 const SEVERITY_RANK: Record<AgendaSeverity, number> = { overdue: 0, due: 1, soon: 2, info: 3 };
+
+/**
+ * Kurzform für die Titelzeile einer Karte. Titel sollen in eine, höchstens
+ * zwei Zeilen passen — „Blutbild / Laborkontrolle — Kontrolle unter
+ * Levetiracetam" braucht sonst drei. Alles nach dem Gedankenstrich und alle
+ * Klammer-Zusätze wandern weg; das Vollständige steht im Plan.
+ */
+export function shortSubject(text: string, max = 34): string {
+  const head = text
+    .split(' — ')[0]
+    .replace(/\s*\([^)]*\)\s*/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return head.length <= max ? head : `${head.slice(0, max - 1).trimEnd()}…`;
+}
 
 export function severityRank(s: AgendaSeverity): number {
   return SEVERITY_RANK[s];
@@ -100,10 +115,10 @@ export function prescriptionAgenda({ prescriptions, todayKey }: AgendaInput): Ag
           key: `rx.${p.id}.needed`,
           module: 'prescriptions',
           severity: info.openDays != null && info.openDays >= 3 ? 'due' : 'soon',
-          title: `Verordnung anfordern: ${p.title}`,
+          title: `${shortSubject(p.title)} anfordern`,
           detail:
             `Steht als „${PRESCRIPTION_STATUS_LABEL.needed}" auf der Liste` +
-            (info.openDays && info.openDays > 0 ? ` — seit ${fmtDays(info.openDays)}` : '') +
+            (info.openDays && info.openDays > 0 ? ` — seit ${fmtDaysDative(info.openDays)}` : '') +
             `${bei ? `. Ansprechpartner: ${at}` : ''}.`,
         });
         break;
@@ -112,8 +127,8 @@ export function prescriptionAgenda({ prescriptions, todayKey }: AgendaInput): Ag
           key: `rx.${p.id}.waiting`,
           module: 'prescriptions',
           severity: 'due',
-          title: `Nachfragen: ${p.title}`,
-          detail: `Seit ${fmtDays(info.waitingDays ?? 0)} angefragt${bei} und noch nichts eingetroffen.`,
+          title: `${shortSubject(p.title)}: nachfragen`,
+          detail: `Seit ${fmtDaysDative(info.waitingDays ?? 0)} angefragt${bei} und noch nichts eingetroffen.`,
         });
         break;
       case 'expiring':
@@ -121,7 +136,7 @@ export function prescriptionAgenda({ prescriptions, todayKey }: AgendaInput): Ag
           key: `rx.${p.id}.expiring`,
           module: 'prescriptions',
           severity: (info.daysLeft ?? 0) <= 2 ? 'overdue' : 'due',
-          title: `Rezept einlösen: ${p.title}`,
+          title: `${shortSubject(p.title)} einlösen`,
           detail:
             `Noch ${fmtDays(info.daysLeft ?? 0)} einlösbar (bis ${fmtDayKey(info.expiry!)}).` +
             ' Frist bitte auf dem Beleg prüfen.',
@@ -132,7 +147,7 @@ export function prescriptionAgenda({ prescriptions, todayKey }: AgendaInput): Ag
           key: `rx.${p.id}.expired`,
           module: 'prescriptions',
           severity: 'overdue',
-          title: `Frist abgelaufen: ${p.title}`,
+          title: `${shortSubject(p.title)}: Frist abgelaufen`,
           detail: `War bis ${fmtDayKey(info.expiry!)} einlösbar — eine neue Verordnung ist nötig.`,
         });
         break;
@@ -222,7 +237,7 @@ export function appointmentAgenda({ appointments, todayKey }: AgendaInput): Agen
   const out: AgendaItem[] = [];
   for (const a of appointments) {
     const info = appointmentInfo(a, todayKey);
-    const title = appointmentTitle(a);
+    const title = shortSubject(appointmentTitle(a));
     const prep = openPrep(a);
     const prepNote =
       prep.length > 0 ? ` Offen in der Vorbereitung: ${prep.slice(0, 3).join('; ')}.` : '';
@@ -243,7 +258,7 @@ export function appointmentAgenda({ appointments, todayKey }: AgendaInput): Agen
           key: `appt.${a.id}.soon`,
           module: 'appointments',
           severity: prep.length > 0 && (info.daysUntil ?? 0) <= 1 ? 'due' : 'soon',
-          title: `${title} in ${fmtDays(info.daysUntil ?? 0)}`,
+          title: `${title} in ${fmtDaysDative(info.daysUntil ?? 0)}`,
           detail: `Termin am ${fmtDayKey(localDayKey(a.at!))}${place}.${prepNote}`,
         });
         break;
@@ -252,7 +267,7 @@ export function appointmentAgenda({ appointments, todayKey }: AgendaInput): Agen
           key: `appt.${a.id}.past`,
           module: 'appointments',
           severity: 'due',
-          title: `Nachtragen: ${title}`,
+          title: `${title} nachtragen`,
           detail:
             `Der Termin war ${fmtDayKey(localDayKey(a.at!))} und ist noch offen. ` +
             'Als erledigt markieren — dann läuft das Intervall weiter.',
@@ -264,7 +279,7 @@ export function appointmentAgenda({ appointments, todayKey }: AgendaInput): Agen
           key: `appt.${a.id}.due`,
           module: 'appointments',
           severity: info.state === 'overdue' ? 'overdue' : 'due',
-          title: `Kontrolle fällig: ${title}`,
+          title: `${title} vereinbaren`,
           detail:
             `Laut Intervall (${a.intervalMonths} Monate) fällig seit ${fmtDayKey(info.dueDayKey!)}` +
             `${a.lastDoneDate ? `, zuletzt ${fmtDayKey(a.lastDoneDate)}` : ''}. Termin vereinbaren.`,
@@ -275,7 +290,7 @@ export function appointmentAgenda({ appointments, todayKey }: AgendaInput): Agen
           key: `appt.${a.id}.dueSoon`,
           module: 'appointments',
           severity: 'soon',
-          title: `Kontrolle bald fällig: ${title}`,
+          title: `${title} bald wieder fällig`,
           detail:
             `Laut Intervall (${a.intervalMonths} Monate) ab ${fmtDayKey(info.dueDayKey!)} — ` +
             'jetzt ist ein guter Zeitpunkt für einen Termin.',

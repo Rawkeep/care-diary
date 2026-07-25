@@ -69,7 +69,7 @@ export function PhotoPicker({
         </div>
       )}
       <button type="button" className="btn secondary" onClick={() => inputRef.current?.click()}>
-        📷 Foto / Video hinzufügen
+        <IconCamera size={18} /> Foto / Video hinzufügen
       </button>
       {hint && <p className="hint" style={{ color: 'var(--danger)' }}>{hint}</p>}
       <input

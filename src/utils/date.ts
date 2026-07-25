@@ -112,3 +112,12 @@ export function fmtRelativeDays(days: number): string {
 export function fmtDays(days: number): string {
   return `${days} ${Math.abs(days) === 1 ? 'Tag' : 'Tage'}`;
 }
+
+/**
+ * Dativ-Form für Zeitangaben nach Präpositionen: „in 5 **Tagen**", „seit 8
+ * Tagen", „vor 3 Tagen". `fmtDays` steht im Nominativ („noch 5 Tage") und
+ * liest sich nach „in/seit/vor" falsch.
+ */
+export function fmtDaysDative(days: number): string {
+  return `${days} ${Math.abs(days) === 1 ? 'Tag' : 'Tagen'}`;
+}

@@ -3,6 +3,7 @@
 // bewusst gleichrangig: sprechen statt tippen, gerade für alle, denen
 // Schreiben schwerfällt.
 import { useEffect, useRef, useState } from 'react';
+import { IconCamera, IconDone, IconMic, IconStop, IconVideo } from './icons';
 
 const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 
@@ -85,10 +86,10 @@ export function CaptureButtons({
   return (
     <div className="capture-row">
       <button type="button" className="capture-btn" onClick={() => videoRef.current?.click()}>
-        🎥 Video
+        <IconVideo size={20} /> Video
       </button>
       <button type="button" className="capture-btn" onClick={() => photoRef.current?.click()}>
-        📷 Foto
+        <IconCamera size={20} /> Foto
       </button>
       {micSupported && (
         <button
@@ -96,12 +97,21 @@ export function CaptureButtons({
           className={recording ? 'capture-btn recording' : 'capture-btn'}
           onClick={toggleMic}
         >
-          {recording ? `⏹ Stopp (${mm}:${ss})` : '🎙 Sprachnotiz'}
+          {recording ? (
+            <>
+              <IconStop size={20} /> Stopp ({mm}:{ss})
+            </>
+          ) : (
+            <>
+              <IconMic size={20} /> Sprachnotiz
+            </>
+          )}
         </button>
       )}
       {count > 0 && (
         <span className="capture-count">
-          ✓ {count} Aufnahme{count === 1 ? '' : 'n'} — wird mit dem Ereignis gespeichert
+          <IconDone size={15} className="inline-icon" /> {count} Aufnahme{count === 1 ? '' : 'n'} — wird
+          mit dem Ereignis gespeichert
         </span>
       )}
       <input

@@ -7,6 +7,15 @@ import { newId, nowIso } from '../db/models';
 import { useAppStore } from '../store/appStore';
 import { REMINDER_PREF_KEY, remindersEnabled } from '../components/ReminderManager';
 import { MODULES, moduleEnabled, toggleModule } from '../modules/registry';
+import {
+  IconBell,
+  IconDone,
+  IconDocument,
+  IconEmergency,
+  IconLock,
+  IconTrash,
+  IconUser,
+} from '../components/icons';
 import { deleteProfileData } from '../demo/demoData';
 import { decryptBackup, encryptBackup, isBackupEnvelope } from '../utils/backup';
 import { dayKeyDaysAgo, localDayKey } from '../utils/date';
@@ -206,7 +215,7 @@ export function More({ profile }: { profile: Profile }) {
       {profile.isDemo && (
         <div className="card demo-banner">
           <h2>Demo-Profil</h2>
-          <p className="hint" style={{ marginTop: 0 }}>
+          <p className="hint tight">
             „{profile.name}" enthält nur Beispieldaten zum Ausprobieren. Ein Tipp entfernt
             alles rückstandslos — echte Profile bleiben unberührt.
           </p>
@@ -220,13 +229,15 @@ export function More({ profile }: { profile: Profile }) {
               else window.location.reload();
             }}
           >
-            🗑 Demo-Daten löschen
+            <IconTrash size={18} /> Demo-Daten löschen
           </button>
         </div>
       )}
 
       <div className="card">
-        <h2>Profil</h2>
+        <h2>
+          <IconUser size={16} /> Profil
+        </h2>
         <p style={{ margin: '4px 0' }}>
           <strong>{profile.name}</strong>
           {profile.birthDate ? ` · geboren ${profile.birthDate}` : ''}
@@ -250,25 +261,26 @@ export function More({ profile }: { profile: Profile }) {
                 }
                 aria-label={`${a} entfernen`}
               >
-                ⚠ {a} ✕
+                <IconEmergency size={14} className="inline-icon" /> {a} ✕
               </button>
             ))}
           </div>
         )}
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input
-            type="text"
-            value={allergyText}
-            onChange={(e) => setAllergyText(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addAllergy()}
-            placeholder="z. B. Erdnüsse (schwer), Laktose"
-            style={{ flex: 1 }}
-          />
+        <div className="row">
+          <span className="grow">
+            <input
+              type="text"
+              value={allergyText}
+              onChange={(e) => setAllergyText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addAllergy()}
+              placeholder="z. B. Erdnüsse (schwer), Laktose"
+            />
+          </span>
           <button
-            className="btn secondary"
-            style={{ width: 'auto', marginTop: 0 }}
+            className="icon-btn accent"
             onClick={addAllergy}
             disabled={allergyText.trim() === ''}
+            aria-label="Allergie hinzufügen"
           >
             ＋
           </button>
@@ -277,7 +289,7 @@ export function More({ profile }: { profile: Profile }) {
 
       <div className="card">
         <h2>Module</h2>
-        <p className="hint" style={{ marginTop: 0 }}>
+        <p className="hint tight">
           Die Begleit-Aktivitäten rund um die Therapie — einzeln zuschaltbar, damit die App nur
           zeigt, was ihr gerade braucht. Aktivierte Module erscheinen im Tab „Plan", melden sich
           bei Fristen und Fälligkeiten und kommen in den Arztbericht. Ausschalten verbirgt nur:
@@ -286,22 +298,30 @@ export function More({ profile }: { profile: Profile }) {
         {MODULES.map((m) => {
           const on = moduleEnabled(profile.modules, m.key);
           return (
-            <div key={m.key} className={`choice ${on ? 'selected' : ''}`} style={{ marginBottom: 8 }}>
-              <label className="check-row" style={{ padding: 0 }}>
-                <input
-                  type="checkbox"
-                  checked={on}
-                  onChange={(e) =>
-                    db.profiles.update(profile.id, {
-                      modules: toggleModule(profile.modules, m.key, e.target.checked),
-                    })
-                  }
-                />
-                <span className="label">{m.label}</span>
-              </label>
-              <div className="desc">{m.description}</div>
-              <div className="desc">🔔 {m.reminds}</div>
-            </div>
+            <label key={m.key} className={on ? 'toggle-row on' : 'toggle-row'}>
+              <span className="toggle-body">
+                <span className="toggle-title">{m.label}</span>
+                <span className="toggle-desc">
+                  {on ? (
+                    <>
+                      <IconBell size={14} className="inline-icon" /> {m.reminds}
+                    </>
+                  ) : (
+                    m.description
+                  )}
+                </span>
+              </span>
+              <input
+                type="checkbox"
+                checked={on}
+                onChange={(e) =>
+                  db.profiles.update(profile.id, {
+                    modules: toggleModule(profile.modules, m.key, e.target.checked),
+                  })
+                }
+                aria-label={`Modul ${m.label} ${on ? 'ausschalten' : 'einschalten'}`}
+              />
+            </label>
           );
         })}
       </div>
@@ -310,43 +330,50 @@ export function More({ profile }: { profile: Profile }) {
         <summary>Berichte &amp; Fragen</summary>
       <div className="card">
         <h2>Arztbericht</h2>
-        <p className="hint" style={{ marginTop: 0 }}>
+        <p className="hint tight">
           Strukturierter Verlaufsbericht zum Ausdrucken oder als PDF — inklusive
           Ereignis-Kalender, Medikationsverlauf und offener Fragen.
         </p>
         <div className="quick-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-          <button className="quick-btn" onClick={() => report(28)}>📄 Letzte 4 Wochen</button>
-          <button className="quick-btn" onClick={() => report(91)}>📄 Letzte 3 Monate</button>
-          <button className="quick-btn" onClick={() => report(182)}>📄 Letzte 6 Monate</button>
-          <button className="quick-btn" onClick={() => report(null)}>📄 Gesamter Verlauf</button>
+          <button className="quick-btn" onClick={() => report(28)}>
+            <span className="icon"><IconDocument size={22} /></span>4 Wochen
+          </button>
+          <button className="quick-btn" onClick={() => report(91)}>
+            <span className="icon"><IconDocument size={22} /></span>3 Monate
+          </button>
+          <button className="quick-btn" onClick={() => report(182)}>
+            <span className="icon"><IconDocument size={22} /></span>6 Monate
+          </button>
+          <button className="quick-btn" onClick={() => report(null)}>
+            <span className="icon"><IconDocument size={22} /></span>Gesamt
+          </button>
         </div>
       </div>
 
       <div className="card">
         <h2>Bericht fürs Umfeld</h2>
-        <p className="hint" style={{ marginTop: 0 }}>
+        <p className="hint tight">
           „So könnt ihr {profile.name} unterstützen" — ein laienverständliches Blatt für
           Schule, Betreuung, Familie und Freunde: was die Erkrankung bedeutet, was im
           Moment hilft, was im Alltag guttut. Ihr bestimmt, was hineinkommt — Skalen,
           Gewicht und Nebenwirkungen bleiben grundsätzlich draußen.
         </p>
-        <button className="btn" onClick={openCareReport}>🤝 Umfeld-Bericht öffnen</button>
+        <button className="btn" onClick={openCareReport}>Umfeld-Bericht öffnen</button>
       </div>
 
       <div className="card">
         <h2>Fragen für den nächsten Termin</h2>
         {openQuestions.map((q) => (
-          <div key={q.id} className="entry kind-observation">
+          <div key={q.id} className="entry kind-observation flat">
             <div className="body">
-              <div className="title" style={{ fontWeight: 400 }}>{q.text}</div>
+              <div className="title">{q.text}</div>
             </div>
             <button
-              className="btn secondary"
-              style={{ width: 'auto', padding: '6px 10px', marginTop: 0 }}
+              className="icon-btn accent"
               onClick={() => resolveQuestion(q.id)}
               aria-label="Frage als besprochen markieren"
             >
-              ✓
+              <IconDone size={17} />
             </button>
           </div>
         ))}
@@ -381,8 +408,12 @@ export function More({ profile }: { profile: Profile }) {
               <input type="password" inputMode="numeric" value={pin2} onChange={(e) => setPin2(e.target.value)} />
             </label>
             {pinError && <p className="hint" style={{ color: 'var(--danger)' }}>{pinError}</p>}
-            <button className="btn" onClick={savePin}>PIN speichern</button>
-            <button className="btn secondary" onClick={() => { setPinMode('none'); setPinError(''); }}>Abbrechen</button>
+            <div className="btn-row">
+              <button className="btn" onClick={savePin}>PIN speichern</button>
+              <button className="btn secondary" onClick={() => { setPinMode('none'); setPinError(''); }}>
+                Abbrechen
+              </button>
+            </div>
           </>
         )}
         {pinMode === 'remove' && (
@@ -392,21 +423,33 @@ export function More({ profile }: { profile: Profile }) {
               <input type="password" inputMode="numeric" value={pin1} onChange={(e) => setPin1(e.target.value)} />
             </label>
             {pinError && <p className="hint" style={{ color: 'var(--danger)' }}>{pinError}</p>}
-            <button className="btn danger" onClick={removePin}>PIN entfernen</button>
-            <button className="btn secondary" onClick={() => { setPinMode('none'); setPinError(''); }}>Abbrechen</button>
+            <div className="btn-row">
+              <button className="btn danger" onClick={removePin}>PIN entfernen</button>
+              <button className="btn secondary" onClick={() => { setPinMode('none'); setPinError(''); }}>
+                Abbrechen
+              </button>
+            </div>
           </>
         )}
         {pinMode === 'none' && (
           <>
-            <p className="hint" style={{ marginTop: 0 }}>
+            <p className="hint tight">
               Schützt die App vor neugierigen Blicken auf einem geteilten Gerät. Beim nächsten
               Öffnen wird die PIN abgefragt. (Die Daten selbst bleiben unverschlüsselt lokal.)
             </p>
             {pinSet ? (
               <>
-                <button className="btn" onClick={lock}>🔒 Jetzt sperren</button>
-                <button className="btn secondary" onClick={() => { setPinMode('set'); setPin1(''); setPin2(''); }}>PIN ändern</button>
-                <button className="btn secondary" onClick={() => { setPinMode('remove'); setPin1(''); }}>PIN entfernen</button>
+                      <button className="btn" onClick={lock}>
+                  <IconLock size={18} /> Jetzt sperren
+                </button>
+                <div className="btn-row">
+                  <button className="btn secondary" onClick={() => { setPinMode('set'); setPin1(''); setPin2(''); }}>
+                    PIN ändern
+                  </button>
+                  <button className="btn secondary" onClick={() => { setPinMode('remove'); setPin1(''); }}>
+                    PIN entfernen
+                  </button>
+                </div>
               </>
             ) : (
               <button className="btn" onClick={() => { setPinMode('set'); setPin1(''); setPin2(''); }}>PIN einrichten</button>
@@ -417,23 +460,23 @@ export function More({ profile }: { profile: Profile }) {
 
       <div className="card">
         <h2>Kurzanleitung</h2>
-        <p className="hint" style={{ marginTop: 0 }}>
+        <p className="hint tight">
           Die vier Karten vom ersten Start — jederzeit zum Nachschauen oder zum Zeigen,
           wenn jemand Neues die App bedient.
         </p>
-        <button className="btn secondary" onClick={openIntro}>📖 Kurzanleitung ansehen</button>
+        <button className="btn secondary" onClick={openIntro}>Kurzanleitung ansehen</button>
       </div>
 
       <div className="card">
         <h2>Darstellung</h2>
-        <p className="hint" style={{ marginTop: 0 }}>
+        <p className="hint tight">
           „System" folgt der Hell/Dunkel-Einstellung des Geräts.
         </p>
         <div className="tabs">
           {([
             ['system', 'System'],
-            ['light', '☀️ Hell'],
-            ['dark', '🌙 Dunkel'],
+            ['light', 'Hell'],
+            ['dark', 'Dunkel'],
           ] as [ThemePref, string][]).map(([value, label]) => (
             <button
               key={value}
@@ -466,7 +509,7 @@ export function More({ profile }: { profile: Profile }) {
 
       <div className="card">
         <h2>Erinnerungen</h2>
-        <p className="hint" style={{ marginTop: 0 }}>
+        <p className="hint tight">
           Sanfte Einnahme-Erinnerung aus dem Schema („1-0-1"): Tagesstatus auf den
           Medikamenten-Buttons, App-Badge mit offenen Einnahmen (installierte App) und —
           wenn erlaubt — eine Benachrichtigung je fälligem Zeitpunkt (morgens 8 Uhr,
@@ -482,11 +525,11 @@ export function More({ profile }: { profile: Profile }) {
         </label>
         {notifPermission === 'default' && (
           <button className="btn secondary" onClick={requestNotifications}>
-            🔔 Benachrichtigungen erlauben
+            Benachrichtigungen erlauben
           </button>
         )}
         {notifPermission === 'granted' && (
-          <p className="hint">🔔 Benachrichtigungen sind erlaubt.</p>
+          <p className="hint">Benachrichtigungen sind erlaubt.</p>
         )}
         {notifPermission === 'denied' && (
           <p className="hint">
@@ -506,7 +549,7 @@ export function More({ profile }: { profile: Profile }) {
         <summary>Daten — Backup &amp; Datenschutz</summary>
       <div className="card">
         <h2>Sicherung (Backup)</h2>
-        <p className="hint" style={{ marginTop: 0 }}>
+        <p className="hint tight">
           Empfohlen: verschlüsseltes Backup mit Passphrase (AES-256). Die Datei kann
           bedenkenlos in einer Cloud oder per Mail abgelegt werden — lesbar ist sie
           nur mit der Passphrase. <strong>Passphrase gut merken, sie ist nicht wiederherstellbar.</strong>
@@ -521,21 +564,21 @@ export function More({ profile }: { profile: Profile }) {
           />
         </label>
         <button className="btn" onClick={exportEncrypted} disabled={backupPass.length < 8 || backupBusy}>
-          {backupBusy ? 'Verschlüsselt …' : '🔐 Verschlüsseltes Backup erstellen (.cdbak)'}
+          {backupBusy ? 'Verschlüsselt …' : 'Verschlüsseltes Backup erstellen (.cdbak)'}
         </button>
         <button className="btn secondary" onClick={exportJson}>
-          ⬇ Unverschlüsselter Export (JSON)
+          Unverschlüsselter Export (JSON)
         </button>
       </div>
 
       <div className="card">
         <h2>Wiederherstellen</h2>
-        <p className="hint" style={{ marginTop: 0 }}>
+        <p className="hint tight">
           Backup-Datei (.cdbak) oder JSON-Export einspielen — z. B. nach einem
           Gerätewechsel. Gleiche Einträge werden überschrieben, alles andere bleibt.
         </p>
         <button className="btn secondary" onClick={() => restoreInputRef.current?.click()}>
-          📂 Datei auswählen
+          Datei auswählen
         </button>
         <input
           ref={restoreInputRef}
@@ -560,23 +603,21 @@ export function More({ profile }: { profile: Profile }) {
               </label>
             )}
             {restoreError && <p className="hint" style={{ color: 'var(--danger)' }}>{restoreError}</p>}
-            <button
-              className="btn"
-              onClick={restore}
-              disabled={restoreNeedsPass && restorePass === ''}
-            >
-              Wiederherstellen
-            </button>
-            <button className="btn secondary" onClick={() => { setRestoreText(null); setRestoreError(''); }}>
-              Abbrechen
-            </button>
+            <div className="btn-row">
+              <button className="btn" onClick={restore} disabled={restoreNeedsPass && restorePass === ''}>
+                Wiederherstellen
+              </button>
+              <button className="btn secondary" onClick={() => { setRestoreText(null); setRestoreError(''); }}>
+                Abbrechen
+              </button>
+            </div>
           </>
         )}
       </div>
 
       <div className="card">
         <h2>Datenschutz</h2>
-        <p className="hint" style={{ marginTop: 0 }}>
+        <p className="hint tight">
           care-diary speichert alle Angaben ausschließlich lokal auf diesem Gerät (IndexedDB).
           Es gibt kein Konto, keine Cloud und keine Datenübertragung an Dritte.
         </p>

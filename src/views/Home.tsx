@@ -5,9 +5,11 @@ import { AgendaCards } from '../components/AgendaCards';
 import { CaptureButtons } from '../components/CaptureButtons';
 import { EntryList } from '../components/EntryList';
 import {
+  IconClock,
   IconDone,
   IconEmergency,
   IconEvent,
+  IconLeaf,
   IconPill,
   IconState,
   IconWeight,
@@ -143,7 +145,14 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
                       </span>
                       {open.length > 0 && (
                         <span className="med-quick-status open">
-                          {due ? `⏰ jetzt fällig: ${open.join(', ')}` : `heute noch offen: ${open.join(', ')}`}
+                          {due ? (
+                            <>
+                              <IconClock size={14} className="inline-icon" /> jetzt fällig:{' '}
+                              {open.join(', ')}
+                            </>
+                          ) : (
+                            `heute noch offen: ${open.join(', ')}`
+                          )}
                         </span>
                       )}
                     </button>
@@ -182,7 +191,7 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
         <AgendaCards items={agenda} max={AGENDA_ON_HOME} onOpen={() => setView('plan')} />
       )}
 
-      <div className="quick-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+      <div className="quick-grid">
         {/* Reihenfolge nach Nutzungshäufigkeit: täglich → selten */}
         <button className="quick-btn" onClick={() => setOpenForm('intake')}>
           <span className="icon"><IconPill size={30} /></span>Einnahme
@@ -200,11 +209,16 @@ export function Home({ profile, preset }: { profile: Profile; preset: ConditionP
 
       {eventFreeDays != null && (
         <div className={eventFreeDays === 0 ? 'streak-badge today' : 'streak-badge'}>
-          {eventFreeDays === 0
-            ? '⚡ Heute ein Ereignis dokumentiert'
-            : eventFreeDays === 1
-              ? '🕊 1 Tag ohne Ereignis'
-              : `🕊 ${eventFreeDays} Tage ohne Ereignis`}
+          {eventFreeDays === 0 ? (
+            <>
+              <IconEvent size={17} /> Heute ein Ereignis dokumentiert
+            </>
+          ) : (
+            <>
+              <IconLeaf size={17} /> {eventFreeDays} {eventFreeDays === 1 ? 'Tag' : 'Tage'} ohne
+              Ereignis
+            </>
+          )}
         </div>
       )}
 

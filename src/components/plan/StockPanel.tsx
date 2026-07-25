@@ -9,7 +9,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
 import type { MedStock, Medication, Profile } from '../../db/models';
 import { nowIso } from '../../db/models';
-import { fmtDayKey, fmtDays, localDayKey } from '../../utils/date';
+import { fmtDayKey, fmtDays, fmtDaysDative, localDayKey } from '../../utils/date';
 import {
   addPack,
   newStock,
@@ -19,7 +19,7 @@ import {
   type StockState,
 } from '../../utils/stock';
 import { parseSchedule } from '../../utils/schedule';
-import { IconEmergency, IconPill, IconStock, IconTrash } from '../icons';
+import { IconBan, IconEmergency, IconPill, IconStock, IconTrash } from '../icons';
 
 const STATE_TEXT: Record<StockState, string> = {
   ok: 'reicht',
@@ -82,8 +82,7 @@ export function StockPanel({ profile }: { profile: Profile }) {
           </div>
           <div className="med-actions">
             <button onClick={() => startTracking(med)}>
-              <IconStock size={18} />
-              Bestand führen
+              <IconStock size={15} /> Bestand führen
             </button>
           </div>
         </div>
@@ -124,9 +123,14 @@ export function StockPanel({ profile }: { profile: Profile }) {
         </div>
         {exp.state !== 'none' && (
           <div className={exp.state === 'ok' ? 'meta' : 'meta taper'}>
-            {exp.state === 'expired'
-              ? `⛔ Verfallsdatum ${fmtDayKey(stock.expiryDate!)} überschritten`
-              : `Verfällt am ${fmtDayKey(stock.expiryDate!)}${exp.daysLeft != null ? ` (in ${fmtDays(exp.daysLeft)})` : ''}`}
+            {exp.state === 'expired' ? (
+              <>
+                <IconBan size={14} className="inline-icon" /> Verfallsdatum{' '}
+                {fmtDayKey(stock.expiryDate!)} überschritten
+              </>
+            ) : (
+              `Verfällt am ${fmtDayKey(stock.expiryDate!)}${exp.daysLeft != null ? ` (in ${fmtDaysDative(exp.daysLeft)})` : ''}`
+            )}
           </div>
         )}
 
@@ -140,8 +144,7 @@ export function StockPanel({ profile }: { profile: Profile }) {
             }}
             aria-expanded={editing}
           >
-            <IconStock size={18} />
-            {editing ? 'Fertig' : 'Zählen / Nachlegen'}
+            <IconStock size={15} /> {editing ? 'Fertig' : 'Zählen / Nachlegen'}
           </button>
           <button
             onClick={() => {
@@ -150,16 +153,15 @@ export function StockPanel({ profile }: { profile: Profile }) {
             }}
             aria-label={`Bestand von ${med.name} nicht mehr führen`}
           >
-            <IconTrash size={18} />
-            Nicht mehr führen
+            <IconTrash size={15} /> Nicht mehr führen
           </button>
         </div>
 
         {editing && (
-          <div className="card" style={{ marginTop: 6 }}>
-            <h2>Bestand pflegen</h2>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <label className="field" style={{ flex: 1 }}>
+          <div className="subpanel">
+            <h3>Bestand pflegen</h3>
+            <div className="row-fields">
+              <label className="field">
                 <span>Jetzt gezählt ({stock.unitLabel})</span>
                 <input
                   type="number"
@@ -172,8 +174,7 @@ export function StockPanel({ profile }: { profile: Profile }) {
                 />
               </label>
               <button
-                className="btn"
-                style={{ width: 'auto', marginTop: 22 }}
+                className="btn btn-inline"
                 disabled={countValue === '' || !Number.isFinite(num(countValue))}
                 onClick={async () => {
                   await db.stocks.put(recount(stock, num(countValue), nowIso()));
@@ -183,12 +184,12 @@ export function StockPanel({ profile }: { profile: Profile }) {
                 Übernehmen
               </button>
             </div>
-            <p className="hint" style={{ marginTop: 0 }}>
+            <p className="hint tight">
               Zählen setzt den Startpunkt neu — ab dann zählt die App die dokumentierten
               Einnahmen ab.
             </p>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <label className="field" style={{ flex: 1 }}>
+            <div className="row-fields">
+              <label className="field">
                 <span>Packung dazu ({stock.unitLabel})</span>
                 <input
                   type="number"
@@ -201,8 +202,7 @@ export function StockPanel({ profile }: { profile: Profile }) {
                 />
               </label>
               <button
-                className="btn secondary"
-                style={{ width: 'auto', marginTop: 22 }}
+                className="btn secondary btn-inline"
                 disabled={packValue === '' || !Number.isFinite(num(packValue)) || num(packValue) <= 0}
                 onClick={async () => {
                   await db.stocks.put(addPack(stock, med, intakes!, num(packValue), nowIso()));
@@ -213,8 +213,8 @@ export function StockPanel({ profile }: { profile: Profile }) {
               </button>
             </div>
 
-            <div style={{ display: 'flex', gap: 8 }}>
-              <label className="field" style={{ flex: 1 }}>
+            <div className="row-fields">
+              <label className="field">
                 <span>Einheit</span>
                 <input
                   type="text"
@@ -222,7 +222,7 @@ export function StockPanel({ profile }: { profile: Profile }) {
                   onChange={(e) => patch(med.id, { unitLabel: e.target.value })}
                 />
               </label>
-              <label className="field" style={{ flex: 1 }}>
+              <label className="field">
                 <span>Je Einzeldosis</span>
                 <input
                   type="number"
@@ -237,8 +237,8 @@ export function StockPanel({ profile }: { profile: Profile }) {
                 />
               </label>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <label className="field" style={{ flex: 1 }}>
+            <div className="row-fields">
+              <label className="field">
                 <span>Vorlauf (Tage)</span>
                 <input
                   type="number"
@@ -252,7 +252,7 @@ export function StockPanel({ profile }: { profile: Profile }) {
                   }
                 />
               </label>
-              <label className="field" style={{ flex: 1 }}>
+              <label className="field">
                 <span>Verfällt am (optional)</span>
                 <input
                   type="date"
@@ -274,10 +274,14 @@ export function StockPanel({ profile }: { profile: Profile }) {
   return (
     <div className="card">
       <h2>Bestand &amp; Nachschub</h2>
-      <p className="hint" style={{ marginTop: 0 }}>
-        Einmal zählen, Vorlauf einstellen — danach meldet sich die App, wenn der Vorrat mit
-        Vorlaufzeit zur Neige geht. Für Notfallmedikation lohnt vor allem das Verfallsdatum.
-      </p>
+      <details className="explain">
+        <summary>Wie die Reichweite berechnet wird</summary>
+        <p>
+          Einmal zählen, Vorlauf einstellen — die App zieht die dokumentierten Einnahmen ab und
+          meldet sich, wenn der Vorrat mit Vorlaufzeit zur Neige geht. Für Notfallmedikation lohnt
+          vor allem das Verfallsdatum.
+        </p>
+      </details>
       {active.length === 0 && <p className="empty">Noch keine Medikamente angelegt.</p>}
       {active.map(card)}
     </div>

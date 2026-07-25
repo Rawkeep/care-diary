@@ -21,7 +21,7 @@ import {
 } from '../../utils/appointments';
 import {
   fmtDayKey,
-  fmtDays,
+  fmtDaysDative,
   fmtTime,
   localDayKey,
   toLocalInputValue,
@@ -141,8 +141,8 @@ export function AppointmentPanel({ profile }: { profile: Profile }) {
               ? info.daysUntil === 0
                 ? ' — heute'
                 : info.daysUntil > 0
-                  ? ` — in ${fmtDays(info.daysUntil)}`
-                  : ` — vor ${fmtDays(-info.daysUntil)}`
+                  ? ` — in ${fmtDaysDative(info.daysUntil)}`
+                  : ` — vor ${fmtDaysDative(-info.daysUntil)}`
               : ''}
             {a.place ? ` · ${a.place}` : ''}
           </div>
@@ -160,7 +160,7 @@ export function AppointmentPanel({ profile }: { profile: Profile }) {
         {a.note && <div className="meta">{a.note}</div>}
 
         {(a.prep ?? []).length > 0 && !isDone && (
-          <div style={{ marginTop: 6 }}>
+          <div className="prep">
             <div className="meta">Vorbereitung:</div>
             {(a.prep ?? []).map((item) => (
               <label key={item} className="check-row">
@@ -182,8 +182,7 @@ export function AppointmentPanel({ profile }: { profile: Profile }) {
               onClick={() => setPlanFor(planFor === a.id ? null : a.id)}
               aria-expanded={planFor === a.id}
             >
-              <IconClock size={18} />
-              {a.at ? 'Termin ändern' : 'Termin eintragen'}
+              <IconClock size={15} /> {a.at ? 'Termin ändern' : 'Termin eintragen'}
             </button>
             <button
               className={doneFor === a.id ? 'active' : ''}
@@ -193,24 +192,23 @@ export function AppointmentPanel({ profile }: { profile: Profile }) {
               }}
               aria-expanded={doneFor === a.id}
             >
-              <IconDone size={18} />
-              Erledigt
+              <IconDone size={15} /> Erledigt
             </button>
             <button
+              className="danger"
               onClick={() => {
                 if (window.confirm(`„${appointmentTitle(a)}" wirklich löschen?`))
                   db.appointments.delete(a.id);
               }}
               aria-label={`${appointmentTitle(a)} löschen`}
             >
-              <IconTrash size={18} />
-              Löschen
+              <IconTrash size={15} /> Löschen
             </button>
           </div>
         )}
 
         {planFor === a.id && (
-          <div className="card" style={{ marginTop: 6 }}>
+          <div className="subpanel">
             <label className="field">
               <span>Termin (Datum &amp; Uhrzeit)</span>
               <input
@@ -253,8 +251,8 @@ export function AppointmentPanel({ profile }: { profile: Profile }) {
         )}
 
         {doneFor === a.id && (
-          <div className="card" style={{ marginTop: 6 }}>
-            <h2>Termin abschließen</h2>
+          <div className="subpanel">
+            <h3>Termin abschließen</h3>
             <label className="field">
               <span>Ergebnis in einem Satz (optional — erscheint im Arztbericht)</span>
               <input
@@ -265,7 +263,7 @@ export function AppointmentPanel({ profile }: { profile: Profile }) {
               />
             </label>
             {a.intervalMonths != null && a.intervalMonths > 0 && (
-              <p className="hint" style={{ marginTop: 0 }}>
+              <p className="hint tight">
                 Die nächste Kontrolle (in {a.intervalMonths} Monaten) wird automatisch als offener
                 Punkt angelegt.
               </p>
@@ -286,11 +284,14 @@ export function AppointmentPanel({ profile }: { profile: Profile }) {
     <>
       <div className="card">
         <h2>Termine &amp; Kontrollen</h2>
-        <p className="hint" style={{ marginTop: 0 }}>
-          Ein Termin kann fest vereinbart sein („EEG am 12.08.") oder nur als Intervall geführt
-          werden („Blutbild alle 3 Monate") — dann erinnert die App, wenn es wieder Zeit ist.
-          Vorbereitungen und Intervalle kommen aus der Praxis; die App führt nur die Liste.
-        </p>
+        <details className="explain">
+          <summary>Termin oder Intervall — was ist der Unterschied?</summary>
+          <p>
+            Ein Termin ist fest vereinbart („EEG am 12.08."). Ein Intervall führt die Kontrolle
+            ohne Datum („Blutbild alle 3 Monate") — die App erinnert, wenn es wieder Zeit ist.
+            Vorbereitungen und Intervalle kommen aus der Praxis; die App führt nur die Liste.
+          </p>
+        </details>
         {open.length === 0 && <p className="empty">Nichts offen.</p>}
         {open.map(card)}
       </div>
@@ -325,8 +326,8 @@ export function AppointmentPanel({ profile }: { profile: Profile }) {
             <span>Ort / Praxis (optional)</span>
             <input type="text" value={place} onChange={(e) => setPlace(e.target.value)} />
           </label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <label className="field" style={{ flex: 1 }}>
+          <div className="row-fields">
+            <label className="field">
               <span>Intervall (Monate)</span>
               <input
                 type="number"
@@ -338,7 +339,7 @@ export function AppointmentPanel({ profile }: { profile: Profile }) {
                 placeholder="z. B. 3"
               />
             </label>
-            <label className="field" style={{ flex: 1 }}>
+            <label className="field">
               <span>Zuletzt durchgeführt</span>
               <input
                 type="date"
@@ -380,7 +381,7 @@ export function AppointmentPanel({ profile }: { profile: Profile }) {
       )}
 
       {done.length > 0 && (
-        <div className="card" style={{ marginTop: 12 }}>
+        <div className="card">
           <h2>Erledigt (Historie)</h2>
           <button className="btn secondary" onClick={() => setShowDone(!showDone)}>
             {showDone ? 'Historie einklappen' : `${done.length} erledigte anzeigen`}

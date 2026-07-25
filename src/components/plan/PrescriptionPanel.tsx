@@ -7,7 +7,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
 import type { Prescription, PrescriptionKind, Profile } from '../../db/models';
 import { newId, nowIso } from '../../db/models';
-import { fmtDayKey, fmtDays, localDayKey } from '../../utils/date';
+import { fmtDayKey, fmtDays, fmtDaysDative, localDayKey } from '../../utils/date';
 import {
   PRESCRIPTION_KINDS,
   prescriptionInfo,
@@ -16,7 +16,7 @@ import {
   validDaysOf,
   type PrescriptionState,
 } from '../../utils/prescription';
-import { IconPrescription, IconTrash } from '../icons';
+import { IconDone, IconPrescription, IconRefresh, IconTrash } from '../icons';
 
 const STATE_TEXT: Record<PrescriptionState, string> = {
   needed: 'noch anzufragen',
@@ -114,23 +114,27 @@ export function PrescriptionPanel({ profile }: { profile: Profile }) {
           {medName(p.medicationId) ? ` · für ${medName(p.medicationId)}` : ''}
         </div>
         {info.state === 'needed' && info.openDays != null && info.openDays > 0 && (
-          <div className="meta">Auf der Liste seit {fmtDays(info.openDays)}.</div>
+          <div className="meta">Auf der Liste seit {fmtDaysDative(info.openDays)}.</div>
         )}
         {p.requestedDate && (
           <div className="meta">
             Angefragt am {fmtDayKey(p.requestedDate)}
-            {info.waitingDays != null && info.waitingDays > 0 ? ` (vor ${fmtDays(info.waitingDays)})` : ''}
+            {info.waitingDays != null && info.waitingDays > 0 ? ` (vor ${fmtDaysDative(info.waitingDays)})` : ''}
           </div>
         )}
         {p.issuedDate && (
-          <div className="meta rhythm">
-            Ausgestellt am {fmtDayKey(p.issuedDate)} · Frist {fmtDays(validDaysOf(p))} (Richtwert)
-            {info.expiry ? ` → bis ${fmtDayKey(info.expiry)}` : ''}
-            {info.daysLeft != null &&
-              (info.daysLeft >= 0
-                ? ` · noch ${fmtDays(info.daysLeft)}`
-                : ` · seit ${fmtDays(-info.daysLeft)} abgelaufen`)}
-          </div>
+          <>
+            <div className="meta rhythm">
+              {info.expiry ? `Einlösbar bis ${fmtDayKey(info.expiry)}` : 'Einlösefrist unbekannt'}
+              {info.daysLeft != null &&
+                (info.daysLeft >= 0
+                  ? ` — noch ${fmtDays(info.daysLeft)}`
+                  : ` — seit ${fmtDaysDative(-info.daysLeft)} abgelaufen`)}
+            </div>
+            <div className="meta">
+              Ausgestellt am {fmtDayKey(p.issuedDate)} · Frist {fmtDays(validDaysOf(p))} (Richtwert)
+            </div>
+          </>
         )}
         {p.redeemedDate && <div className="meta">Eingelöst am {fmtDayKey(p.redeemedDate)}</div>}
         {p.note && <div className="meta">{p.note}</div>}
@@ -148,29 +152,33 @@ export function PrescriptionPanel({ profile }: { profile: Profile }) {
         <div className="med-actions">
           {p.status === 'needed' && (
             <button onClick={() => patch(p.id, { status: 'requested', requestedDate: today })}>
-              ✓ Angefragt
+              <IconDone size={15} /> Angefragt
             </button>
           )}
           {p.status === 'requested' && (
             <button onClick={() => patch(p.id, { status: 'issued', issuedDate: today })}>
-              ✓ Rezept ist da
+              <IconDone size={15} /> Rezept ist da
             </button>
           )}
           {p.status === 'issued' && (
             <button onClick={() => patch(p.id, { status: 'redeemed', redeemedDate: today })}>
-              ✓ In der Apotheke eingelöst
+              <IconDone size={15} /> Eingelöst
             </button>
           )}
-          {p.status === 'redeemed' && <button onClick={() => renew(p)}>↻ Brauchen wir wieder</button>}
+          {p.status === 'redeemed' && (
+            <button onClick={() => renew(p)}>
+              <IconRefresh size={15} /> Brauchen wir wieder
+            </button>
+          )}
           <button
+            className="danger"
             onClick={() => {
               if (window.confirm(`„${p.title}" wirklich aus der Liste löschen?`))
                 db.prescriptions.delete(p.id);
             }}
             aria-label={`${p.title} löschen`}
           >
-            <IconTrash size={18} />
-            Löschen
+            <IconTrash size={15} /> Löschen
           </button>
         </div>
       </div>
@@ -181,11 +189,13 @@ export function PrescriptionPanel({ profile }: { profile: Profile }) {
     <>
       <div className="card">
         <h2>Offene Verordnungen</h2>
-        <p className="hint" style={{ marginTop: 0 }}>
-          Vom „brauchen wir" bis zum Einlösen. Die Fristen sind die üblichen Richtwerte der
-          Rezeptart — maßgeblich ist das, was auf dem Beleg steht; eine abweichende Frist lässt
-          sich beim Anlegen eintragen.
-        </p>
+        <details className="explain">
+          <summary>Wie die Fristen gemeint sind</summary>
+          <p>
+            Die Fristen sind die üblichen Richtwerte der Rezeptart — maßgeblich ist, was auf dem
+            Beleg steht. Eine abweichende Frist lässt sich beim Anlegen eintragen.
+          </p>
+        </details>
         {open.length === 0 && <p className="empty">Nichts offen — alles besorgt.</p>}
         {open.map(card)}
       </div>
@@ -212,7 +222,7 @@ export function PrescriptionPanel({ profile }: { profile: Profile }) {
               ))}
             </select>
           </label>
-          <p className="hint" style={{ marginTop: 0 }}>
+          <p className="hint tight">
             {prescriptionKindDef(kind).hint}
           </p>
           <label className="field">

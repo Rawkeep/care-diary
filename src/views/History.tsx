@@ -11,11 +11,12 @@
 //   • **Stückweises Nachladen**: nur die ersten Tage im DOM, Rest auf Tipp.
 // Sortierung: neuester Tag oben, innerhalb des Tages morgens → abends
 // (Details in utils/history.ts).
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type JSX } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { StateTrends } from '../components/StateTrends';
 import { TimelineSection } from '../components/TimelineSection';
 import { EntryList } from '../components/EntryList';
+import { IconEvent, IconPill, IconState } from '../components/icons';
 import { db } from '../db/db';
 import type { Profile } from '../db/models';
 import type { ConditionPreset } from '../presets/epilepsy';
@@ -43,11 +44,11 @@ const RANGES: { label: string; title: string; days: number | null }[] = [
   { label: 'Gesamt', title: 'Gesamter Verlauf', days: null },
 ];
 
-const KINDS: { key: HistoryKindFilter; label: string }[] = [
+const KINDS: { key: HistoryKindFilter; label: string; icon?: JSX.Element }[] = [
   { key: 'all', label: 'Alles' },
-  { key: 'event', label: '⚡ Ereignisse' },
-  { key: 'intake', label: '💊 Einnahmen' },
-  { key: 'observation', label: '📝 Zustand' },
+  { key: 'event', label: 'Ereignisse', icon: <IconEvent size={15} /> },
+  { key: 'intake', label: 'Einnahmen', icon: <IconPill size={15} /> },
+  { key: 'observation', label: 'Zustand', icon: <IconState size={15} /> },
 ];
 
 /** Tage pro Nachlade-Schritt — hält das DOM klein und den Scroll flüssig */
@@ -159,6 +160,7 @@ export function History({ profile, preset }: { profile: Profile; preset: Conditi
               className={kind === k.key ? 'active' : ''}
               onClick={() => choose(setKind, k.key)}
             >
+              {k.icon}
               {k.label}
             </button>
           ))}

@@ -8,10 +8,18 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
+import type { JSX } from 'react';
 import type { NutritionRule, NutritionStance, Profile } from '../../db/models';
 import { newId, nowIso } from '../../db/models';
-import { groupByStance, STANCES, stanceDef, unusedSuggestions } from '../../utils/nutrition';
-import { IconTrash } from '../icons';
+import { groupByStance, STANCES, unusedSuggestions } from '../../utils/nutrition';
+import { IconBan, IconDone, IconEmergency, IconTrash } from '../icons';
+
+/** Haltung → Symbol; im Umfeld-/Arztbericht bleiben die Emoji (für Dritte) */
+const STANCE_ICON: Record<NutritionStance, JSX.Element> = {
+  good: <IconDone size={16} className="inline-icon" />,
+  careful: <IconEmergency size={16} className="inline-icon" />,
+  avoid: <IconBan size={16} className="inline-icon" />,
+};
 
 export function NutritionPanel({ profile }: { profile: Profile }) {
   const rules = useLiveQuery(
@@ -51,17 +59,20 @@ export function NutritionPanel({ profile }: { profile: Profile }) {
 
   function row(r: NutritionRule) {
     return (
-      <div key={r.id} className="entry kind-observation">
+      <div key={r.id} className="entry kind-observation flat">
         <div className="body">
           <div className="title">
-            {stanceDef(r.stance).icon} {r.item}
-            {r.confirmed ? ' · ärztlich bestätigt' : ''}
+            {STANCE_ICON[r.stance]}
+            {r.item}
           </div>
-          {r.reason && <div className="meta">{r.reason}</div>}
+          {(r.confirmed || r.reason) && (
+            <div className="meta">
+              {[r.confirmed ? 'ärztlich bestätigt' : null, r.reason].filter(Boolean).join(' · ')}
+            </div>
+          )}
         </div>
         <button
-          className="btn secondary"
-          style={{ width: 'auto', padding: '6px 10px', marginTop: 0 }}
+          className={r.confirmed ? 'icon-btn on' : 'icon-btn'}
           onClick={() =>
             db.nutrition.update(r.id, { confirmed: !r.confirmed, updatedAt: nowIso() })
           }
@@ -71,11 +82,10 @@ export function NutritionPanel({ profile }: { profile: Profile }) {
               : `${r.item} als ärztlich bestätigt markieren`
           }
         >
-          {r.confirmed ? '✓' : '○'}
+          <IconDone size={17} />
         </button>
         <button
-          className="btn secondary"
-          style={{ width: 'auto', padding: '6px 10px', marginTop: 0 }}
+          className="icon-btn danger"
           onClick={() => db.nutrition.delete(r.id)}
           aria-label={`${r.item} entfernen`}
         >
@@ -89,7 +99,7 @@ export function NutritionPanel({ profile }: { profile: Profile }) {
     <>
       <div className="card">
         <h2>Ernährung: Gutes &amp; Meiden</h2>
-        <p className="hint" style={{ marginTop: 0 }}>
+        <p className="hint tight">
           Die App gibt keine Ernährungsempfehlung — hier steht, was <em>ihr</em> mit der Praxis
           vereinbart oder selbst beobachtet habt. Das Häkchen markiert, was ärztlich bestätigt
           wurde. Die Liste erscheint im Arztbericht und lässt sich im Umfeld-Bericht mitgeben.
@@ -97,9 +107,9 @@ export function NutritionPanel({ profile }: { profile: Profile }) {
         {rules.length === 0 && <p className="empty">Noch nichts notiert.</p>}
         {STANCES.map((s) =>
           grouped[s.key].length > 0 ? (
-            <div key={s.key} style={{ marginBottom: 10 }}>
-              <div className="meta rhythm">
-                {s.icon} {s.label}
+            <div key={s.key} className="stance-group">
+              <div className="meta rhythm row">
+                {STANCE_ICON[s.key]} {s.label}
               </div>
               {grouped[s.key].map(row)}
             </div>
@@ -109,14 +119,14 @@ export function NutritionPanel({ profile }: { profile: Profile }) {
 
       <div className="card">
         <h2>Eintrag hinzufügen</h2>
-        <div className="tabs">
+        <div className="segmented">
           {STANCES.map((s) => (
             <button
               key={s.key}
               className={stance === s.key ? 'active' : ''}
               onClick={() => setStance(s.key)}
             >
-              {s.icon} {s.label}
+              {s.label}
             </button>
           ))}
         </div>
@@ -155,19 +165,19 @@ export function NutritionPanel({ profile }: { profile: Profile }) {
       {suggestions.length > 0 && (
         <div className="card">
           <h2>Fragen für den nächsten Termin</h2>
-          <p className="hint" style={{ marginTop: 0 }}>
+          <p className="hint tight">
             Typische Punkte, die man einmal geklärt haben sollte. Ein Tipp übernimmt sie als
             offenen Eintrag — Text und Haltung sind danach frei änderbar.
           </p>
-          <div className="med-chips">
+          <div className="chips">
             {suggestions.map((s) => (
               <button
                 key={s.item}
-                className="med-chip"
+                className="chip"
                 onClick={() => add(s)}
                 aria-label={`${s.item} übernehmen`}
               >
-                {stanceDef(s.stance).icon} {s.item} ＋
+                {STANCE_ICON[s.stance]} {s.item} ＋
               </button>
             ))}
           </div>

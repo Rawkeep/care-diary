@@ -11,7 +11,7 @@ import { fmtDuration, fmtTime } from '../utils/date';
 import { EventForm } from './forms/EventForm';
 import { IntakeForm } from './forms/IntakeForm';
 import { ObservationEditForm } from './forms/ObservationEditForm';
-import { IconEdit, IconTrash } from './icons';
+import { IconEdit, IconEvent, IconPill, IconState, IconTrash } from './icons';
 import { Modal } from './Modal';
 import { PhotoStrip } from './PhotoStrip';
 
@@ -99,7 +99,10 @@ export function EntryList({
             <div key={i.id} className="entry kind-intake tappable" onClick={() => open(item)}>
               <span className="time">{fmtTime(i.at)}</span>
               <div className="body">
-                <div className="title">💊 {medName(i.medicationId)}</div>
+                <div className="title">
+                  <IconPill size={17} className="inline-icon" />
+                  {medName(i.medicationId)}
+                </div>
                 <div className="meta">
                   {i.amount} {i.unit} · {INTAKE_STATUS_LABEL[i.status]}
                   {i.note ? ` · ${i.note}` : ''}
@@ -120,7 +123,10 @@ export function EntryList({
             <div key={e.id} className="entry kind-event tappable" onClick={() => open(item)}>
               <span className="time">{fmtTime(e.startedAt)}</span>
               <div className="body">
-                <div className="title">⚡ {eventTypeLabel(preset, e.type)}</div>
+                <div className="title">
+                  <IconEvent size={17} className="inline-icon" />
+                  {eventTypeLabel(preset, e.type)}
+                </div>
                 <div className="meta">
                   {parts.join(' · ')}
                   {e.note ? ` · ${e.note}` : ''}
@@ -136,7 +142,10 @@ export function EntryList({
           <div key={o.id} className="entry kind-observation tappable" onClick={() => open(item)}>
             <span className="time">{fmtTime(o.at)}</span>
             <div className="body">
-              <div className="title">📝 {param?.label ?? o.parameter}</div>
+              <div className="title">
+                <IconState size={17} className="inline-icon" />
+                {param?.label ?? o.parameter}
+              </div>
               <div className="meta">
                 {o.value}/5{o.note ? ` · ${o.note}` : ''}
               </div>
@@ -154,12 +163,16 @@ export function EntryList({
           {!editing ? (
             <>
               <button className="btn" onClick={() => setEditing(true)}>
-                <IconEdit size={18} className="inline-icon" /> Bearbeiten
+                <IconEdit size={18} /> Bearbeiten
               </button>
-              <button className="btn danger" onClick={deleteSelected}>
-                <IconTrash size={18} className="inline-icon" /> Löschen
-              </button>
-              <button className="btn secondary" onClick={close}>Abbrechen</button>
+              <div className="btn-row">
+                <button className="btn danger" onClick={deleteSelected}>
+                  <IconTrash size={18} /> Löschen
+                </button>
+                <button className="btn secondary" onClick={close}>
+                  Abbrechen
+                </button>
+              </div>
             </>
           ) : selected.kind === 'intake' ? (
             <IntakeForm profile={profile} existing={selected.ref as Intake} onDone={close} />

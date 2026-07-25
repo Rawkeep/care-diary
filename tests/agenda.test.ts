@@ -10,7 +10,7 @@ import type {
   Prescription,
   Profile,
 } from '../src/db/models';
-import { buildAgenda, isNotifyWorthy, type AgendaInput } from '../src/utils/agenda';
+import { buildAgenda, isNotifyWorthy, shortSubject, type AgendaInput } from '../src/utils/agenda';
 import { MODULES } from '../src/modules/registry';
 
 const NOW = '2026-07-23T18:00:00.000Z';
@@ -218,11 +218,14 @@ describe('Termine', () => {
       })
     );
     expect(bald[0].key).toBe('appt.a1.soon');
+    // Dativ nach „in": „in 3 Tagen", nicht „in 3 Tage"
+    expect(bald[0].title).toBe('EEG in 3 Tagen');
     expect(bald[0].detail).toMatch(/Uniklinik/);
     expect(bald[0].detail).toMatch(/Haare waschen/);
 
     const vorbei = buildAgenda(input({ appointments: [appt({ at: localAt(2026, 7, 20) })] }));
     expect(vorbei[0]).toMatchObject({ key: 'appt.a1.past', severity: 'due' });
+    expect(vorbei[0].title).toBe('Kontrolltermin nachtragen');
   });
 
   it('abgehakte Vorbereitung verschwindet aus dem Hinweis', () => {
@@ -241,7 +244,7 @@ describe('Termine', () => {
       input({ appointments: [appt({ kind: 'bloodwork', intervalMonths: 3, lastDoneDate: '2026-04-23' })] })
     );
     expect(due[0]).toMatchObject({ key: 'appt.a1.due', severity: 'due' });
-    expect(due[0].title).toBe('Kontrolle fällig: Blutbild / Laborkontrolle');
+    expect(due[0].title).toBe('Blutbild / Laborkontrolle vereinbaren');
     expect(due[0].detail).toMatch(/3 Monate/);
 
     expect(
@@ -257,6 +260,36 @@ describe('Termine', () => {
     expect(buildAgenda(input({ appointments: [appt({ doneDate: '2026-07-20' })] }))).toEqual([]);
     expect(buildAgenda(input({ appointments: [appt({ at: localAt(2026, 10, 1) })] }))).toEqual([]);
     expect(buildAgenda(input({ appointments: [appt()] }))).toEqual([]);
+  });
+});
+
+describe('Titel und Grammatik', () => {
+  it('Titel sind kurz: Klammer-Zusätze und Beisatz nach „—" fallen weg', () => {
+    expect(shortSubject('Buccolam 10 mg (Notfallset für die Schule)')).toBe('Buccolam 10 mg');
+    expect(shortSubject('Blutbild / Laborkontrolle — Kontrolle unter Levetiracetam')).toBe(
+      'Blutbild / Laborkontrolle'
+    );
+    expect(shortSubject('Kurz')).toBe('Kurz');
+    // hart begrenzt, mit Auslassungszeichen
+    const lang = shortSubject('Ein außergewöhnlich langer Präparatename ohne jede Klammer');
+    expect(lang.length).toBeLessThanOrEqual(34);
+    expect(lang.endsWith('…')).toBe(true);
+  });
+
+  it('Zeitangaben nach Präpositionen stehen im Dativ', () => {
+    const rezept = buildAgenda(
+      input({ prescriptions: [rx({ status: 'requested', requestedDate: '2026-07-15' })] })
+    );
+    expect(rezept[0].detail).toMatch(/Seit 8 Tagen angefragt/);
+    const einzahl = buildAgenda(
+      input({ appointments: [appt({ at: new Date(2026, 6, 24, 10).toISOString() })] })
+    );
+    expect(einzahl[0].title).toBe('Kontrolltermin in 1 Tag');
+  });
+
+  it('Nachschub-Titel nennen das Medikament zuerst', () => {
+    const items = buildAgenda(input({ stocks: [stock({ units: 12 })] }));
+    expect(items[0].title).toBe('Levetiracetam: Nachschub nötig');
   });
 });
 

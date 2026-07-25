@@ -2,7 +2,7 @@
 // drin ist: ein Tipp startet, ein Tipp stoppt. Gespeichert wird die Aufnahme
 // als Anhang beim Eintrag (lokal, wie Fotos).
 import { useEffect, useRef, useState } from 'react';
-import { IconMic } from './icons';
+import { IconMic, IconStop, IconTrash } from './icons';
 
 export function AudioRecorder({
   clips,
@@ -91,17 +91,17 @@ export function AudioRecorder({
             aria-label={`Sprachnotiz ${i + 1} entfernen`}
             onClick={() => onChange(clips.filter((_, j) => j !== i))}
           >
-            🗑
+            <IconTrash size={16} />
           </button>
         </div>
       ))}
       {recording ? (
         <button type="button" className="btn danger" onClick={stop}>
-          ⏹ Aufnahme beenden ({mm}:{ss})
+          <IconStop size={18} /> Aufnahme beenden ({mm}:{ss})
         </button>
       ) : (
         <button type="button" className="btn secondary" onClick={start}>
-          🎙 Sprachnotiz aufnehmen
+          <IconMic size={18} /> Sprachnotiz aufnehmen
         </button>
       )}
       {error && <p className="hint" style={{ color: 'var(--danger)' }}>{error}</p>}

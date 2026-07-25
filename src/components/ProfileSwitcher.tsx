@@ -2,6 +2,7 @@
 // Alle Daten sind strikt per profileId getrennt; Export/Backup enthält alle
 // Profile. Löschen gibt es bewusst nicht — Doku ist wertvoll.
 import { useState } from 'react';
+import { IconUser } from './icons';
 import { db } from '../db/db';
 import type { Profile } from '../db/models';
 import { newId, nowIso } from '../db/models';
@@ -53,7 +54,10 @@ export function ProfileSwitcher({
             role="radio"
             aria-checked={p.id === active.id}
           >
-            <div className="label">👤 {p.name}</div>
+            <div className="label row">
+                <IconUser size={16} className="inline-icon" />
+                {p.name}
+              </div>
             <div className="desc">
               {presetFor(p.conditions).label}
               {p.birthDate ? ` · geboren ${p.birthDate}` : ''}
@@ -102,7 +106,7 @@ export function ProfileSwitcher({
               className="btn secondary"
               onClick={async () => switchTo(await createDemoProfile())}
             >
-              🧪 Demo-Profil laden (Beispieldaten)
+              Demo-Profil laden (Beispieldaten)
             </button>
           )}
         </>
